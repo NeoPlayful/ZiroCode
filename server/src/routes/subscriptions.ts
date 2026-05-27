@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { verifySession, COOKIE_NAME } from '../lib/auth.js';
 import { prisma } from '../lib/db.js';
+import { triggerReferralReward } from '../lib/referral.js';
 
 export async function subscriptionRoutes(app: FastifyInstance) {
   app.get('/api/subscriptions', async (req, reply) => {
@@ -53,6 +54,9 @@ export async function subscriptionRoutes(app: FastifyInstance) {
           subscriptionId: subscription.id, redeemCodeId: redeemCode.id,
         },
       });
+
+      // 触发推荐奖励（不阻塞响应）
+      triggerReferralReward(session.userId as string, redeemCode.quotaAmount).catch(() => {});
 
       return reply.send({
         subscription: { id: subscription.id, type: subscription.type, quotaTotal: Number(subscription.quotaTotal), quotaUsed: Number(subscription.quotaUsed) },

@@ -29,3 +29,12 @@ export class AuthError extends Error {
     this.status = status;
   }
 }
+
+export async function requireAdmin(req: FastifyRequest, reply: FastifyReply): Promise<AuthenticatedUser> {
+  const user = await requireAuth(req, reply);
+  if (user.role !== 'ADMIN') {
+    reply.status(403).send({ error: { code: 'FORBIDDEN', message: '需要管理员权限' } });
+    throw new AuthError('需要管理员权限', 403);
+  }
+  return user;
+}

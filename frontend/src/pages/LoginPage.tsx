@@ -61,6 +61,9 @@ export default function LoginPage() {
             className="w-full bg-[#e8673a] hover:bg-[#d4562a] text-white py-2.5 rounded-lg font-medium disabled:opacity-50">
             {loading ? '登录中...' : '登录'}
           </button>
+          <p className="text-right text-sm">
+            <a href="/auth/forgot-password" className="text-gray-400 hover:text-[#e8673a]">忘记密码？</a>
+          </p>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">

@@ -1,7 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
+
+function genCode() {
+  return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
 
 async function main() {
   // 创建管理员
@@ -13,6 +18,7 @@ async function main() {
       passwordHash: await bcrypt.hash('admin123', 10),
       name: 'Admin',
       role: 'ADMIN',
+      referralCode: genCode(),
     },
   });
 
@@ -25,6 +31,7 @@ async function main() {
       passwordHash: await bcrypt.hash('test123', 10),
       name: 'Test User',
       role: 'USER',
+      referralCode: genCode(),
     },
   });
 
@@ -66,6 +73,20 @@ async function main() {
       priority: 1,
     },
   });
+
+  // 创建订阅套餐
+  const plans = [
+    { name: '按量套餐', type: 'PAY_AS_YOU_GO' as const, price: 10, quotaAmount: BigInt(10000000) },
+    { name: '月卡套餐', type: 'MONTHLY' as const, price: 99, quotaAmount: BigInt(500000000), durationDays: 30 },
+    { name: '永久套餐', type: 'PERMANENT' as const, price: 499, quotaAmount: BigInt(3000000000) },
+  ];
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: { name: plan.name },
+      update: {},
+      create: plan,
+    });
+  }
 
   console.log('✅ Seed data created');
 }

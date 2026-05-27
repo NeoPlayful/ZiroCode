@@ -1,0 +1,99 @@
+import { useQuery } from '@tanstack/react-query'
+import { SparklesIcon, CheckIcon } from '@heroicons/react/20/solid'
+
+const features: Record<string, string[]> = {
+  PAY_AS_YOU_GO: ['按量计费，用多少扣多少', '永不过期', '适合轻度使用'],
+  MONTHLY: ['每月固定配额', '每日 8:00 自动重置', '适合频繁调用', '性价比高'],
+  PERMANENT: ['一次性购买，永久有效', '不限时间', '适合长期使用', '最超值的选择'],
+}
+
+export default function PricingPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['plans'],
+    queryFn: () => fetch('/api/payments/plans').then(r => r.json()),
+  })
+  const plans = data?.plans || []
+
+  async function handlePurchase(planId: string) {
+    try {
+      const res = await fetch('/api/payments/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        alert(err.error?.message || '创建支付失败')
+        return
+      }
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch {
+      alert('网络错误，请稍后重试')
+    }
+  }
+
+  return (
+    <div className="max-w-[1000px] mx-auto px-8 py-10">
+      <div className="text-center mb-10">
+        <h1 className="text-2xl font-bold mb-2">选择套餐</h1>
+        <p className="text-gray-500">按需选择，灵活付费</p>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-20 mb-4" />
+              <div className="h-10 bg-gray-200 rounded w-32 mb-4" />
+              <div className="space-y-2">
+                {[1, 2, 3].map(j => <div key={j} className="h-4 bg-gray-200 rounded" />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : plans.length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <SparklesIcon className="w-12 h-12 mx-auto mb-3" />
+          <p>暂无可用套餐</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-6">
+          {plans.map((plan: any) => (
+            <div key={plan.id} className={`bg-white rounded-xl border-2 p-6 flex flex-col ${
+              plan.type === 'MONTHLY' ? 'border-[#e8673a] shadow-md' : 'border-gray-200'
+            }`}>
+              {plan.type === 'MONTHLY' && (
+                <span className="text-xs font-semibold text-[#e8673a] bg-[#fde8df] px-2.5 py-0.5 rounded-full self-start mb-2">推荐</span>
+              )}
+              <h2 className="text-lg font-bold mb-1">{plan.name}</h2>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">¥{Number(plan.price).toFixed(2)}</span>
+                {plan.type === 'MONTHLY' && <span className="text-gray-400 text-sm">/月</span>}
+                {plan.type === 'PAY_AS_YOU_GO' && <span className="text-gray-400 text-sm ml-1">起</span>}
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                配额：{(Number(plan.quotaAmount) / 100000000).toFixed(0)} 亿 Token
+              </p>
+              <ul className="space-y-2 mb-6 flex-1">
+                {(features[plan.type] || []).map((f: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                    <CheckIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />{f}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => handlePurchase(plan.id)}
+                className={`w-full py-2.5 rounded-lg font-medium text-sm ${
+                  plan.type === 'MONTHLY'
+                    ? 'bg-[#e8673a] hover:bg-[#d4562a] text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}>
+                立即购买
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

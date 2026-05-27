@@ -44,6 +44,13 @@ export default function DashboardPage() {
     }),
   });
 
+  const { data: annData } = useQuery({
+    queryKey: ['announcements'],
+    queryFn: () => fetch('/api/announcements').then(r => r.json()),
+    staleTime: 60 * 1000,
+  })
+  const announcements = annData?.announcements?.filter((a: any) => !a.isRead) || []
+
   if (isLoading) return <DashboardSkeleton />;
 
   if (error) {
@@ -69,6 +76,21 @@ export default function DashboardPage() {
       <main className="max-w-[1280px] mx-auto px-8 py-8">
         <h1 className="text-3xl font-bold mb-1">欢迎回来，{user.name}</h1>
         <p className="text-gray-500 text-sm mb-6">这是您的配额使用概览</p>
+
+        {/* 公告 */}
+        {announcements.length > 0 && (
+          <div className="mb-4 space-y-2">
+            {announcements.slice(0, 3).map((a: any) => (
+              <div key={a.id} className="bg-[#fffbf0] border border-[#f5e8c0] rounded-xl px-4 py-3 flex items-start gap-2">
+                <span className="text-yellow-600 text-sm flex-shrink-0 mt-0.5">📢</span>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{a.title}</p>
+                  <p className="text-xs text-gray-500 line-clamp-2">{a.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Row 1 */}
         <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 mb-4">

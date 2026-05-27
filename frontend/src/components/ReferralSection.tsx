@@ -1,18 +1,35 @@
-'use client';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query'
 import {
   UsersIcon,
-  UserIcon,
   BanknotesIcon,
   ClockIcon,
   ClipboardDocumentListIcon,
   CurrencyDollarIcon,
   ArrowPathIcon,
-} from '@heroicons/react/16/solid';
+  UserIcon,
+} from '@heroicons/react/16/solid'
 
 export default function ReferralSection() {
-  const [activeTab, setActiveTab] = useState<'earnings' | 'claims'>('earnings');
-  const link = typeof window !== 'undefined' ? `${window.location.origin}/auth/register?aff=XPTG007` : '';
+  const { data, isLoading } = useQuery({
+    queryKey: ['referral-stats'],
+    queryFn: () => fetch('/api/referral/stats').then(r => r.ok ? r.json() : { stats: null, referrals: [] }),
+  })
+
+  const stats = data?.stats || { totalReferrals: 0, totalReward: 0, claimedReward: 0, pendingReward: 0 }
+  const referrals = data?.referrals || []
+  const link = typeof window !== 'undefined' ? `${window.location.origin}/auth/register?ref=${data?.referralCode || ''}` : ''
+  const rules = data?.rules || { minWithdrawal: 10 }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl p-5 shadow-sm mb-4 animate-pulse">
+        <div className="h-5 bg-gray-200 rounded w-24 mb-4" />
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-lg" />)}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white rounded-xl p-5 shadow-sm mb-4">
@@ -26,9 +43,9 @@ export default function ReferralSection() {
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { icon: UserIcon, bg: 'bg-[#fde8df]', iconColor: 'text-[#e8673a]', label: '邀请人数', value: '0' },
-          { icon: BanknotesIcon, bg: 'bg-[#d4f5e2]', iconColor: 'text-[#27ae60]', label: '已领取', value: '¥0.00' },
-          { icon: ClockIcon, bg: 'bg-[#fde8df]', iconColor: 'text-[#e8673a]', label: '待领取', value: '¥0.00' },
+          { icon: UserIcon, bg: 'bg-[#fde8df]', iconColor: 'text-[#e8673a]', label: '邀请人数', value: `${stats.totalReferrals}` },
+          { icon: BanknotesIcon, bg: 'bg-[#d4f5e2]', iconColor: 'text-[#27ae60]', label: '已领取', value: `¥${Number(stats.claimedReward).toFixed(2)}` },
+          { icon: ClockIcon, bg: 'bg-[#fde8df]', iconColor: 'text-[#e8673a]', label: '待领取', value: `¥${Number(stats.pendingReward).toFixed(2)}` },
         ].map(({ icon: Icon, bg, iconColor, label, value }) => (
           <div key={label} className="bg-gray-50 rounded-lg p-3.5 flex items-center gap-3">
             <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
@@ -63,32 +80,38 @@ export default function ReferralSection() {
             '被邀请者每兑换1亿额度，奖励您1元；5亿奖励您5元，以此类推。',
             '长期享受返现：被邀请人以后每次购买都享受返现。',
             '严禁自我邀请薅羊毛行为，我们有多重检测，如被发现直接封禁、额度清零。',
-            '每月1号左右处理提现。',
+            '每月1号左右处理提现（最低提现¥10起）。',
           ].map((rule, i) => (
             <li key={i} className="text-[13px] text-gray-600 leading-relaxed">{rule}</li>
           ))}
         </ol>
       </div>
 
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-base font-semibold">收益与申请</span>
-          <div className="flex gap-1">
-            {(['earnings', 'claims'] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-3.5 py-1.5 rounded-md text-[13px] ${activeTab === tab ? 'bg-[#e8673a] text-white' : 'text-gray-500'}`}>
-                {tab === 'earnings' ? '收益记录' : '申请记录'}
-              </button>
+      {referrals.length === 0 ? (
+        <div className="text-center py-8 text-gray-300">
+          <CurrencyDollarIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+          <p className="text-[13px]">暂无收益记录</p>
+          <p className="text-[13px]">邀请好友消费后可获得奖励</p>
+        </div>
+      ) : (
+        <div>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-base font-semibold">邀请记录</span>
+            <span className="text-xs text-gray-300">最近{referrals.length}条</span>
+          </div>
+          <div className="space-y-2">
+            {referrals.slice(0, 10).map((r: any) => (
+              <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <div>
+                  <p className="text-sm font-medium">{r.name}</p>
+                  <p className="text-xs text-gray-400">{new Date(r.joinedAt).toLocaleDateString()}</p>
+                </div>
+                <span className="text-sm font-semibold text-green-600">+¥{r.reward?.toFixed(2) || '0.00'}</span>
+              </div>
             ))}
           </div>
         </div>
-        <span className="text-xs text-gray-300">最近10条记录</span>
-      </div>
-      <div className="text-center py-8 text-gray-300">
-        <CurrencyDollarIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-        <p className="text-[13px]">暂无收益记录</p>
-        <p className="text-[13px]"><a href="#" className="text-[#e8673a]">邀请好友消费后可获得奖励</a></p>
-      </div>
+      )}
     </div>
-  );
+  )
 }
