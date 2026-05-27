@@ -15,6 +15,9 @@ model User {
   name         String
   avatar       String?
   role         Role     @default(USER)
+  referralCode String   @unique
+  resetPasswordToken   String?   @unique
+  resetPasswordExpires DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -22,8 +25,15 @@ model User {
   subscriptions Subscription[]
   transactions  Transaction[]
   usageLogs     ApiUsageLog[]
+  referrals     Referral[]           @relation("referrer")
+  referred      Referral?            @relation("referred")
+  withdrawals   WithdrawalRequest[]
+  tickets       Ticket[]
+  ticketReplies TicketReply[]
+  readAnnouncements AnnouncementRead[]
 
   @@index([email])
+  @@index([referralCode])
 }
 
 enum Role {
@@ -121,12 +131,119 @@ model Transaction {
 enum TransactionType {
   REDEEM
   ADMIN_ADJUST
+  REFERRAL_REWARD
 }
 
 enum TransactionStatus {
   PENDING
   SUCCEEDED
   FAILED
+}
+
+// 推荐关系表
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referredId    String   @unique
+  tier          Int      @default(1)
+  totalReward   BigInt   @default(0)
+  claimedReward BigInt   @default(0)
+  createdAt     DateTime @default(now())
+
+  referrer User @relation("referrer", fields: [referrerId], references: [id])
+  referred User @relation("referred", fields: [referredId], references: [id])
+
+  @@index([referrerId])
+}
+
+// 提现申请表
+model WithdrawalRequest {
+  id          String            @id @default(cuid())
+  userId      String
+  amount      Decimal           @db.Decimal(10, 2)
+  status      WithdrawalStatus  @default(PENDING)
+  createdAt   DateTime          @default(now())
+  processedAt DateTime?
+  remark      String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// 工单表
+model Ticket {
+  id        String        @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  status    TicketStatus  @default(OPEN)
+  priority  TicketPriority @default(NORMAL)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id])
+  replies TicketReply[]
+
+  @@index([userId, status])
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  content   String
+  isStaff   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// 公告表
+model Announcement {
+  id        String             @id @default(cuid())
+  title     String
+  content   String
+  priority  Int                @default(0)
+  isPinned  Boolean            @default(false)
+  isActive  Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  readBy AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String @id @default(cuid())
+  userId         String
+  announcementId String
+  readAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, announcementId])
 }
 
 // API 使用日志表
@@ -147,6 +264,19 @@ model ApiUsageLog {
 
   @@index([userId, requestTime])
   @@index([apiKeyId])
+}
+
+// 订阅套餐定价表
+model SubscriptionPlan {
+  id           String           @id @default(cuid())
+  name         String           @unique
+  type         SubscriptionType
+  price        Decimal          @db.Decimal(10, 2)
+  quotaAmount  BigInt
+  durationDays Int?
+  stripePriceId String?
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
 }
 
 // 模型渠道表
