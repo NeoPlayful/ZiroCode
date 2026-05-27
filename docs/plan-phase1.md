@@ -8,7 +8,7 @@
 ## 📌 修订说明
 
 **v2 主要变更（2026-05-27）：**
-- ❌ 不再使用 Next.js（已迁移至 React 19 + Fastify）
+- ❌ 不再使用 Next.js（已迁移至 React 19.2.6 + Fastify）
 - ❌ 删除独立 Fastify 网关服务（改为 Next.js API Routes，后迁移至独立 Fastify）
 - ❌ 删除 Stripe 支付（Phase 2 实现）
 - ❌ 删除推荐系统完整实现（Phase 2 实现）
@@ -48,7 +48,7 @@ ZiroCode/
 │   │   ├── schema.prisma     # 7张表完整数据模型
 │   │   └── seed.ts           # 种子数据
 │   └── Dockerfile
-├── frontend/                 # React 19 + Vite (:5173)
+├── frontend/                 # React 19.2.6 + Vite (:5173)
 │   ├── src/
 │   │   ├── pages/            # 6个页面组件
 │   │   ├── components/       # 共享组件
@@ -62,7 +62,7 @@ ZiroCode/
 ```
 
 **关键决策：**
-1. **前后端分离**：React 19 + Fastify，各自独立部署
+1. **前后端分离**：React 19.2.6 + Fastify，各自独立部署
 2. **统一端口**：Nginx 反向代理处理 `/api/*` → 后端，其他 → 前端
 3. **开发环境**：Vite 自动代理 `/api/*` 到后端
 

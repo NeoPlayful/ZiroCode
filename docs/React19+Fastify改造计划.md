@@ -1,4 +1,4 @@
-# ZiroCode 重构计划：Next.js → React 19 + Fastify
+# ZiroCode 重构计划：Next.js → React 19.2.6 + Fastify 5.8.5
 
 > 日期：2026-05-27 | 版本：v1.0
 
@@ -19,7 +19,7 @@
 ```
 用户 → Nginx (:3000)
          ├── /api/*    → Fastify 后端 (:4000)
-         └── /*        → React 19 + Vite 前端 (:5173)
+         └── /*        → React 19.2.6 + Vite 前端 (:5173)
 ```
 
 ### 2.1 目录结构
@@ -29,7 +29,7 @@ ZiroCode/
 ├── docker-compose.yml          # PostgreSQL + Redis + Nginx
 ├── nginx/                      # 反向代理配置
 │   └── default.conf
-├── frontend/                   # React 19 + Vite
+├── frontend/                   # React 19.2.6 + Vite
 │   ├── src/
 │   │   ├── pages/              # 页面组件
 │   │   │   ├── Dashboard.tsx
@@ -125,7 +125,7 @@ export async function POST(req) {               fastify.post('/api/auth/login', 
 }                                                 })
 ```
 
-### 第二步：新建 React 19 + Vite 前端（2天）
+### 第二步：新建 React 19.2.6 + Vite 前端（2天）
 
 **目标：** 页面正常渲染，API 连接后端
 
@@ -158,7 +158,7 @@ export async function POST(req) {               fastify.post('/api/auth/login', 
 
 **主要修改点：**
 
-| 修改项 | Next.js | React 19 |
+| 修改项 | Next.js | React 19.2.6 |
 |--------|---------|----------|
 | 路由 | 文件路由 | `react-router-dom` |
 | 页面跳转 | `useRouter().push()` | `useNavigate()` |
@@ -252,7 +252,7 @@ services:
 
 ### 5.2 开发环境热更新
 
-- React 19 + Vite 开发服务器支持 HMR，比 Next.js Turbopack 稳定
+- React 19.2.6 + Vite 开发服务器支持 HMR，比 Next.js Turbopack 稳定
 - 后端 Fastify 支持 `--watch` 模式自动重启
 
 ### 5.3 部署变化
@@ -270,7 +270,7 @@ services:
 
 ```
 Day 1:  新建 Fastify 后端，迁移 API 路由 + lib  + prisma
-Day 2:  新建 React 19 前端，迁移页面组件 + 配置路由
+Day 2:  新建 React 19.2.6 前端，迁移页面组件 + 配置路由
 Day 3:  配置 Nginx + Docker Compose，联调测试
 Day 4:  Bug 修复 + 收尾
 ```
