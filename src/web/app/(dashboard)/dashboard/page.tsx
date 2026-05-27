@@ -1,0 +1,193 @@
+'use client';
+import { useQuery } from '@tanstack/react-query';
+import ReferralSection from '../../components/ReferralSection';
+import { SparklesIcon } from '@heroicons/react/20/solid';
+import { BoltIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/16/solid';
+
+const Logo = () => <SparklesIcon className="w-7 h-7 text-[#e8673a]" />;
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`animate-pulse bg-gray-200 rounded ${className || ''}`} />;
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#f0ebe3]">
+      <nav className="bg-white border-b border-gray-200 h-14" />
+      <main className="max-w-[1280px] mx-auto px-8 py-8">
+        <Skeleton className="h-9 w-64 mb-1" />
+        <Skeleton className="h-4 w-48 mb-6" />
+        <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 mb-4">
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <Skeleton className="h-52 rounded-xl" />
+          <Skeleton className="h-52 rounded-xl" />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function formatQuota(value: number): string {
+  if (value >= 100_000_000) return (value / 100_000_000).toFixed(1) + '亿';
+  if (value >= 10_000) return (value / 10_000).toFixed(1) + '万';
+  return value.toLocaleString();
+}
+
+export default function DashboardPage() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => fetch('/api/user/dashboard').then(r => {
+      if (!r.ok) throw new Error('获取数据失败');
+      return r.json();
+    }),
+  });
+
+  if (isLoading) return <DashboardSkeleton />;
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
+          <ExclamationTriangleIcon className="w-10 h-10 text-[#e8673a] mx-auto mb-2" />
+          <p className="text-gray-600 mb-4">加载数据失败，请刷新页面重试</p>
+          <button onClick={() => window.location.reload()} className="bg-[#e8673a] text-white px-6 py-2 rounded-lg text-sm">
+            刷新页面
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const user = data?.user || { name: '用户' };
+  const quota = data?.quota || { payAsYouGo: { remaining: 0 }, monthly: { remaining: null } };
+  const subs = data?.subscriptions || [];
+  const hasSub = data?.hasActiveSubscription || false;
+
+  return (
+    <div className="min-h-screen bg-[#f0ebe3]">
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-xl"><Logo />ZiroCode</div>
+          <div className="flex gap-1">
+            {[
+              { label: '仪表板', href: '/dashboard' },
+              { label: 'API密钥', href: '/keys' },
+              { label: '兑换订阅', href: '/subscription' },
+              { label: '使用统计', href: '/usage' },
+            ].map((item) => (
+              <a key={item.label} href={item.href}
+                className={`px-4 py-1.5 rounded-md text-base font-medium ${item.href === '/dashboard' ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                {item.label}
+              </a>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full bg-[#e8673a] text-white flex items-center justify-center font-bold text-sm">
+              {user.name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <span className="font-medium">{user.name || '用户'}</span>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-[1280px] mx-auto px-8 py-8">
+        <h1 className="text-3xl font-bold mb-1">欢迎回来，{user.name}</h1>
+        <p className="text-gray-500 text-sm mb-6">这是您的配额使用概览</p>
+
+        {!hasSub && (
+          <div className="bg-[#fffbf0] border border-[#f5e8c0] rounded-xl p-5 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">还没有订阅</h3>
+                <p className="text-sm text-gray-500 mt-1">使用兑换码激活您的订阅，开始使用AI服务</p>
+              </div>
+              <a href="/subscription" className="bg-[#e8673a] text-white px-5 py-2 rounded-lg text-sm font-medium">
+                去兑换
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Row 1 */}
+        <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 mb-4">
+          <div className="bg-white rounded-xl p-5 border border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-[#e8673a] flex items-center justify-center flex-shrink-0">
+                <BoltIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="font-semibold text-base">剩余配额</div>
+                <p className="text-gray-400 text-xs">当前可用额度余量</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#fef3ee] border border-[#f5d5c5] rounded-lg p-3 flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg bg-[#e8673a] flex items-center justify-center flex-shrink-0">
+                  <BanknotesIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600">按量额度</div>
+                  <div className="text-xl font-bold">{formatQuota(quota.payAsYouGo.remaining)}</div>
+                </div>
+              </div>
+              <div className="bg-[#edfaf3] border border-[#b8ecd4] rounded-lg p-3 flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg bg-[#27ae60] flex items-center justify-center flex-shrink-0">
+                  <CalendarDaysIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600">月卡额度</div>
+                  <div className="text-xl font-bold">{quota.monthly?.remaining !== null && quota.monthly?.remaining !== undefined ? formatQuota(quota.monthly.remaining) : '0'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-5 border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-[#27ae60] flex items-center justify-center flex-shrink-0">
+                <CheckCircleIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">活跃订阅</div>
+                <div className="text-lg font-bold">{subs.length} 个套餐</div>
+              </div>
+            </div>
+            <a href="/subscription" className="block w-full bg-[#e8673a] hover:bg-[#d4562a] text-white py-2.5 rounded-lg text-sm font-medium text-center">
+              查看详情
+            </a>
+          </div>
+
+          <div className="bg-white rounded-xl p-5 border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-[#27ae60] flex items-center justify-center flex-shrink-0">
+                <ShieldCheckIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">订阅状态</div>
+                <div className="text-lg font-bold">{subs.some((s: any) => s.type === 'PERMANENT') ? '永久有效' : subs.length > 0 ? '有效' : '无订阅'}</div>
+              </div>
+            </div>
+            <a href="/subscription" className="block w-full bg-[#e8673a] hover:bg-[#d4562a] text-white py-2.5 rounded-lg text-sm font-medium text-center">
+              购买兑换码
+            </a>
+          </div>
+        </div>
+
+        {/* Row 3 - Referral */}
+        <ReferralSection />
+      </main>
+
+      <footer className="bg-white border-t border-gray-200 mt-4">
+        <div className="max-w-[1280px] mx-auto px-8 py-8">
+          <div className="flex items-center gap-2 font-bold text-base mb-1.5"><Logo />ZiroCode</div>
+          <p className="text-gray-400 text-sm mb-6">专业的AI服务平台，为开发者提供AI解决方案。</p>
+          <p className="text-gray-300 text-xs">© 2026 ZiroCode. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}

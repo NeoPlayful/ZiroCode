@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatar       String?
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  apiKeys       ApiKey[]
+  subscriptions Subscription[]
+  transactions  Transaction[]
+  usageLogs     ApiUsageLog[]
+
+  @@index([email])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// API 密钥表
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  key        String    @unique
+  name       String
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs ApiUsageLog[]
+
+  @@index([userId])
+  @@index([key])
+}
+
+// 订阅表
+model Subscription {
+  id               String           @id @default(cuid())
+  userId           String
+  type             SubscriptionType
+  quotaTotal       BigInt
+  quotaUsed        BigInt           @default(0)
+  quotaMonthly     BigInt?
+  quotaMonthlyUsed BigInt           @default(0)
+  startsAt         DateTime
+  expiresAt        DateTime?
+  isActive         Boolean          @default(true)
+  lastResetAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+enum SubscriptionType {
+  PAY_AS_YOU_GO
+  MONTHLY
+  PERMANENT
+}
+
+// 兑换码表
+model RedeemCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  quotaAmount BigInt
+  type        SubscriptionType
+  maxUses     Int       @default(1)
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  transactions Transaction[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// 交易记录表
+model Transaction {
+  id             String             @id @default(cuid())
+  userId         String
+  type           TransactionType
+  amount         Decimal            @db.Decimal(10, 2)
+  quotaAmount    BigInt?
+  description    String
+  subscriptionId String?
+  redeemCodeId   String?
+  status         TransactionStatus  @default(SUCCEEDED)
+  createdAt      DateTime           @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  redeemCode   RedeemCode?   @relation(fields: [redeemCodeId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum TransactionType {
+  REDEEM
+  ADMIN_ADJUST
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+// API 使用日志表
+model ApiUsageLog {
+  id           String   @id @default(cuid())
+  userId       String
+  apiKeyId     String
+  model        String
+  tokensUsed   Int
+  quotaUsed    BigInt
+  statusCode   Int
+  error        String?
+  requestTime  DateTime @default(now())
+  responseTime DateTime
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, requestTime])
+  @@index([apiKeyId])
+}
+
+// 模型渠道表
+model ModelChannel {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  baseUrl     String
+  apiKey      String
+  models      String[]
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([isActive, priority])
+}

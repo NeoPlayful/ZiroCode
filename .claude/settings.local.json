@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(pip install *)",
+      "Bash(python3 -c \"import docx; print\\('docx ok'\\)\")",
+      "Bash(powershell *)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --use-pnpm)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\")",
+      "Bash(npm install *)",
+      "Bash(npm config *)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add button card badge tabs --overwrite)",
+      "Bash(npm run *)"
+    ]
+  }
+}
