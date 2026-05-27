@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SparklesIcon } from '@heroicons/react/20/solid';
 
 export default function KeysPage() {
   const queryClient = useQueryClient();
@@ -39,33 +38,11 @@ export default function KeysPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3]">
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center relative font-bold text-xl">
-          <div className="flex items-center gap-2">
-            <SparklesIcon className="w-7 h-7 text-[#e8673a]" />ZiroCode
-          </div>
-          <div className="absolute left-1/2 -translate-x-1/2 flex gap-1 font-normal text-base">
-            {[
-              { label: '仪表板', href: '/dashboard' },
-              { label: 'API密钥', href: '/keys' },
-              { label: '兑换订阅', href: '/subscription' },
-              { label: '使用统计', href: '/usage' },
-            ].map((item) => (
-              <a key={item.label} href={item.href}
-                className={`px-4 py-1.5 rounded-md ${item.href === '/keys' ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-[1280px] mx-auto px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">API 密钥</h1>
-            <p className="text-sm text-gray-500 mt-1">管理您的 API 访问密钥</p>
+    <main className="max-w-[1280px] mx-auto px-8 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">API 密钥</h1>
+          <p className="text-sm text-gray-500 mt-1">管理您的 API 访问密钥</p>
           </div>
           <button onClick={() => { setShowCreate(true); setNewKeyResult(null); }}
             className="bg-[#e8673a] hover:bg-[#d4562a] text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -75,8 +52,8 @@ export default function KeysPage() {
 
         {/* 创建弹窗 */}
         {showCreate && (
-          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => { if (!newKeyResult) setShowCreate(false); }}>
-            <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => { if (!newKeyResult) setShowCreate(false); }}>
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
               {newKeyResult ? (
                 <div>
                   <h3 className="font-semibold text-lg mb-2">密钥创建成功</h3>
@@ -113,19 +90,19 @@ export default function KeysPage() {
 
         {/* 密钥列表 */}
         {isLoading ? (
-          <div className="animate-pulse space-y-3">
+        <div className="animate-pulse space-y-3">
             {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-200 rounded-lg" />)}
           </div>
         ) : keys.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-            <div className="text-4xl mb-3">🔑</div>
+        <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+          <div className="text-4xl mb-3">🔑</div>
             <p className="text-gray-500 mb-4">还没有创建 API 密钥</p>
             <button onClick={() => setShowCreate(true)} className="bg-[#e8673a] text-white px-5 py-2 rounded-lg text-sm font-medium">
               创建第一个密钥
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
@@ -158,6 +135,5 @@ export default function KeysPage() {
           </div>
         )}
       </main>
-    </div>
   );
 }

@@ -13,7 +13,6 @@ function Skeleton({ className }: { className?: string }) {
 function DashboardSkeleton() {
   return (
     <div className="min-h-screen bg-[#f0ebe3]">
-      <nav className="bg-white border-b border-gray-200 h-14" />
       <main className="max-w-[1280px] mx-auto px-8 py-8">
         <Skeleton className="h-9 w-64 mb-1" />
         <Skeleton className="h-4 w-48 mb-6" />
@@ -65,7 +64,6 @@ export default function DashboardPage() {
   const user = data?.user || { name: '用户' };
   const quota = data?.quota || { payAsYouGo: { remaining: 0 }, monthly: { remaining: null } };
   const subs = data?.subscriptions || [];
-  const hasSub = data?.hasActiveSubscription || false;
 
   return (
     <div className="min-h-screen bg-[#f0ebe3]">
@@ -97,20 +95,6 @@ export default function DashboardPage() {
       <main className="max-w-[1280px] mx-auto px-8 py-8">
         <h1 className="text-3xl font-bold mb-1">欢迎回来，{user.name}</h1>
         <p className="text-gray-500 text-sm mb-6">这是您的配额使用概览</p>
-
-        {!hasSub && (
-          <div className="bg-[#fffbf0] border border-[#f5e8c0] rounded-xl p-5 mb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">还没有订阅</h3>
-                <p className="text-sm text-gray-500 mt-1">使用兑换码激活您的订阅，开始使用AI服务</p>
-              </div>
-              <a href="/subscription" className="bg-[#e8673a] text-white px-5 py-2 rounded-lg text-sm font-medium">
-                去兑换
-              </a>
-            </div>
-          </div>
-        )}
 
         {/* Row 1 */}
         <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 mb-4">

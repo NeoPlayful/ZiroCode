@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SparklesIcon } from '@heroicons/react/20/solid';
 
 export default function SubscriptionPage() {
   const queryClient = useQueryClient();
@@ -53,29 +52,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3]">
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center relative font-bold text-xl">
-          <div className="flex items-center gap-2">
-            <SparklesIcon className="w-7 h-7 text-[#e8673a]" />ZiroCode
-          </div>
-          <div className="absolute left-1/2 -translate-x-1/2 flex gap-1 font-normal text-base">
-            {[
-              { label: '仪表板', href: '/dashboard' },
-              { label: 'API密钥', href: '/keys' },
-              { label: '兑换订阅', href: '/subscription' },
-              { label: '使用统计', href: '/usage' },
-            ].map((item) => (
-              <a key={item.label} href={item.href}
-                className={`px-4 py-1.5 rounded-md ${item.href === '/subscription' ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-[1280px] mx-auto px-8 py-8">
+    <main className="max-w-[1280px] mx-auto px-8 py-8">
         <h1 className="text-2xl font-bold mb-1">订阅管理</h1>
         <p className="text-sm text-gray-500 mb-6">管理您的订阅和配额</p>
 
@@ -157,6 +134,5 @@ export default function SubscriptionPage() {
           </div>
         )}
       </main>
-    </div>
   );
 }
