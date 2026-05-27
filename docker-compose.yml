@@ -29,6 +29,37 @@ services:
       timeout: 5s
       retries: 5
 
+  server:
+    build: ./server
+    container_name: zirocode-server
+    ports:
+      - "4000:4000"
+    env_file: ./server/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: zirocode-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
+  nginx:
+    image: nginx:alpine
+    container_name: zirocode-nginx
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - server
+      - frontend
+
 volumes:
   postgres_data:
   redis_data:

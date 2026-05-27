@@ -11,7 +11,9 @@
       "Bash(npm config *)",
       "Bash(npx shadcn@latest init -d)",
       "Bash(npx shadcn@latest add button card badge tabs --overwrite)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git *)",
+      "Bash(npm create *)"
     ]
   }
 }
