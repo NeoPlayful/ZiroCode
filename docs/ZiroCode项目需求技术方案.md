@@ -103,6 +103,7 @@ ZiroCode/
 | 样式 | Tailwind CSS 4.3 | Utility-first |
 | 路由（前端） | react-router-dom 7 | 客户端路由 |
 | 状态管理 | TanStack Query 5 | 服务端数据缓存 |
+| 客户端状态 | Zustand 5 | 轻量级状态管理 |
 | 图标 | Heroicons | 统一图标库 |
 | 图表 | ECharts + echarts-for-react | 统计图表 |
 | ORM | Prisma 5.22 | PostgreSQL ORM |
