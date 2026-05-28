@@ -9,7 +9,7 @@ export function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY 未配置');
     }
     _stripe = new Stripe(key, {
-      apiVersion: '2025-03-31.feature',
+      apiVersion: '2026-04-22.dahlia',
     });
   }
   return _stripe;

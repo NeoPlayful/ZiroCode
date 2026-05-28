@@ -31,11 +31,21 @@ export async function keyRoutes(app: FastifyInstance) {
       const session = await verifySession(token);
       if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
 
-      const { name } = req.body as any;
+      const { name, ipWhitelist, rateLimit, allowedModels, maxTokens } = req.body as any;
       if (!name) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '密钥名称为必填项' } });
 
       const rawKey = generateApiKey();
-      const key = await prisma.apiKey.create({ data: { userId: session.userId as string, key: rawKey, name } });
+      const key = await prisma.apiKey.create({
+        data: {
+          userId: session.userId as string,
+          key: rawKey,
+          name,
+          ...(ipWhitelist && { ipWhitelist }),
+          ...(rateLimit && { rateLimit }),
+          ...(allowedModels && { allowedModels }),
+          ...(maxTokens && { maxTokens }),
+        }
+      });
       return reply.send({ key: { id: key.id, name: key.name, key: rawKey } });
     } catch (error) {
       console.error('Create key error:', error);

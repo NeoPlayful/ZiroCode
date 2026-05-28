@@ -21,7 +21,7 @@ export default function TicketDetailPage() {
     queryFn: () => fetch(`/api/tickets/${id}`).then(r => r.json()),
   })
   const ticket = data?.ticket
-  const s = ticket ? (statusLabels[ticket.status] || { label: ticket.status, color: 'bg-gray-100' }) : {}
+  const s = ticket ? (statusLabels[ticket.status] || { label: ticket.status, color: 'bg-gray-100' }) : { label: '', color: '' }
 
   const replyMutation = useMutation({
     mutationFn: (content: string) => fetch(`/api/tickets/${id}/reply`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) }),

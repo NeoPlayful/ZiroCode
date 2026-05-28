@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { prisma } from '../lib/db.js';
 import { requireAuth } from '../lib/api-utils.js';
+import { createNotification } from '../lib/notification.js';
 
 export async function ticketRoutes(app: FastifyInstance) {
   // 工单列表
@@ -72,6 +73,12 @@ export async function ticketRoutes(app: FastifyInstance) {
         data: { ticketId: id, userId: user.userId, content },
       });
       await prisma.ticket.update({ where: { id }, data: { status: ticket.status === 'RESOLVED' ? 'IN_PROGRESS' : ticket.status } });
+
+      // 如果是客服回复，通知工单所有者
+      if (user.userId !== ticket.userId) {
+        createNotification(ticket.userId, 'TICKET_REPLY', '工单有新回复', `您的工单「${ticket.title}」收到新回复`, `/tickets/${id}`).catch(() => {});
+      }
+
       return reply.send({ reply: reply_ });
     } catch (error) {
       console.error('Reply ticket error:', error);

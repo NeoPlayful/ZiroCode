@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { authRoutes } from './routes/auth.js';
 import { keyRoutes } from './routes/keys.js';
 import { subscriptionRoutes } from './routes/subscriptions.js';
@@ -12,6 +14,9 @@ import { referralRoutes } from './routes/referral.js';
 import { ticketRoutes } from './routes/tickets.js';
 import { announcementRoutes } from './routes/announcements.js';
 import { adminRoutes } from './routes/admin.js';
+import { notificationRoutes } from './routes/notifications.js';
+import { webhookRoutes } from './routes/webhooks.js';
+import { analyticsRoutes } from './routes/analytics.js';
 
 const app = Fastify({ logger: true });
 
@@ -37,6 +42,21 @@ async function start() {
   });
   await app.register(cookie);
 
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'ZiroCode API',
+        description: 'ZiroCode API 文档',
+        version: '1.0.0',
+      },
+      servers: [{ url: 'http://localhost:4000' }],
+    },
+  });
+
+  await app.register(swaggerUi, {
+    routePrefix: '/api/docs',
+  });
+
   app.register(authRoutes);
   app.register(keyRoutes);
   app.register(subscriptionRoutes);
@@ -48,6 +68,9 @@ async function start() {
   app.register(ticketRoutes);
   app.register(announcementRoutes);
   app.register(adminRoutes);
+  app.register(notificationRoutes);
+  app.register(webhookRoutes);
+  app.register(analyticsRoutes);
 
   const port = parseInt(process.env.PORT || '4000');
   await app.listen({ port, host: '0.0.0.0' });

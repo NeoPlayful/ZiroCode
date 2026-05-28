@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { prisma } from '../lib/db.js';
 import { requireAdmin, AuthError } from '../lib/api-utils.js';
+import { checkChannelHealth } from '../lib/router.js';
 
 async function handleAuth(req: any, reply: any) {
   try { return await requireAdmin(req, reply); }
@@ -205,6 +206,77 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Admin reject withdrawal error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '审批失败' } });
+    }
+  });
+
+  app.get('/api/admin/audit-logs', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const query = req.query as any;
+      const page = parseInt(query.page || '1');
+      const pageSize = 50;
+      const where: any = {};
+      if (query.userId) where.userId = query.userId;
+      if (query.action) where.action = query.action;
+      if (query.resource) where.resource = query.resource;
+      const [logs, total] = await Promise.all([
+        prisma.auditLog.findMany({ where, skip: (page - 1) * pageSize, take: pageSize, orderBy: { createdAt: 'desc' } }),
+        prisma.auditLog.count({ where }),
+      ]);
+      return reply.send({ logs, total, page, pageSize });
+    } catch (error) {
+      console.error('Admin audit logs error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取审计日志失败' } });
+    }
+  });
+
+  app.post('/api/admin/batch/redeem-codes', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { count, quotaAmount, type } = req.body as any;
+      const codes = [];
+      for (let i = 0; i < count; i++) {
+        const code = crypto.randomBytes(8).toString('hex').toUpperCase();
+        codes.push({ code, quotaAmount: BigInt(quotaAmount), type });
+      }
+      await prisma.redeemCode.createMany({ data: codes });
+      return reply.send({ codes: codes.map(c => c.code) });
+    } catch (error) {
+      console.error('Batch create redeem codes error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '批量生成失败' } });
+    }
+  });
+
+  app.post('/api/admin/batch/adjust-quota', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { userIds, quotaAmount } = req.body as any;
+      for (const userId of userIds) {
+        const sub = await prisma.subscription.findFirst({ where: { userId, type: 'PAY_AS_YOU_GO' } });
+        if (sub) {
+          await prisma.subscription.update({ where: { id: sub.id }, data: { quotaTotal: { increment: BigInt(quotaAmount) } } });
+        }
+      }
+      return reply.send({ success: true });
+    } catch (error) {
+      console.error('Batch adjust quota error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '批量调整失败' } });
+    }
+  });
+
+  app.post('/api/admin/channels/:id/test', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const healthy = await checkChannelHealth(id);
+      return reply.send({ healthy });
+    } catch (error) {
+      console.error('Test channel error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '测试失败' } });
     }
   });
 }

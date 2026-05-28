@@ -1,4 +1,5 @@
 import { prisma } from './db.js';
+import { createNotification } from './notification.js';
 
 // 奖励规则（可配置）
 const RULES = {
@@ -45,6 +46,10 @@ export async function triggerReferralReward(userId: string, quotaAmount: bigint)
       description: '推荐奖励：好友消费返佣',
     },
   });
+
+  // 通知推荐人获得奖励
+  const rewardAmount = Number(rewardQuota) / 100000000;
+  createNotification(referral.referrerId, 'REFERRAL_REWARD', '推荐奖励到账', `您获得了推荐奖励 ${rewardAmount.toFixed(2)} 元配额`, '/subscription').catch(() => {});
 }
 
 export function getReferralRules() {

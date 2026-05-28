@@ -31,6 +31,9 @@ model User {
   tickets       Ticket[]
   ticketReplies TicketReply[]
   readAnnouncements AnnouncementRead[]
+  notifications Notification[]
+  notificationPreference NotificationPreference?
+  webhooks WebhookEndpoint[]
 
   @@index([email])
   @@index([referralCode])
@@ -43,15 +46,20 @@ enum Role {
 
 // API 密钥表
 model ApiKey {
-  id         String    @id @default(cuid())
-  userId     String
-  key        String    @unique
-  name       String
-  lastUsedAt DateTime?
-  expiresAt  DateTime?
-  isActive   Boolean   @default(true)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  userId        String
+  key           String    @unique
+  name          String
+  lastUsedAt    DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  ipWhitelist   String[]  @default([])
+  rateLimit     Int?      @default(60)
+  allowedModels String[]  @default([])
+  maxTokens     Int?      @default(4096)
+  metadata      Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   usageLogs ApiUsageLog[]
@@ -292,4 +300,112 @@ model ModelChannel {
   createdAt   DateTime @default(now())
 
   @@index([isActive, priority])
+}
+
+// 通知表
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  content   String?
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+enum NotificationType {
+  QUOTA_LOW
+  QUOTA_EXHAUSTED
+  SUBSCRIPTION_EXPIRING
+  PAYMENT_SUCCESS
+  TICKET_REPLY
+  ANNOUNCEMENT
+  REFERRAL_REWARD
+  WEBHOOK_FAILED
+}
+
+// 通知偏好表
+model NotificationPreference {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  quotaLow             Boolean  @default(true)
+  quotaExhausted       Boolean  @default(true)
+  subscriptionExpiring Boolean  @default(true)
+  marketing            Boolean  @default(false)
+  emailDigest          Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Webhook 端点表
+model WebhookEndpoint {
+  id            String        @id @default(cuid())
+  userId        String
+  name          String
+  url           String
+  secret        String
+  events        WebhookEvent[]
+  isActive      Boolean       @default(true)
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs WebhookLog[]
+
+  @@index([userId])
+}
+
+model WebhookLog {
+  id           String        @id @default(cuid())
+  endpointId   String
+  event        WebhookEvent
+  statusCode   Int?
+  responseBody String?
+  success      Boolean
+  durationMs   Int?
+  createdAt    DateTime      @default(now())
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, createdAt])
+}
+
+enum WebhookEvent {
+  QUOTA_LOW
+  QUOTA_EXHAUSTED
+  PAYMENT_SUCCESS
+  API_CALL_COMPLETED
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_EXPIRED
+}
+
+// 审计日志表
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  detail     Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([action])
+}
+
+// 系统配置表
+model SystemConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }

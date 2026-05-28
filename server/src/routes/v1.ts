@@ -2,6 +2,9 @@ import type { FastifyInstance } from 'fastify';
 import { prisma } from '../lib/db.js';
 import { getUserQuota, deductQuota, checkRateLimit } from '../lib/quota.js';
 import { routeToUpstream, getAvailableChannels } from '../lib/router.js';
+import { createNotification } from '../lib/notification.js';
+import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
+import { cacheGet, cacheSet } from '../lib/cache.js';
 
 async function validateApiKey(authHeader: string | null): Promise<{ userId: string; apiKeyId: string } | null> {
   if (!authHeader || !authHeader.startsWith('Bearer sk-')) return null;
@@ -23,6 +26,14 @@ async function logUsage(auth: { userId: string; apiKeyId: string }, model: strin
   });
 }
 
+async function getCachedQuota(userId: string) {
+  const cached = await cacheGet(`quota:${userId}`);
+  if (cached) return JSON.parse(cached);
+  const quota = await getUserQuota(userId);
+  await cacheSet(`quota:${userId}`, JSON.stringify(quota), 30);
+  return quota;
+}
+
 export async function v1Routes(app: FastifyInstance) {
   // 聊天补全 - 普通 JSON 模式
   app.post('/api/v1/chat/completions', async (req, reply) => {
@@ -33,8 +44,10 @@ export async function v1Routes(app: FastifyInstance) {
       const allowed = await checkRateLimit(auth.userId);
       if (!allowed) return reply.status(429).send({ error: { code: 'RATE_LIMITED', message: '请求过于频繁' } });
 
-      const quota = await getUserQuota(auth.userId);
+      const quota = await getCachedQuota(auth.userId);
       if (quota.payAsYouGoRemaining <= BigInt(0) && (quota.monthlyRemaining === null || quota.monthlyRemaining <= BigInt(0))) {
+        createNotification(auth.userId, 'QUOTA_EXHAUSTED', '配额已用完', '请充值或兑换订阅以继续使用', '/subscription').catch(() => {});
+        dispatchWebhook(auth.userId, 'QUOTA_EXHAUSTED', { quotaRemaining: 0 }).catch(() => {});
         return reply.status(403).send({ error: { code: 'INSUFFICIENT_QUOTA', message: '配额不足' } });
       }
 
@@ -96,7 +109,17 @@ export async function v1Routes(app: FastifyInstance) {
 
         const responseTime = new Date();
         const quotaUsed = BigInt(totalTokens);
-        if (!hasError && totalTokens > 0) await deductQuota(auth.userId, quotaUsed);
+        if (!hasError && totalTokens > 0) {
+          await deductQuota(auth.userId, quotaUsed);
+          const newQuota = await getUserQuota(auth.userId);
+          const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
+          const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
+          if (total > BigInt(0) && remaining * BigInt(10) < total) {
+            const percentageUsed = Number((total - remaining) * BigInt(100) / total);
+            createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', `剩余配额不足 10%，请及时充值`, '/subscription').catch(() => {});
+            dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed }).catch(() => {});
+          }
+        }
         await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime);
         return;
       }
@@ -113,7 +136,17 @@ export async function v1Routes(app: FastifyInstance) {
 
       const tokensUsed = responseData.usage?.total_tokens || 0;
       const quotaUsed = BigInt(tokensUsed);
-      if (result.response.ok) await deductQuota(auth.userId, quotaUsed);
+      if (result.response.ok) {
+        await deductQuota(auth.userId, quotaUsed);
+        const newQuota = await getUserQuota(auth.userId);
+        const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
+        const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
+        if (total > BigInt(0) && remaining * BigInt(10) < total) {
+          const percentageUsed = Number((total - remaining) * BigInt(100) / total);
+          createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', `剩余配额不足 10%，请及时充值`, '/subscription').catch(() => {});
+          dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed }).catch(() => {});
+        }
+      }
 
       await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime);
 
@@ -127,11 +160,16 @@ export async function v1Routes(app: FastifyInstance) {
   // 模型列表
   app.get('/api/v1/models', async (_req, reply) => {
     try {
+      const cached = await cacheGet('models:list');
+      if (cached) return reply.send(JSON.parse(cached));
+
       const channels = await getAvailableChannels();
       const models = channels.flatMap(c => c.models.map(m => ({
         id: m, object: 'model', created: Math.floor(c.createdAt.getTime() / 1000), owned_by: c.name,
       })));
-      return reply.send({ object: 'list', data: models });
+      const result = { object: 'list', data: models };
+      await cacheSet('models:list', JSON.stringify(result), 300);
+      return reply.send(result);
     } catch (error) {
       console.error('List models error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取模型列表失败' } });

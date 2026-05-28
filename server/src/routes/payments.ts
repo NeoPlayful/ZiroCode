@@ -3,6 +3,8 @@ import { getStripe } from '../lib/stripe.js';
 import { prisma } from '../lib/db.js';
 import { requireAuth } from '../lib/api-utils.js';
 import { triggerReferralReward } from '../lib/referral.js';
+import { createNotification } from '../lib/notification.js';
+import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
 
 export async function paymentRoutes(app: FastifyInstance) {
   // 创建 Stripe Checkout 会话
@@ -84,6 +86,10 @@ export async function paymentRoutes(app: FastifyInstance) {
             status: 'SUCCEEDED',
           },
         });
+
+        // 通知支付成功
+        createNotification(userId, 'PAYMENT_SUCCESS', '支付成功', `已成功购买套餐，配额已到账`, '/dashboard').catch(() => {});
+        dispatchWebhook(userId, 'PAYMENT_SUCCESS', { amount: session.amount_total / 100, quotaAmount: Number(quotaAmount) }).catch(() => {});
 
         // 触发推荐奖励
         triggerReferralReward(userId, BigInt(quotaAmount)).catch(() => {});

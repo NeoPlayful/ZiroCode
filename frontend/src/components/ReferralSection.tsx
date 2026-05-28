@@ -18,7 +18,6 @@ export default function ReferralSection() {
   const stats = data?.stats || { totalReferrals: 0, totalReward: 0, claimedReward: 0, pendingReward: 0 }
   const referrals = data?.referrals || []
   const link = typeof window !== 'undefined' ? `${window.location.origin}/auth/register?ref=${data?.referralCode || ''}` : ''
-  const rules = data?.rules || { minWithdrawal: 10 }
 
   if (isLoading) {
     return (

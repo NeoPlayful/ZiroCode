@@ -12,6 +12,10 @@ import TicketDetailPage from './pages/TicketDetailPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AdminPage from './pages/AdminPage'
+import NotificationsPage from './pages/NotificationsPage'
+import WebhooksPage from './pages/WebhooksPage'
+import AnalyticsPage from './pages/AnalyticsPage'
+import DeveloperPage from './pages/DeveloperPage'
 
 export default function App() {
   return (
@@ -28,6 +32,10 @@ export default function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/tickets" element={<TicketsPage />} />
         <Route path="/tickets/:id" element={<TicketDetailPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/webhooks" element={<WebhooksPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/developer" element={<DeveloperPage />} />
       </Route>
       <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
