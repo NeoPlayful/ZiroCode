@@ -1,19 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-
-const adminTabs = [
-  { key: 'dashboard', label: '概览' },
-  { key: 'users', label: '用户管理' },
-  { key: 'subscriptions', label: '订阅' },
-  { key: 'redeem-codes', label: '兑换码' },
-  { key: 'channels', label: '渠道' },
-  { key: 'withdrawals', label: '提现' },
-  { key: 'tickets', label: '工单' },
-  { key: 'announcements', label: '公告' },
-  { key: 'audit-logs', label: '审计日志' },
-  { key: 'batch', label: '批量操作' },
-  { key: 'config', label: '系统配置' },
-]
+import AdminSidebar from '../components/admin/AdminSidebar'
+import AdminDashboard from '../components/admin/AdminDashboard'
 
 export default function AdminPage() {
   const [tab, setTab] = useState('dashboard')
@@ -21,54 +9,28 @@ export default function AdminPage() {
 
   if (!me?.user) return null
   if (me.user.role !== 'ADMIN') {
-    return <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center text-gray-400"><p>需要管理员权限</p></div>
+    return <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center text-gray-400"><p>需要管理员权限</p></div>
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-6">
-      <div className="flex items-center gap-2 mb-6">
-        {adminTabs.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium ${tab === t.key ? 'bg-[#e8673a] text-white' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
-            {t.label}
-          </button>
-        ))}
+    <div className="flex overflow-hidden bg-[#f9f9f9]" style={{ height: 'calc(100vh - 56px)' }}>
+      <AdminSidebar activeTab={tab} onTabChange={setTab} />
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-8">
+          {tab === 'dashboard' && <AdminDashboard />}
+          {tab === 'users' && <AdminUsers />}
+          {tab === 'subscriptions' && <AdminSubscriptions />}
+          {tab === 'redeem-codes' && <AdminRedeemCodes />}
+          {tab === 'channels' && <AdminChannels />}
+          {tab === 'withdrawals' && <AdminWithdrawals />}
+          {tab === 'tickets' && <AdminTickets />}
+          {tab === 'announcements' && <AdminAnnouncements />}
+          {tab === 'audit-logs' && <AdminAuditLogs />}
+          {tab === 'batch' && <AdminBatch />}
+          {tab === 'config' && <AdminConfig />}
+        </main>
       </div>
-      {tab === 'dashboard' && <AdminDashboard />}
-      {tab === 'users' && <AdminUsers />}
-      {tab === 'subscriptions' && <AdminSubscriptions />}
-      {tab === 'redeem-codes' && <AdminRedeemCodes />}
-      {tab === 'channels' && <AdminChannels />}
-      {tab === 'withdrawals' && <AdminWithdrawals />}
-      {tab === 'tickets' && <AdminTickets />}
-      {tab === 'announcements' && <AdminAnnouncements />}
-      {tab === 'audit-logs' && <AdminAuditLogs />}
-      {tab === 'batch' && <AdminBatch />}
-      {tab === 'config' && <AdminConfig />}
-    </div>
-  )
-}
-
-function AdminDashboard() {
-  const { data } = useQuery({ queryKey: ['admin-stats'], queryFn: () => fetch('/api/admin/stats').then(r => r.json()) })
-  const stats = data?.stats || {}
-  return (
-    <div className="grid grid-cols-4 gap-4">
-      {[
-        { label: '用户总数', value: stats.users, color: 'bg-blue-500' },
-        { label: '活跃密钥', value: stats.activeKeys, color: 'bg-green-500' },
-        { label: '今日调用', value: stats.todayCalls, color: 'bg-orange-500' },
-        { label: '总调用量', value: stats.totalCalls, color: 'bg-purple-500' },
-      ].map(s => (
-        <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className={`w-3 h-3 rounded-full ${s.color} mb-2`} />
-          <div className="text-2xl font-bold">{s.value ?? '-'}</div>
-          <div className="text-sm text-gray-500">{s.label}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
+    )
+  }
 
 function AdminUsers() {
   const { data } = useQuery({ queryKey: ['admin-users'], queryFn: () => fetch('/api/admin/users').then(r => r.json()) })

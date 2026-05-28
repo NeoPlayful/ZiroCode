@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import ReferralSection from '../components/ReferralSection';
+import TutorialAndAnnouncement from '../components/TutorialAndAnnouncement';
 import { SparklesIcon } from '@heroicons/react/20/solid';
 import { BoltIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/16/solid';
 
@@ -156,6 +157,9 @@ export default function DashboardPage() {
             </a>
           </div>
         </div>
+
+        {/* Row 2 - Tutorial & Announcement */}
+        <TutorialAndAnnouncement />
 
         {/* Row 3 - Referral */}
         <ReferralSection />
