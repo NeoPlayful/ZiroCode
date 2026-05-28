@@ -21,13 +21,14 @@ export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => fetch('/api/auth/me').then(r => r.ok ? r.json() : { user: null }),
     staleTime: 5 * 60 * 1000,
   })
   const user = data?.user
 
+  // 处理菜单点击
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -37,6 +38,30 @@ export default function AppLayout() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  // 登录验证
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/auth/login', { replace: true, state: { from: location.pathname } })
+    }
+  }, [isLoading, user, navigate, location.pathname])
+
+  // 加载中显示加载动画
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center">
+        <div className="text-center">
+          <SparklesIcon className="w-12 h-12 text-[#e8673a] mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">加载中...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 未登录时不渲染内容（等待重定向）
+  if (!user) {
+    return null
+  }
 
   async function handleLogout() {
     setMenuOpen(false)
