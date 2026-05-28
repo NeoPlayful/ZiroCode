@@ -1,46 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { UsersIcon, KeyIcon, TicketIcon, CurrencyDollarIcon, Cog6ToothIcon, BanknotesIcon, SparklesIcon } from '@heroicons/react/20/solid'
+import AdminLayout from '../components/AdminLayout'
 
 export default function AdminPage() {
   const [tab, setTab] = useState('dashboard')
   const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => fetch('/api/auth/me').then(r => r.json()) })
 
-  // 检查管理员权限
-  if (me?.user && me.user.role !== 'ADMIN') {
-    return <div className="text-center py-16 text-gray-400"><p>需要管理员权限</p></div>
+  if (!me?.user) return null
+  if (me.user.role !== 'ADMIN') {
+    return <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center text-gray-400"><p>需要管理员权限</p></div>
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-8">
-      <div className="flex items-center gap-2 mb-6">
-        <SparklesIcon className="w-6 h-6 text-[#e8673a]" />
-        <h1 className="text-2xl font-bold">管理后台</h1>
-      </div>
-
-      <div className="flex gap-4 mb-6">
-        {[
-          { key: 'dashboard', label: '概览', icon: Cog6ToothIcon },
-          { key: 'users', label: '用户管理', icon: UsersIcon },
-          { key: 'subscriptions', label: '订阅', icon: TicketIcon },
-          { key: 'redeem-codes', label: '兑换码', icon: CurrencyDollarIcon },
-          { key: 'channels', label: '渠道', icon: KeyIcon },
-          { key: 'withdrawals', label: '提现', icon: BanknotesIcon },
-        ].map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setTab(key)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium ${tab === key ? 'bg-[#e8673a] text-white' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
-            <Icon className="w-4 h-4" /> {label}
-          </button>
-        ))}
-      </div>
-
+    <AdminLayout tab={tab} onTabChange={setTab}>
       {tab === 'dashboard' && <AdminDashboard />}
       {tab === 'users' && <AdminUsers />}
       {tab === 'subscriptions' && <AdminSubscriptions />}
       {tab === 'redeem-codes' && <AdminRedeemCodes />}
       {tab === 'channels' && <AdminChannels />}
       {tab === 'withdrawals' && <AdminWithdrawals />}
-    </div>
+    </AdminLayout>
   )
 }
 
