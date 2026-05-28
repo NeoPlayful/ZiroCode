@@ -19,6 +19,9 @@ export default function AdminPage() {
       {tab === 'redeem-codes' && <AdminRedeemCodes />}
       {tab === 'channels' && <AdminChannels />}
       {tab === 'withdrawals' && <AdminWithdrawals />}
+      {tab === 'audit-logs' && <AdminAuditLogs />}
+      {tab === 'batch' && <AdminBatch />}
+      {tab === 'config' && <AdminConfig />}
     </AdminLayout>
   )
 }
@@ -47,13 +50,6 @@ function AdminDashboard() {
 function AdminUsers() {
   const { data } = useQuery({ queryKey: ['admin-users'], queryFn: () => fetch('/api/admin/users').then(r => r.json()) })
   const users = data?.users || []
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editName, setEditName] = useState('')
-
-  async function saveUser(id: string) {
-    await fetch(`/api/admin/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName }) })
-    setEditingId(null)
-  }
 
   return (
     <div className="bg-white rounded-xl border border-gray-200">
@@ -67,11 +63,7 @@ function AdminUsers() {
             {users.map((u: any) => (
               <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50">
                 <td className="p-3">{u.email}</td>
-                <td className="p-3">
-                  {editingId === u.id ? (
-                    <input value={editName} onChange={e => setEditName(e.target.value)} className="border rounded px-2 py-1 text-sm w-28" />
-                  ) : u.name}
-                </td>
+                <td className="p-3">{u.name}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded-full ${u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100'}`}>{u.role}</span></td>
                 <td className="p-3">{u._count?.apiKeys || 0}</td>
                 <td className="p-3">{u._count?.subscriptions || 0}</td>
@@ -166,6 +158,12 @@ function AdminChannels() {
     setShowForm(false); refetch()
   }
 
+  async function testChannel(id: string) {
+    const res = await fetch(`/api/admin/channels/${id}/test`, { method: 'POST' })
+    const data = await res.json()
+    alert(data.healthy ? '测试成功' : '测试失败')
+  }
+
   return (
     <div>
       <div className="flex justify-end mb-3">
@@ -181,7 +179,7 @@ function AdminChannels() {
       )}
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b">{['名称', 'URL', '模型数', '优先级', '状态'].map(h => <th key={h} className="p-3 font-medium">{h}</th>)}</tr></thead>
+          <thead><tr className="text-left text-gray-500 border-b">{['名称', 'URL', '模型数', '优先级', '状态', '操作'].map(h => <th key={h} className="p-3 font-medium">{h}</th>)}</tr></thead>
           <tbody>
             {channels.map((c: any) => (
               <tr key={c.id} className="border-b border-gray-50">
@@ -190,6 +188,7 @@ function AdminChannels() {
                 <td className="p-3">{c.models?.length || 0}</td>
                 <td className="p-3">{c.priority}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded-full ${c.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{c.isActive ? '启用' : '禁用'}</span></td>
+                <td className="p-3"><button onClick={() => testChannel(c.id)} className="text-blue-600 hover:underline text-xs">测试</button></td>
               </tr>
             ))}
           </tbody>
@@ -233,6 +232,72 @@ function AdminWithdrawals() {
           {withdrawals.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-gray-400">暂无提现申请</td></tr>}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+function AdminAuditLogs() {
+  const { data } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => fetch('/api/admin/audit-logs').then(r => r.json()) })
+  const logs = data?.logs || []
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead><tr className="text-left text-gray-500 border-b">{['操作', '资源', '用户ID', '时间'].map(h => <th key={h} className="p-3 font-medium">{h}</th>)}</tr></thead>
+        <tbody>
+          {logs.map((log: any) => (
+            <tr key={log.id} className="border-b border-gray-50">
+              <td className="p-3">{log.action}</td>
+              <td className="p-3">{log.resource}</td>
+              <td className="p-3 text-gray-400">{log.userId || '-'}</td>
+              <td className="p-3 text-gray-400">{new Date(log.createdAt).toLocaleString()}</td>
+            </tr>
+          ))}
+          {logs.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-gray-400">暂无审计日志</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function AdminBatch() {
+  const [count, setCount] = useState('10')
+  const [quotaAmount, setQuotaAmount] = useState('100000000')
+
+  async function batchGenerate() {
+    await fetch('/api/admin/batch/redeem-codes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ count: parseInt(count), quotaAmount, type: 'PAY_AS_YOU_GO' })
+    })
+    alert('批量生成成功')
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="font-semibold mb-4">批量生成兑换码</h3>
+        <label className="block text-sm mb-1">数量</label>
+        <input value={count} onChange={e => setCount(e.target.value)} type="number" className="w-full border rounded px-3 py-2 mb-3" />
+        <label className="block text-sm mb-1">配额</label>
+        <input value={quotaAmount} onChange={e => setQuotaAmount(e.target.value)} type="number" className="w-full border rounded px-3 py-2 mb-3" />
+        <button onClick={batchGenerate} className="bg-[#e8673a] text-white px-4 py-2 rounded">生成</button>
+      </div>
+    </div>
+  )
+}
+
+function AdminConfig() {
+  const [siteName, setSiteName] = useState('ZiroCode')
+  const [defaultQuota, setDefaultQuota] = useState('100000000')
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="font-semibold mb-4">系统配置</h3>
+      <label className="block text-sm mb-1">站点名称</label>
+      <input value={siteName} onChange={e => setSiteName(e.target.value)} className="w-full border rounded px-3 py-2 mb-3" />
+      <label className="block text-sm mb-1">默认配额</label>
+      <input value={defaultQuota} onChange={e => setDefaultQuota(e.target.value)} type="number" className="w-full border rounded px-3 py-2 mb-3" />
+      <button className="bg-[#e8673a] text-white px-4 py-2 rounded">保存</button>
     </div>
   )
 }

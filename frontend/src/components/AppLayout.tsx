@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SparklesIcon } from '@heroicons/react/20/solid'
+import NotificationBell from './NotificationBell'
 
 const navItems = [
   { label: '仪表板', href: '/dashboard' },
@@ -9,7 +10,6 @@ const navItems = [
   { label: '兑换订阅', href: '/subscription' },
   { label: '使用统计', href: '/usage' },
   { label: '定价', href: '/pricing' },
-  { label: '工单', href: '/tickets' },
 ]
 
 export default function AppLayout() {
@@ -75,8 +75,9 @@ export default function AppLayout() {
               </Link>
             )}
           </div>
+          {user && <NotificationBell />}
           {user && (
-            <div className="relative flex-shrink-0" ref={menuRef}>
+            <div className="relative flex-shrink-0 ml-2" ref={menuRef}>
               <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center gap-2 cursor-pointer">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
@@ -96,6 +97,10 @@ export default function AppLayout() {
                   <Link to="/dashboard" onClick={() => setMenuOpen(false)}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                     个人设置
+                  </Link>
+                  <Link to="/tickets" onClick={() => setMenuOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    工单中心
                   </Link>
                   <button onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">

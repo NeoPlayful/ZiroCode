@@ -1,0 +1,128 @@
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+const eventOptions = [
+  { value: 'QUOTA_LOW', label: '配额不足' },
+  { value: 'QUOTA_EXHAUSTED', label: '配额耗尽' },
+  { value: 'PAYMENT_SUCCESS', label: '支付成功' },
+  { value: 'API_CALL_COMPLETED', label: 'API 调用完成' },
+  { value: 'SUBSCRIPTION_EXPIRING', label: '订阅即将过期' },
+  { value: 'SUBSCRIPTION_EXPIRED', label: '订阅已过期' },
+]
+
+export default function WebhooksPage() {
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({ name: '', url: '', events: [] as string[] })
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['webhooks'],
+    queryFn: () => fetch('/api/webhooks').then(r => r.json()),
+  })
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => fetch('/api/webhooks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['webhooks'] })
+      setShowForm(false)
+      setFormData({ name: '', url: '', events: [] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/webhooks/${id}`, { method: 'DELETE' }).then(r => r.json()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['webhooks'] }),
+  })
+
+  const testMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/webhooks/${id}/test`, { method: 'POST' }).then(r => r.json()),
+  })
+
+  const webhooks = data?.webhooks || []
+
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-8 py-6">
+        <div className="animate-pulse space-y-4">
+          {[1, 2].map(i => <div key={i} className="h-24 bg-gray-200 rounded-lg" />)}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-8 py-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Webhook 管理</h1>
+        <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f]">
+          {showForm ? '取消' : '+ 新建 Webhook'}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+          <h2 className="font-semibold mb-4">新建 Webhook</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">名称</label>
+              <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">URL</label>
+              <input type="url" value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="https://example.com/webhook" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">监听事件</label>
+              <div className="grid grid-cols-2 gap-2">
+                {eventOptions.map(opt => (
+                  <label key={opt.value} className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.events.includes(opt.value)} onChange={e => {
+                      if (e.target.checked) setFormData({ ...formData, events: [...formData.events, opt.value] })
+                      else setFormData({ ...formData, events: formData.events.filter(ev => ev !== opt.value) })
+                    }} />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button onClick={() => createMutation.mutate(formData)} disabled={!formData.name || !formData.url || formData.events.length === 0} className="px-4 py-2 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f] disabled:opacity-50">
+              创建
+            </button>
+          </div>
+        </div>
+      )}
+
+      {webhooks.length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <div className="text-4xl mb-4">🔗</div>
+          <div>暂无 Webhook</div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {webhooks.map((wh: any) => (
+            <div key={wh.id} className="bg-white p-4 rounded-lg border border-gray-200">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="font-semibold">{wh.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">{wh.url}</div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {wh.events.map((ev: string) => (
+                      <span key={ev} className="px-2 py-1 bg-gray-100 text-xs rounded">{eventOptions.find(o => o.value === ev)?.label || ev}</span>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2">
+                    {wh.lastSuccessAt && `最后成功: ${new Date(wh.lastSuccessAt).toLocaleString('zh-CN')}`}
+                  </div>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <button onClick={() => testMutation.mutate(wh.id)} className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">测试</button>
+                  <button onClick={() => deleteMutation.mutate(wh.id)} className="px-3 py-1 text-sm text-red-500 border border-red-300 rounded hover:bg-red-50">删除</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

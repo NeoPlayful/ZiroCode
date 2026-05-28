@@ -5,6 +5,8 @@ export default function KeysPage() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
+  const [rateLimit, setRateLimit] = useState('60');
+  const [maxTokens, setMaxTokens] = useState('4096');
   const [newKeyResult, setNewKeyResult] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -14,11 +16,13 @@ export default function KeysPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (name: string) =>
-      fetch('/api/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }).then(r => r.json()),
+    mutationFn: (data: { name: string; rateLimit?: number; maxTokens?: number }) =>
+      fetch('/api/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json()),
     onSuccess: (result) => {
       setNewKeyResult(result.key?.key || '');
       setNewKeyName('');
+      setRateLimit('60');
+      setMaxTokens('4096');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
     },
   });
@@ -71,10 +75,16 @@ export default function KeysPage() {
                   <h3 className="font-semibold text-lg mb-4">创建新密钥</h3>
                   <label className="block text-sm font-medium mb-1">密钥名称</label>
                   <input value={newKeyName} onChange={e => setNewKeyName(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-[#e8673a]"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:border-[#e8673a]"
                     placeholder="例如：生产环境" />
+                  <label className="block text-sm font-medium mb-1">速率限制（次/分钟）</label>
+                  <input value={rateLimit} onChange={e => setRateLimit(e.target.value)} type="number"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:border-[#e8673a]" />
+                  <label className="block text-sm font-medium mb-1">最大 Token</label>
+                  <input value={maxTokens} onChange={e => setMaxTokens(e.target.value)} type="number"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-[#e8673a]" />
                   <div className="flex gap-2">
-                    <button onClick={() => createMutation.mutate(newKeyName)} disabled={!newKeyName || createMutation.isPending}
+                    <button onClick={() => createMutation.mutate({ name: newKeyName, rateLimit: parseInt(rateLimit), maxTokens: parseInt(maxTokens) })} disabled={!newKeyName || createMutation.isPending}
                       className="flex-1 bg-[#e8673a] text-white py-2 rounded-lg text-sm disabled:opacity-50">
                       {createMutation.isPending ? '创建中...' : '创建'}
                     </button>

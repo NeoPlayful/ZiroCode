@@ -118,3 +118,17 @@ export async function routeToUpstreamStreaming(
 
   onError(new Error('All channels failed for streaming'));
 }
+
+export async function checkChannelHealth(channelId: string): Promise<boolean> {
+  try {
+    const channel = await prisma.modelChannel.findUnique({ where: { id: channelId } });
+    if (!channel) return false;
+    const response = await fetch(`${channel.baseUrl}/v1/models`, {
+      headers: { Authorization: `Bearer ${channel.apiKey}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
