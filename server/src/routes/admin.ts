@@ -279,4 +279,73 @@ export async function adminRoutes(app: FastifyInstance) {
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '测试失败' } });
     }
   });
+
+  // 工单管理
+  app.get('/api/admin/tickets', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const tickets = await prisma.ticket.findMany({
+        include: { user: { select: { name: true, email: true } } },
+        orderBy: { createdAt: 'desc' },
+      });
+      return reply.send({ tickets });
+    } catch (error) {
+      console.error('Admin list tickets error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取工单失败' } });
+    }
+  });
+
+  // 公告管理
+  app.get('/api/admin/announcements', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const announcements = await prisma.announcement.findMany({ orderBy: { createdAt: 'desc' } });
+      return reply.send({ announcements });
+    } catch (error) {
+      console.error('Admin list announcements error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取公告失败' } });
+    }
+  });
+
+  app.post('/api/admin/announcements', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { title, content } = req.body as any;
+      const announcement = await prisma.announcement.create({ data: { title, content } });
+      return reply.send({ announcement });
+    } catch (error) {
+      console.error('Create announcement error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '创建公告失败' } });
+    }
+  });
+
+  app.put('/api/admin/announcements/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const { title, content, isActive, isPinned } = req.body as any;
+      const announcement = await prisma.announcement.update({ where: { id }, data: { title, content, isActive, isPinned } });
+      return reply.send({ announcement });
+    } catch (error) {
+      console.error('Update announcement error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新公告失败' } });
+    }
+  });
+
+  app.delete('/api/admin/announcements/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      await prisma.announcement.delete({ where: { id } });
+      return reply.send({ ok: true });
+    } catch (error) {
+      console.error('Delete announcement error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '删除公告失败' } });
+    }
+  });
 }

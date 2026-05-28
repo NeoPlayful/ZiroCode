@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import {
   UsersIcon,
   BanknotesIcon,
@@ -18,6 +19,22 @@ export default function ReferralSection() {
   const stats = data?.stats || { totalReferrals: 0, totalReward: 0, claimedReward: 0, pendingReward: 0 }
   const referrals = data?.referrals || []
   const link = typeof window !== 'undefined' ? `${window.location.origin}/auth/register?ref=${data?.referralCode || ''}` : ''
+  const [claiming, setClaiming] = useState(false)
+  const [claimMsg, setClaimMsg] = useState('')
+
+  async function handleClaim() {
+    setClaiming(true)
+    setClaimMsg('')
+    try {
+      const res = await fetch('/api/referral/claim', { method: 'POST' })
+      const result = await res.json()
+      setClaimMsg(result.message || '提现申请已提交')
+    } catch {
+      setClaimMsg('请求失败，请稍后重试')
+    } finally {
+      setClaiming(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -85,6 +102,22 @@ export default function ReferralSection() {
           ))}
         </ol>
       </div>
+
+      {Number(stats.pendingReward) > 0 && (
+        <div className="flex items-center justify-between bg-[#fde8df] rounded-lg p-3.5 mb-4">
+          <div>
+            <p className="text-sm font-semibold">可提现奖励</p>
+            <p className="text-lg font-bold text-[#e8673a]">¥{Number(stats.pendingReward).toFixed(2)}</p>
+          </div>
+          <button onClick={handleClaim} disabled={claiming}
+            className="bg-[#e8673a] hover:bg-[#d4562a] text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50">
+            {claiming ? '提现中...' : '申请提现'}
+          </button>
+        </div>
+      )}
+      {claimMsg && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700 mb-4">{claimMsg}</div>
+      )}
 
       {referrals.length === 0 ? (
         <div className="text-center py-8 text-gray-300">

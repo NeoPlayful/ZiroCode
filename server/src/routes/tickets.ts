@@ -85,4 +85,24 @@ export async function ticketRoutes(app: FastifyInstance) {
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '回复失败' } });
     }
   });
+
+  // 关闭工单
+  app.put('/api/tickets/:id/close', async (req, reply) => {
+    try {
+      const user = await requireAuth(req, reply);
+      const { id } = req.params as any;
+      const ticket = await prisma.ticket.findUnique({ where: { id } });
+      if (!ticket || ticket.userId !== user.userId) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '工单不存在' } });
+      }
+      const updated = await prisma.ticket.update({
+        where: { id },
+        data: { status: 'CLOSED' },
+      });
+      return reply.send({ ticket: updated });
+    } catch (error) {
+      console.error('Close ticket error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '关闭工单失败' } });
+    }
+  });
 }

@@ -3,6 +3,7 @@ import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 import NotificationBell from './NotificationBell'
+import AnnouncementBanner from './AnnouncementBanner'
 
 const navItems = [
   { label: '仪表板', href: '/dashboard' },
@@ -112,6 +113,7 @@ export default function AppLayout() {
           )}
         </div>
       </nav>
+      <AnnouncementBanner />
       <Outlet />
     </div>
   )
