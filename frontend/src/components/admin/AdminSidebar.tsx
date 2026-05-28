@@ -26,7 +26,7 @@ const menuItems = [
   { key: 'channels', label: '渠道管理', icon: ServerIcon },
   { key: 'withdrawals', label: '提现管理', icon: BanknotesIcon },
   { key: 'tickets', label: '工单系统', icon: ChatBubbleLeftRightIcon },
-  { key: 'announcements', label: '公告', icon: MegaphoneIcon },
+  { key: 'announcements', label: '系统公告', icon: MegaphoneIcon },
   { key: 'audit-logs', label: '审计日志', icon: DocumentTextIcon },
   { key: 'batch', label: '批量操作', icon: CommandLineIcon },
   { key: 'config', label: '系统设置', icon: Cog6ToothIcon },
