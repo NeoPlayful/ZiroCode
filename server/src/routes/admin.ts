@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { prisma } from '../lib/db.js';
 import { requireAdmin, AuthError } from '../lib/api-utils.js';
 import { checkChannelHealth } from '../lib/router.js';
+import { isSlaViolated } from '../lib/ticket-sla.js';
 
 async function handleAuth(req: any, reply: any) {
   try { return await requireAdmin(req, reply); }
@@ -296,6 +297,23 @@ export async function adminRoutes(app: FastifyInstance) {
     }
   });
 
+  app.get('/api/admin/tickets/sla-violations', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const tickets = await prisma.ticket.findMany({
+        where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
+        include: { user: { select: { name: true, email: true } }, category: true },
+        orderBy: { slaDeadline: 'asc' },
+      });
+      const violations = tickets.filter(t => isSlaViolated(t.slaDeadline, t.status));
+      return reply.send({ tickets: violations });
+    } catch (error) {
+      console.error('Admin SLA violations error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取SLA违规工单失败' } });
+    }
+  });
+
   // 公告管理
   app.get('/api/admin/announcements', async (req, reply) => {
     try {
@@ -346,6 +364,42 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Delete announcement error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '删除公告失败' } });
+    }
+  });
+
+  // 推荐作弊记录管理
+  app.get('/api/admin/referral/fraud-logs', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const logs = await prisma.referralFraudLog.findMany({
+        include: { referral: { include: { referrer: { select: { name: true, email: true } }, referred: { select: { name: true, email: true } } } } },
+        orderBy: { createdAt: 'desc' },
+      });
+      return reply.send({ logs });
+    } catch (error) {
+      console.error('Admin fraud logs error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取作弊记录失败' } });
+    }
+  });
+
+  app.put('/api/admin/referral/fraud-logs/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const { status } = req.body as any;
+      const log = await prisma.referralFraudLog.update({
+        where: { id },
+        data: { status, reviewedBy: admin.userId, reviewedAt: new Date() },
+      });
+      if (status === 'CONFIRMED') {
+        await prisma.referral.update({ where: { id: log.referralId }, data: { isFraud: true } });
+      }
+      return reply.send({ log });
+    } catch (error) {
+      console.error('Review fraud log error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '审查失败' } });
     }
   });
 }

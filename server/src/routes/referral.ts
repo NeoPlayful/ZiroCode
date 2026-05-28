@@ -84,4 +84,74 @@ export async function referralRoutes(app: FastifyInstance) {
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '领取失败' } });
     }
   });
+
+  // 推荐数据分析
+  app.get('/api/referral/analytics', async (req, reply) => {
+    try {
+      const user = await requireAuth(req, reply);
+
+      const referrals = await prisma.referral.findMany({ where: { referrerId: user.userId } });
+      const totalReferrals = referrals.length;
+      const activeReferrals = referrals.filter(r => Number(r.totalReward) > 0).length;
+      const conversionRate = totalReferrals > 0 ? (activeReferrals / totalReferrals) * 100 : 0;
+      const totalEarnings = referrals.reduce((sum, r) => sum + Number(r.totalReward), 0) / 100000000;
+
+      return reply.send({
+        analytics: {
+          totalReferrals,
+          activeReferrals,
+          conversionRate: conversionRate.toFixed(2),
+          totalEarnings: totalEarnings.toFixed(2),
+        },
+      });
+    } catch (error) {
+      console.error('Referral analytics error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取分析数据失败' } });
+    }
+  });
+
+  // 推荐排行榜
+  app.get('/api/referral/leaderboard', async (req, reply) => {
+    try {
+      const { sortBy = 'count' } = req.query as any;
+
+      const referrers = await prisma.user.findMany({
+        include: { referrals: true },
+      });
+
+      const leaderboard = referrers
+        .map(u => ({
+          name: u.name,
+          referralCount: u.referrals.length,
+          totalEarnings: u.referrals.reduce((sum, r) => sum + Number(r.totalReward), 0) / 100000000,
+        }))
+        .filter(u => u.referralCount > 0)
+        .sort((a, b) => sortBy === 'earnings' ? b.totalEarnings - a.totalEarnings : b.referralCount - a.referralCount)
+        .slice(0, 50);
+
+      return reply.send({ leaderboard });
+    } catch (error) {
+      console.error('Referral leaderboard error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取排行榜失败' } });
+    }
+  });
+
+  // 推荐链接统计
+  app.get('/api/referral/link-stats', async (req, reply) => {
+    try {
+      const user = await requireAuth(req, reply);
+      const referrals = await prisma.referral.findMany({ where: { referrerId: user.userId } });
+
+      return reply.send({
+        stats: {
+          totalClicks: referrals.length,
+          conversions: referrals.filter(r => Number(r.totalReward) > 0).length,
+          conversionRate: referrals.length > 0 ? ((referrals.filter(r => Number(r.totalReward) > 0).length / referrals.length) * 100).toFixed(2) : '0.00',
+        },
+      });
+    } catch (error) {
+      console.error('Referral link stats error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取链接统计失败' } });
+    }
+  });
 }
