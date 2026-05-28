@@ -164,14 +164,6 @@ export default function DashboardPage() {
         {/* Row 3 - Referral */}
         <ReferralSection />
       </main>
-
-      <footer className="bg-white border-t border-gray-200 mt-4">
-        <div className="max-w-[1280px] mx-auto px-8 py-8">
-          <div className="flex items-center gap-2 font-bold text-base mb-1.5"><Logo />ZiroCode</div>
-          <p className="text-gray-400 text-sm mb-6">专业的AI服务平台，为开发者提供AI解决方案。</p>
-          <p className="text-gray-300 text-xs">© 2026 ZiroCode. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

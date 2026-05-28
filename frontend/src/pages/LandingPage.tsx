@@ -1,8 +1,17 @@
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { SparklesIcon } from '@heroicons/react/20/solid';
+import Footer from '../components/Footer';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+
+  const { data } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => fetch('/api/auth/me').then(r => r.ok ? r.json() : { user: null }),
+    staleTime: 5 * 60 * 1000,
+  });
+  const user = data?.user;
 
   const copyAPI = () => {
     const text = 'https://api.zirocode.com/v1/chat/completions';
@@ -27,18 +36,32 @@ export default function LandingPage() {
             <span>ZiroCode</span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/auth/login')}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
-            >
-              登录
-            </button>
-            <button
-              onClick={() => navigate('/auth/register')}
-              className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              注册
-            </button>
+            {user ? (
+              <>
+                <span className="text-sm text-gray-600">欢迎，{user.name}</span>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  进入控制台
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/auth/login')}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
+                >
+                  登录
+                </button>
+                <button
+                  onClick={() => navigate('/auth/register')}
+                  className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  注册
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -111,16 +134,7 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-[1280px] mx-auto px-6 py-12">
-          <div className="flex items-center gap-2 font-bold text-lg mb-2">
-            <SparklesIcon className="w-6 h-6 text-[#F97346]" />
-            <span>ZiroCode</span>
-          </div>
-          <p className="text-gray-500 text-sm mb-6">专业的AI服务平台，为开发者提供AI解决方案。</p>
-          <p className="text-gray-400 text-xs">© 2026 ZiroCode. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

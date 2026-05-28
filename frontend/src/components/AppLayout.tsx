@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 import NotificationBell from './NotificationBell'
 import AnnouncementBanner from './AnnouncementBanner'
+import Footer from './Footer'
 
 const navItems = [
   { label: '仪表板', href: '/dashboard' },
@@ -45,7 +46,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3]">
+    <div className="min-h-screen bg-[#f0ebe3] flex flex-col">
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
@@ -114,7 +115,10 @@ export default function AppLayout() {
         </div>
       </nav>
       <AnnouncementBanner />
-      <Outlet />
+      <div className="flex-1">
+        <Outlet />
+      </div>
+      {!location.pathname.startsWith('/admin') && <Footer />}
     </div>
   )
 }
