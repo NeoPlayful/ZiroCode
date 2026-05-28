@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { verifySession, COOKIE_NAME } from '../lib/auth.js';
 import { prisma } from '../lib/db.js';
 import { getUserQuota } from '../lib/quota.js';
+import bcrypt from 'bcryptjs';
 
 export async function userRoutes(app: FastifyInstance) {
   app.get('/api/user/dashboard', async (req, reply) => {
@@ -31,6 +32,87 @@ export async function userRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Dashboard error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取仪表板数据失败' } });
+    }
+  });
+
+  app.get('/api/user/profile', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const user = await prisma.user.findUnique({
+        where: { id: session.userId as string },
+        select: { id: true, email: true, name: true, role: true, referralCode: true, createdAt: true },
+      });
+      if (!user) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '用户不存在' } });
+
+      return reply.send(user);
+    } catch (error) {
+      console.error('Profile error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取用户资料失败' } });
+    }
+  });
+
+  app.put('/api/user/profile', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const { name } = req.body as { name?: string };
+      if (!name || name.trim().length === 0) {
+        return reply.status(400).send({ error: { code: 'INVALID_INPUT', message: '用户名不能为空' } });
+      }
+
+      const user = await prisma.user.update({
+        where: { id: session.userId as string },
+        data: { name: name.trim() },
+        select: { id: true, email: true, name: true, role: true, referralCode: true, createdAt: true },
+      });
+
+      return reply.send(user);
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新用户资料失败' } });
+    }
+  });
+
+  app.put('/api/user/password', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const { oldPassword, newPassword } = req.body as { oldPassword?: string; newPassword?: string };
+      if (!oldPassword || !newPassword) {
+        return reply.status(400).send({ error: { code: 'INVALID_INPUT', message: '旧密码和新密码不能为空' } });
+      }
+      if (newPassword.length < 6) {
+        return reply.status(400).send({ error: { code: 'INVALID_INPUT', message: '新密码长度至少为6位' } });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: session.userId as string },
+        select: { passwordHash: true },
+      });
+      if (!user) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '用户不存在' } });
+
+      const valid = await bcrypt.compare(oldPassword, user.passwordHash);
+      if (!valid) {
+        return reply.status(400).send({ error: { code: 'INVALID_PASSWORD', message: '旧密码错误' } });
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: session.userId as string },
+        data: { passwordHash },
+      });
+
+      return reply.send({ message: '密码修改成功' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '修改密码失败' } });
     }
   });
 

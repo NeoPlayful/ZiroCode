@@ -18,6 +18,8 @@ model User {
   referralCode String   @unique
   resetPasswordToken   String?   @unique
   resetPasswordExpires DateTime?
+  emailVerified Boolean  @default(false)
+  emailVerificationToken String? @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -138,6 +140,7 @@ model Transaction {
 
 enum TransactionType {
   REDEEM
+  PURCHASE
   ADMIN_ADJUST
   REFERRAL_REWARD
 }

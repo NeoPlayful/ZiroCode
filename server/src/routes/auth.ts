@@ -94,6 +94,50 @@ export async function authRoutes(app: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  app.post('/api/auth/refresh', async (req, reply) => {
+    try {
+      const { verifySession } = await import('../lib/auth.js');
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) {
+        return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+      }
+      const newToken = await createSession(session.userId as string, session.email as string, session.role as string);
+      reply.setCookie(COOKIE_NAME, newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60,
+        path: '/',
+      });
+      return reply.send({ ok: true });
+    } catch (error) {
+      console.error('Refresh error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '刷新令牌失败' } });
+    }
+  });
+
+  app.post('/api/auth/verify-email', async (req, reply) => {
+    try {
+      const { token } = req.body as { token?: string };
+      if (!token) {
+        return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '验证令牌为必填项' } });
+      }
+      const user = await prisma.user.findUnique({ where: { emailVerificationToken: token } });
+      if (!user) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '无效的验证令牌' } });
+      }
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerificationToken: null },
+      });
+      return reply.send({ message: '邮箱验证成功' });
+    } catch (error) {
+      console.error('Verify email error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '邮箱验证失败' } });
+    }
+  });
+
   app.get('/api/auth/me', async (req, reply) => {
     try {
       const { verifySession } = await import('../lib/auth.js');

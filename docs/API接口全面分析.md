@@ -96,6 +96,7 @@
 |------|------|------|
 | GET | `/api/health` | 健康检查 |
 | GET | `/api/config` | 获取配置 |
+| GET | `/api/tutorials` | 获取官方教程 |
 
 ## 十一、模型广场 (Models)
 
