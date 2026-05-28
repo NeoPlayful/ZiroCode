@@ -156,12 +156,43 @@ model Referral {
   tier          Int      @default(1)
   totalReward   BigInt   @default(0)
   claimedReward BigInt   @default(0)
+  isFraud       Boolean  @default(false)
   createdAt     DateTime @default(now())
 
-  referrer User @relation("referrer", fields: [referrerId], references: [id])
-  referred User @relation("referred", fields: [referredId], references: [id])
+  referrer  User                   @relation("referrer", fields: [referrerId], references: [id])
+  referred  User                   @relation("referred", fields: [referredId], references: [id])
+  fraudLogs ReferralFraudLog[]
 
   @@index([referrerId])
+}
+
+// 推荐作弊记录表
+model ReferralFraudLog {
+  id          String      @id @default(cuid())
+  referralId  String
+  fraudType   FraudType
+  evidence    Json
+  status      FraudStatus @default(PENDING)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime    @default(now())
+
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+}
+
+enum FraudType {
+  SAME_IP
+  RAPID_REGISTRATION
+  SUSPICIOUS_PATTERN
+  DEVICE_DUPLICATE
+}
+
+enum FraudStatus {
+  PENDING
+  CONFIRMED
+  DISMISSED
 }
 
 // 提现申请表
@@ -185,19 +216,48 @@ enum WithdrawalStatus {
   REJECTED
 }
 
+// 工单分类表
+model TicketCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String   @default("#3B82F6")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tickets   Ticket[]
+  templates TicketTemplate[]
+}
+
+// 工单模板表
+model TicketTemplate {
+  id         String   @id @default(cuid())
+  name       String
+  title      String
+  content    String
+  categoryId String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  category TicketCategory? @relation(fields: [categoryId], references: [id])
+}
+
 // 工单表
 model Ticket {
-  id        String        @id @default(cuid())
-  userId    String
-  title     String
-  content   String
-  status    TicketStatus  @default(OPEN)
-  priority  TicketPriority @default(NORMAL)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String         @id @default(cuid())
+  userId      String
+  title       String
+  content     String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(NORMAL)
+  categoryId  String?
+  slaDeadline DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
-  user    User          @relation(fields: [userId], references: [id])
-  replies TicketReply[]
+  user     User            @relation(fields: [userId], references: [id])
+  category TicketCategory? @relation(fields: [categoryId], references: [id])
+  replies  TicketReply[]
 
   @@index([userId, status])
 }
@@ -272,6 +332,8 @@ model ApiUsageLog {
 
   @@index([userId, requestTime])
   @@index([apiKeyId])
+  @@index([model, requestTime])
+  @@index([requestTime])
 }
 
 // 订阅套餐定价表
@@ -376,6 +438,7 @@ model WebhookLog {
   endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
 
   @@index([endpointId, createdAt])
+  @@index([success, createdAt])
 }
 
 enum WebhookEvent {
