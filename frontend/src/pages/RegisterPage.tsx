@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,6 +24,9 @@ export default function RegisterPage() {
         body: JSON.stringify({ email, password, name }),
       })
       if (!res.ok) { const d = await res.json(); setError(d.error?.message || '注册失败'); return }
+      const data = await res.json()
+      // 刷新用户状态
+      queryClient.setQueryData(['me'], data)
       navigate('/dashboard')
     } catch {
       setError('网络错误，请稍后重试')

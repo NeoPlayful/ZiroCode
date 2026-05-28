@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -26,6 +28,9 @@ export default function LoginPage() {
         return
       }
 
+      const data = await res.json()
+      // 刷新用户状态
+      queryClient.setQueryData(['me'], data)
       navigate('/dashboard')
     } catch {
       setError('网络错误，请稍后重试')
