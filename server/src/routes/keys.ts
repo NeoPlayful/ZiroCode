@@ -93,4 +93,29 @@ export async function keyRoutes(app: FastifyInstance) {
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新密钥失败' } });
     }
   });
+
+  app.get('/api/keys/:id/usage', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const { id } = req.params as any;
+      const key = await prisma.apiKey.findFirst({ where: { id, userId: session.userId as string } });
+      if (!key) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '密钥不存在' } });
+
+      const logs = await prisma.apiUsageLog.findMany({
+        where: { apiKeyId: id },
+        orderBy: { requestTime: 'desc' },
+        take: 100,
+        select: { model: true, tokensUsed: true, quotaUsed: true, statusCode: true, requestTime: true },
+      });
+
+      const total = { calls: logs.length, tokens: logs.reduce((s, l) => s + l.tokensUsed, 0), quota: Number(logs.reduce((s, l) => s + l.quotaUsed, BigInt(0))) };
+      return reply.send({ usage: { total, recent: logs.slice(0, 20) } });
+    } catch (error) {
+      console.error('Get key usage error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取密钥使用量失败' } });
+    }
+  });
 }

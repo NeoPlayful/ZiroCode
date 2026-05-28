@@ -28,10 +28,11 @@
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/user/referral` | 获取推荐信息 |
-| GET | `/api/user/referral/claims` | 获取收益记录 |
-| POST | `/api/user/referral/claim` | 领取推荐奖励 |
-| GET | `/api/user/referral/link` | 生成推荐链接 |
+| GET | `/api/referral/stats` | 获取推荐统计信息 |
+| POST | `/api/referral/claim` | 领取推荐奖励 |
+| GET | `/api/referral/analytics` | 推荐数据分析 |
+| GET | `/api/referral/leaderboard` | 推荐排行榜 |
+| GET | `/api/referral/link-stats` | 推荐链接统计 |
 
 ## 四、API 密钥管理 (Keys)
 
@@ -61,6 +62,10 @@
 | GET | `/api/tickets/:id` | 获取工单详情 |
 | PUT | `/api/tickets/:id` | 更新工单 |
 | POST | `/api/tickets/:id/reply` | 回复工单 |
+| GET | `/api/tickets/categories` | 获取工单分类列表 |
+| GET | `/api/tickets/templates` | 获取工单模板列表 |
+| GET | `/api/tickets/search` | 搜索工单（支持关键词、分类、状态筛选） |
+| GET | `/api/tickets/export` | 导出工单（CSV格式） |
 
 ## 七、公告与教程 (Announcements)
 
@@ -91,6 +96,7 @@
 |------|------|------|
 | GET | `/api/health` | 健康检查 |
 | GET | `/api/config` | 获取配置 |
+| GET | `/api/tutorials` | 获取官方教程 |
 
 ## 十一、模型广场 (Models)
 
@@ -107,13 +113,25 @@
 | PUT | `/api/notifications/:id/read` | 标记通知已读 |
 | PUT | `/api/notifications/read-all` | 全部标记已读 |
 
+## 十三、管理后台 (Admin)
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/admin/tickets/sla-violations` | 获取SLA违规工单列表 |
+| GET | `/api/admin/referral/fraud-logs` | 获取推荐作弊记录 |
+| PUT | `/api/admin/referral/fraud-logs/:id` | 审查作弊记录（确认/驳回） |
+
 ---
 
 ## 总结
 
 | 类型 | 数量 |
 |------|------|
-| 已确认接口 | 4 个 |
-| 推断接口 | 约 40+ 个 |
+| 已确认接口 | 50+ 个 |
+| 新增接口（Phase 4） | 8 个 |
 
-**主要模块：** 认证、用户、推荐、密钥、订阅、工单、支付、统计、模型广场、通知
+**主要模块：** 认证、用户、推荐、密钥、订阅、工单、支付、统计、模型广场、通知、管理后台
+
+**Phase 4 新增功能：**
+- 工单系统增强：分类、模板、搜索、导出、SLA管理
+- 推荐系统增强：数据分析、排行榜、链接统计、防作弊检测

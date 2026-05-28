@@ -17,6 +17,9 @@ import WebhooksPage from './pages/WebhooksPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import DeveloperPage from './pages/DeveloperPage'
 import AnnouncementsPage from './pages/AnnouncementsPage'
+import ProfilePage from './pages/ProfilePage'
+import PlansPage from './pages/PlansPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 
 export default function App() {
   return (
@@ -24,9 +27,12 @@ export default function App() {
       <Route path="/auth/login" element={<LoginPage />} />
       <Route path="/auth/register" element={<RegisterPage />} />
       <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<AppLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/plans" element={<PlansPage />} />
         <Route path="/keys" element={<KeysPage />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/usage" element={<UsagePage />} />
