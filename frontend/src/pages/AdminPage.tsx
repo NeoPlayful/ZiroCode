@@ -1,6 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import AdminLayout from '../components/AdminLayout'
+
+const adminTabs = [
+  { key: 'dashboard', label: '概览' },
+  { key: 'users', label: '用户管理' },
+  { key: 'subscriptions', label: '订阅' },
+  { key: 'redeem-codes', label: '兑换码' },
+  { key: 'channels', label: '渠道' },
+  { key: 'withdrawals', label: '提现' },
+  { key: 'tickets', label: '工单' },
+  { key: 'announcements', label: '公告' },
+  { key: 'audit-logs', label: '审计日志' },
+  { key: 'batch', label: '批量操作' },
+  { key: 'config', label: '系统配置' },
+]
 
 export default function AdminPage() {
   const [tab, setTab] = useState('dashboard')
@@ -12,17 +25,27 @@ export default function AdminPage() {
   }
 
   return (
-    <AdminLayout tab={tab} onTabChange={setTab}>
+    <div className="max-w-[1280px] mx-auto px-8 py-6">
+      <div className="flex items-center gap-2 mb-6">
+        {adminTabs.map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium ${tab === t.key ? 'bg-[#e8673a] text-white' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
       {tab === 'dashboard' && <AdminDashboard />}
       {tab === 'users' && <AdminUsers />}
       {tab === 'subscriptions' && <AdminSubscriptions />}
       {tab === 'redeem-codes' && <AdminRedeemCodes />}
       {tab === 'channels' && <AdminChannels />}
       {tab === 'withdrawals' && <AdminWithdrawals />}
+      {tab === 'tickets' && <AdminTickets />}
+      {tab === 'announcements' && <AdminAnnouncements />}
       {tab === 'audit-logs' && <AdminAuditLogs />}
       {tab === 'batch' && <AdminBatch />}
       {tab === 'config' && <AdminConfig />}
-    </AdminLayout>
+    </div>
   )
 }
 
@@ -298,6 +321,71 @@ function AdminConfig() {
       <label className="block text-sm mb-1">默认配额</label>
       <input value={defaultQuota} onChange={e => setDefaultQuota(e.target.value)} type="number" className="w-full border rounded px-3 py-2 mb-3" />
       <button className="bg-[#e8673a] text-white px-4 py-2 rounded">保存</button>
+    </div>
+  )
+}
+
+function AdminTickets() {
+  const { data } = useQuery({ queryKey: ['admin-tickets'], queryFn: () => fetch('/api/admin/tickets').then(r => r.json()) })
+  const tickets = data?.tickets || []
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead><tr className="text-left text-gray-500 border-b">{['标题', '用户', '状态', '优先级', '创建时间'].map(h => <th key={h} className="p-3 font-medium">{h}</th>)}</tr></thead>
+        <tbody>
+          {tickets.map((t: any) => (
+            <tr key={t.id} className="border-b border-gray-50">
+              <td className="p-3">{t.title}</td>
+              <td className="p-3">{t.user?.name || '-'}</td>
+              <td className="p-3">{t.status}</td>
+              <td className="p-3">{t.priority}</td>
+              <td className="p-3 text-gray-400">{new Date(t.createdAt).toLocaleDateString()}</td>
+            </tr>
+          ))}
+          {tickets.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-gray-400">暂无工单</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function AdminAnnouncements() {
+  const { data, refetch } = useQuery({ queryKey: ['admin-announcements'], queryFn: () => fetch('/api/admin/announcements').then(r => r.json()) })
+  const announcements = data?.announcements || []
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ title: '', content: '' })
+
+  async function create() {
+    await fetch('/api/admin/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    setShowForm(false); setForm({ title: '', content: '' }); refetch()
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-3">
+        <button onClick={() => setShowForm(!showForm)} className="bg-[#e8673a] text-white px-4 py-1.5 rounded-lg text-sm">新建公告</button>
+      </div>
+      {showForm && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+          <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="标题" className="w-full border rounded px-2 py-1.5 text-sm mb-2" />
+          <textarea value={form.content} onChange={e => setForm({...form, content: e.target.value})} placeholder="内容" rows={3} className="w-full border rounded px-2 py-1.5 text-sm mb-2" />
+          <button onClick={create} className="bg-[#e8673a] text-white px-4 py-1.5 rounded-lg text-sm">保存</button>
+        </div>
+      )}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead><tr className="text-left text-gray-500 border-b">{['标题', '状态', '创建时间'].map(h => <th key={h} className="p-3 font-medium">{h}</th>)}</tr></thead>
+          <tbody>
+            {announcements.map((a: any) => (
+              <tr key={a.id} className="border-b border-gray-50">
+                <td className="p-3">{a.title}</td>
+                <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded-full ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100'}`}>{a.isActive ? '启用' : '禁用'}</span></td>
+                <td className="p-3 text-gray-400">{new Date(a.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

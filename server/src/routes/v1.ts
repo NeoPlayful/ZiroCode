@@ -5,6 +5,7 @@ import { routeToUpstream, getAvailableChannels } from '../lib/router.js';
 import { createNotification } from '../lib/notification.js';
 import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
+import { triggerReferralReward } from '../lib/referral.js';
 
 async function validateApiKey(authHeader: string | null): Promise<{ userId: string; apiKeyId: string } | null> {
   if (!authHeader || !authHeader.startsWith('Bearer sk-')) return null;
@@ -111,6 +112,7 @@ export async function v1Routes(app: FastifyInstance) {
         const quotaUsed = BigInt(totalTokens);
         if (!hasError && totalTokens > 0) {
           await deductQuota(auth.userId, quotaUsed);
+          triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
           const newQuota = await getUserQuota(auth.userId);
           const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
           const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
@@ -138,6 +140,7 @@ export async function v1Routes(app: FastifyInstance) {
       const quotaUsed = BigInt(tokensUsed);
       if (result.response.ok) {
         await deductQuota(auth.userId, quotaUsed);
+        triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
         const newQuota = await getUserQuota(auth.userId);
         const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
         const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));

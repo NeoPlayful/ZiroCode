@@ -46,3 +46,37 @@ export async function sendPasswordResetEmail(to: string, token: string): Promise
     </div>
   `);
 }
+
+export async function sendWelcomeEmail(to: string, name: string): Promise<boolean> {
+  const origin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  return sendEmail(to, 'ZiroCode - 欢迎加入', `
+    <div style="max-width:480px;margin:0 auto;font-family:sans-serif;">
+      <h2 style="color:#e8673a;">欢迎加入 ZiroCode！</h2>
+      <p>您好 ${name}，</p>
+      <p>感谢您注册 ZiroCode AI 服务平台。</p>
+      <p>您可以开始创建 API Key 并使用我们的服务。</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${origin}/dashboard" style="background:#e8673a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;">
+          前往控制台
+        </a>
+      </div>
+    </div>
+  `);
+}
+
+export async function sendQuotaLowEmail(to: string, name: string, remaining: number): Promise<boolean> {
+  const origin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  return sendEmail(to, 'ZiroCode - 配额不足提醒', `
+    <div style="max-width:480px;margin:0 auto;font-family:sans-serif;">
+      <h2 style="color:#e8673a;">配额不足提醒</h2>
+      <p>您好 ${name}，</p>
+      <p>您的配额剩余不足 10%，当前剩余：${remaining.toLocaleString()} tokens。</p>
+      <p>请及时充值以继续使用服务。</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${origin}/subscription" style="background:#e8673a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;">
+          立即充值
+        </a>
+      </div>
+    </div>
+  `);
+}

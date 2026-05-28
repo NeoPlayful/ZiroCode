@@ -16,6 +16,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import WebhooksPage from './pages/WebhooksPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import DeveloperPage from './pages/DeveloperPage'
+import AnnouncementsPage from './pages/AnnouncementsPage'
 
 export default function App() {
   return (
@@ -36,8 +37,9 @@ export default function App() {
         <Route path="/webhooks" element={<WebhooksPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/developer" element={<DeveloperPage />} />
+        <Route path="/announcements" element={<AnnouncementsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Route>
-      <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
