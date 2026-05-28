@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import ReferralSection from '../components/ReferralSection';
 import TutorialAndAnnouncement from '../components/TutorialAndAnnouncement';
-import { SparklesIcon } from '@heroicons/react/20/solid';
 import { BoltIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/16/solid';
-
-const Logo = () => <SparklesIcon className="w-7 h-7 text-[#e8673a]" />;
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-200 rounded ${className || ''}`} />;
