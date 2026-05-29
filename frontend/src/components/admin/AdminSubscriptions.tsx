@@ -13,18 +13,19 @@ export default function AdminSubscriptions() {
 
   const { data } = useQuery({
     queryKey: ['admin-subscriptions', search, typeFilter, statusFilter, page, pageSize],
-    queryFn: () => fetch('/api/admin/subscriptions').then(r => r.json())
+    queryFn: () => fetch(`/api/admin/subscriptions?${new URLSearchParams({ search, typeFilter, statusFilter, page: String(page), pageSize: String(pageSize) })}`).then(r => r.json()),
+    refetchInterval: 30000,
   })
 
   const subs = data?.subscriptions || []
-  const total = subs.length
+  const total = data?.total || 0
   const activeSubs = subs.filter((s: any) => s.isActive).length
   const expiringToday = subs.filter((s: any) => {
     if (!s.expiresAt) return false
     const today = new Date().toDateString()
     return new Date(s.expiresAt).toDateString() === today
   }).length
-  const totalQuotaUsed = subs.reduce((sum: number, s: any) => sum + Number(s.quotaUsed || 0), 0)
+  const totalQuotaUsed = subs.reduce((sum: number, s: any) => sum + Number(s.quotaUsed || 0) + Number(s.quotaMonthlyUsed || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -54,7 +55,7 @@ export default function AdminSubscriptions() {
         <KPICard
           icon={<ChartBarIcon className="w-5 h-5" />}
           label={t('subscriptions.kpi.totalQuota')}
-          value={`${(totalQuotaUsed / 100000000).toFixed(1)}亿`}
+          value={formatQuota(totalQuotaUsed)}
           trend="+12%"
           trendUp={true}
         />
@@ -70,7 +71,7 @@ export default function AdminSubscriptions() {
               type="text"
               placeholder={t('subscriptions.search')}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             />
           </div>
@@ -78,7 +79,7 @@ export default function AdminSubscriptions() {
           {/* 订阅类型筛选 */}
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('subscriptions.filter.allTypes')}</option>
@@ -90,7 +91,7 @@ export default function AdminSubscriptions() {
           {/* 状态筛选 */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('subscriptions.filter.allStatus')}</option>
@@ -130,7 +131,7 @@ export default function AdminSubscriptions() {
           <div className="flex items-center gap-2">
             <select
               value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
               <option value={10}>{t('subscriptions.pageSize', { size: 10 })}</option>
@@ -180,10 +181,17 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 }
 
 // 订阅行组件
+function formatQuota(value: number): string {
+  if (value >= 100000000) return `${(value / 100000000).toFixed(2)}亿`;
+  if (value >= 10000) return `${(value / 10000).toFixed(1)}万`;
+  return value.toLocaleString();
+}
+
 function SubscriptionRow({ subscription }: any) {
   const { t } = useTranslation('admin')
-  const quotaTotal = Number(subscription.quotaTotal || 0)
-  const quotaUsed = Number(subscription.quotaUsed || 0)
+  const isMonthly = subscription.type === 'MONTHLY'
+  const quotaTotal = Number(isMonthly ? (subscription.quotaMonthly || 0) : (subscription.quotaTotal || 0))
+  const quotaUsed = Number(isMonthly ? (subscription.quotaMonthlyUsed || 0) : (subscription.quotaUsed || 0))
   const usagePercent = quotaTotal > 0 ? (quotaUsed / quotaTotal) * 100 : 0
 
   const getTypeColor = (type: string) => {
@@ -221,7 +229,7 @@ function SubscriptionRow({ subscription }: any) {
       <td className="px-6 py-4">
         <div className="space-y-1">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">{(quotaUsed / 100000000).toFixed(2)}亿 / {(quotaTotal / 100000000).toFixed(2)}亿</span>
+            <span className="text-gray-600">{formatQuota(quotaUsed)} / {formatQuota(quotaTotal)}</span>
             <span className="text-gray-500">{usagePercent.toFixed(0)}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-1.5">

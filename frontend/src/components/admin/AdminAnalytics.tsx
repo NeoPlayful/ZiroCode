@@ -119,7 +119,7 @@ export default function AdminAnalytics() {
               ))}
             </div>
             <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {['requests', 'tokens'].map(m => (
+              {['requests', 'tokens', 'input_tokens', 'output_tokens', 'cost'].map(m => (
                 <button key={m} onClick={() => setMetric(m)}
                   className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${metric === m ? 'bg-white text-[#111827] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
                   {t(`analytics.metric.${m}`) || m}
@@ -155,6 +155,7 @@ export default function AdminAnalytics() {
                     <div className="text-right">
                       <div className="text-sm font-semibold text-[#111827]">{m.tokens.toLocaleString()}</div>
                       <div className="text-xs text-gray-400">tokens</div>
+                      {m.cost > 0 && <div className="text-xs text-[#F97346]">${m.cost.toFixed(4)}</div>}
                     </div>
                   </div>
                 ))}

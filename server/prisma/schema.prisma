@@ -325,13 +325,17 @@ model ApiUsageLog {
   apiKeyId     String
   model        String
   tokensUsed   Int
+  inputTokens         Int @default(0)
+  outputTokens        Int @default(0)
+  cacheCreationTokens Int @default(0)
+  cacheReadTokens     Int @default(0)
   quotaUsed    BigInt
   statusCode   Int
   error        String?
   channelId    String?
   latencyMs    Int?
   clientIp     String?
-  cost         Float?
+  cost         Decimal? @db.Decimal(12, 6)
   routePath    String?
   requestTime  DateTime @default(now())
   responseTime DateTime
@@ -357,9 +361,13 @@ model ApiUsageHourly {
   requestCount  Int      @default(0)
   successCount  Int      @default(0)
   errorCount    Int      @default(0)
-  totalTokens   BigInt   @default(0)
-  totalLatency  BigInt   @default(0)
-  totalQuota    BigInt   @default(0)
+  totalTokens       BigInt   @default(0)
+  totalInputTokens  BigInt   @default(0)
+  totalOutputTokens BigInt   @default(0)
+  totalCacheReadTokens  BigInt @default(0)
+  totalCacheWriteTokens BigInt @default(0)
+  totalLatency      BigInt   @default(0)
+  totalQuota        BigInt   @default(0)
 
   @@unique([timeBucket, model, channelId, routePath])
   @@index([timeBucket])
@@ -378,8 +386,12 @@ model ApiUsageDaily {
   successCount  Int      @default(0)
   errorCount    Int      @default(0)
   totalTokens   BigInt   @default(0)
-  totalLatency  BigInt   @default(0)
-  totalQuota    BigInt   @default(0)
+  totalInputTokens  BigInt  @default(0)
+  totalOutputTokens BigInt  @default(0)
+  totalCacheReadTokens  BigInt @default(0)
+  totalCacheWriteTokens BigInt @default(0)
+  totalLatency   BigInt   @default(0)
+  totalQuota     BigInt   @default(0)
 
   @@unique([date, model, channelId, routePath])
   @@index([date])
@@ -434,6 +446,10 @@ model ModelChannel {
   weight           Int          @default(1)
   healthStatus     HealthStatus @default(UNKNOWN)
   lastHealthCheckAt DateTime?
+  inputPrice        Decimal  @default("0")
+  outputPrice       Decimal  @default("0")
+  cacheWritePrice   Decimal  @default("0")
+  cacheReadPrice    Decimal  @default("0")
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 

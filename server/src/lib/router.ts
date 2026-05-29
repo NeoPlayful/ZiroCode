@@ -1,7 +1,7 @@
 import { prisma } from './db.js';
 
 interface RouteResult {
-  channel: { id: string; name: string; baseUrl: string; apiKey: string };
+  channel: { id: string; name: string; baseUrl: string; apiKey: string; inputPrice: number; outputPrice: number; cacheWritePrice: number; cacheReadPrice: number };
   response: Response;
 }
 
@@ -135,7 +135,7 @@ export async function routeToUpstream(
 
       // Success - reset failure count
       resetFailureCount(channel.id);
-      return { channel: { id: channel.id, name: channel.name, baseUrl: channel.baseUrl, apiKey: channel.apiKey }, response };
+      return { channel: { id: channel.id, name: channel.name, baseUrl: channel.baseUrl, apiKey: channel.apiKey, inputPrice: Number(channel.inputPrice), outputPrice: Number(channel.outputPrice), cacheWritePrice: Number(channel.cacheWritePrice), cacheReadPrice: Number(channel.cacheReadPrice) }, response };
     } catch (err: any) {
       lastError = err;
       console.warn(`Channel ${channel.name} failed: ${err.message}`);

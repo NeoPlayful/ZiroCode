@@ -204,13 +204,13 @@ export default function AdminRedeemCodes() {
           <div className="flex items-center gap-2">
             <select
               value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>{t('redeemCodes.pageSize', { count: 10 })}</option>
-              <option value={20}>{t('redeemCodes.pageSize', { count: 20 })}</option>
-              <option value={50}>{t('redeemCodes.pageSize', { count: 50 })}</option>
-              <option value={100}>{t('redeemCodes.pageSize', { count: 100 })}</option>
+              <option value={10}>{t('redeemCodes.pageSize', { size: 10 })}</option>
+              <option value={20}>{t('redeemCodes.pageSize', { size: 20 })}</option>
+              <option value={50}>{t('redeemCodes.pageSize', { size: 50 })}</option>
+              <option value={100}>{t('redeemCodes.pageSize', { size: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -218,14 +218,14 @@ export default function AdminRedeemCodes() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('redeemCodes.pagination.prev')}
+                {t('redeemCodes.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('redeemCodes.pagination.next')}
+                {t('redeemCodes.next')}
               </button>
             </div>
           </div>

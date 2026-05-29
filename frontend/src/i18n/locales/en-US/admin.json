@@ -486,7 +486,17 @@
       "title": "System Configuration",
       "siteName": "Site Name",
       "defaultQuota": "Default Quota",
-      "save": "Save"
+      "save": "Save",
+      "saving": "Saving...",
+      "defaultPricing": "Default Pricing (3rd Priority)",
+      "inputPrice": "Input Price ($/M)",
+      "outputPrice": "Output Price ($/M)",
+      "cacheWritePrice": "Cache Write ($/M)",
+      "cacheReadPrice": "Cache Read ($/M)",
+      "modelPricing": "Model Pricing (1st Priority)",
+      "modelName": "Model",
+      "fillBuiltin": "Set All to $1",
+      "configuredModels": "Configured Models"
     }
   },
   "analytics": {
@@ -508,7 +518,16 @@
     "metric": {
       "requests": "Requests",
       "tokens": "Tokens",
-      "latency": "Latency"
+      "latency": "Latency",
+      "input_tokens": "Input Tokens",
+      "output_tokens": "Output Tokens",
+      "cost": "Cost (USD)"
     }
+  },
+  "billing": {
+    "title": "Billing Report",
+    "totalCost": "Total Cost",
+    "period": "Period",
+    "modelBreakdown": "Model Cost Breakdown"
   }
 }
