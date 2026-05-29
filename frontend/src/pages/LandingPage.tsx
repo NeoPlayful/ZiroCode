@@ -41,12 +41,12 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">{tStatic('static.nav.welcome', { name: user.name })}</span>
+                <span className="text-sm text-gray-600">{tStatic('nav.welcome', { name: user.name })}</span>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  {tStatic('static.nav.dashboard')}
+                  {tStatic('nav.dashboard')}
                 </button>
               </>
             ) : (
@@ -55,13 +55,13 @@ export default function LandingPage() {
                   onClick={() => navigate('/auth/login')}
                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
                 >
-                  {tStatic('static.nav.login')}
+                  {tStatic('nav.login')}
                 </button>
                 <button
                   onClick={() => navigate('/auth/register')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  {tStatic('static.nav.register')}
+                  {tStatic('nav.register')}
                 </button>
               </>
             )}
