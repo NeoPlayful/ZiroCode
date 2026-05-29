@@ -81,9 +81,7 @@ export async function getAvailableChannels() {
   // Filter out channels in cooling period
   const available = channels.filter(c => {
     if (c.healthStatus === 'UNHEALTHY') {
-      // If cooling expired, auto-recover to UNKNOWN for re-check
       if (isInCooling(c.id)) return false;
-      // Not in cooling anymore -> auto-recover
       prisma.modelChannel.update({
         where: { id: c.id },
         data: { healthStatus: 'UNKNOWN' },
@@ -93,7 +91,11 @@ export async function getAvailableChannels() {
     return true;
   });
 
-  return available;
+  // Normalize baseUrl: strip trailing slash
+  return available.map(c => ({
+    ...c,
+    baseUrl: c.baseUrl.replace(/\/+$/, ''),
+  }));
 }
 
 // 透明代理到上游，支持故障转移
@@ -116,9 +118,9 @@ export async function routeToUpstream(
       const response = await fetch(url, {
         method: options.method,
         headers: {
-          Authorization: `Bearer ${channel.apiKey}`,
           'Content-Type': 'application/json',
           ...options.headers,
+          Authorization: `Bearer ${channel.apiKey}`,
         },
         body: options.body,
         signal: AbortSignal.timeout(60000),
@@ -165,9 +167,9 @@ export async function routeToUpstreamStreaming(
       const response = await fetch(url, {
         method: options.method,
         headers: {
-          Authorization: `Bearer ${channel.apiKey}`,
           'Content-Type': 'application/json',
           ...options.headers,
+          Authorization: `Bearer ${channel.apiKey}`,
         },
         body: options.body,
       });

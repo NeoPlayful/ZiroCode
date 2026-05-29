@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { prisma } from '../lib/db.js';
 import { getUserQuota, deductQuota, checkRateLimit } from '../lib/quota.js';
-import { routeToUpstream, getAvailableChannels } from '../lib/router.js';
+import { routeToUpstream } from '../lib/router.js';
 import { createNotification } from '../lib/notification.js';
 import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
@@ -43,16 +43,48 @@ async function getCachedQuota(userId: string) {
   return serialized;
 }
 
-export async function v1Routes(app: FastifyInstance) {
-  // 聊天补全 - 普通 JSON 模式
-  app.post('/api/v1/chat/completions', async (req, reply) => {
+function matchRoute(routes: { path: string }[], urlPath: string): string | null {
+  let bestMatch: string | null = null;
+  for (const route of routes) {
+    if (urlPath.startsWith(route.path)) {
+      if (!bestMatch || route.path.length > bestMatch.length) {
+        bestMatch = route.path;
+      }
+    }
+  }
+  return bestMatch;
+}
+
+export async function gatewayRoutes(app: FastifyInstance) {
+  app.setNotFoundHandler(async (req, reply) => {
     try {
-      const auth = await validateApiKey(req.headers.authorization || null);
+      const urlPath = (req as any).url.split('?')[0];
+
+      // 只处理非 /api/ 路径（路径路由）
+      if (urlPath.startsWith('/api/')) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Not found' } });
+      }
+
+      // 最长前缀匹配路由
+      const routes = await prisma.apiRoute.findMany({
+        where: { isActive: true },
+        select: { id: true, path: true, mode: true, primaryChannelId: true, backupChannelId: true, activeChannel: true, channelIds: true, strategy: true },
+      });
+
+      const matchedPath = matchRoute(routes, urlPath);
+      if (!matchedPath) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: `No route matching "${urlPath}"` } });
+      }
+
+      // 认证
+      const auth = await validateApiKey((req as any).headers.authorization || null);
       if (!auth) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '无效的 API Key' } });
 
+      // 速率限制
       const allowed = await checkRateLimit(auth.userId);
       if (!allowed) return reply.status(429).send({ error: { code: 'RATE_LIMITED', message: '请求过于频繁' } });
 
+      // 配额检查
       const quota = await getCachedQuota(auth.userId);
       if (quota.payAsYouGoRemaining <= 0 && (quota.monthlyRemaining === null || quota.monthlyRemaining <= 0)) {
         createNotification(auth.userId, 'QUOTA_EXHAUSTED', '配额已用完', '请充值或兑换订阅以继续使用', '/subscription').catch(() => {});
@@ -60,36 +92,36 @@ export async function v1Routes(app: FastifyInstance) {
         return reply.status(403).send({ error: { code: 'INSUFFICIENT_QUOTA', message: '配额不足' } });
       }
 
-      const body = req.body as any;
+      const body = (req as any).body as any;
       const requestTime = new Date();
+      // 去掉路由前缀，剩余部分作为上游路径
+      let upstreamPath = urlPath.slice(matchedPath.length) || '/';
+      // 服务层加 /v1 前缀（如果上游路径尚未包含）
+      if (!upstreamPath.startsWith('/v1')) {
+        upstreamPath = '/v1' + upstreamPath;
+      }
       const isStream = body?.stream === true;
 
       if (isStream) {
-        // SSE 流式模式
         reply.raw.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           Connection: 'keep-alive',
         });
-
         let totalTokens = 0;
         let hasError = false;
         let streamChannelId: string | undefined;
-
         try {
-          const result = await routeToUpstream('/v1/chat/completions', {
-            method: 'POST',
-            headers: { Authorization: '' }, // router handles auth
+          const result = await routeToUpstream(upstreamPath, {
+            method: (req as any).method,
+            headers: { Authorization: '' },
             body: JSON.stringify(body),
           });
           streamChannelId = result.channel.id;
-
           const reader = result.response.body?.getReader();
           if (!reader) throw new Error('No response body');
-
           const decoder = new TextDecoder();
           let buffer = '';
-
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -99,14 +131,8 @@ export async function v1Routes(app: FastifyInstance) {
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
-                if (data === '[DONE]') {
-                  reply.raw.write('data: [DONE]\n\n');
-                  continue;
-                }
-                try {
-                  const parsed = JSON.parse(data);
-                  totalTokens = parsed.usage?.total_tokens || totalTokens;
-                } catch {}
+                if (data === '[DONE]') { reply.raw.write('data: [DONE]\n\n'); continue; }
+                try { const parsed = JSON.parse(data); totalTokens = parsed.usage?.total_tokens || totalTokens; } catch {}
                 reply.raw.write(`data: ${data}\n\n`);
               }
             }
@@ -117,76 +143,36 @@ export async function v1Routes(app: FastifyInstance) {
           reply.raw.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
           reply.raw.end();
         }
-
         const responseTime = new Date();
         const quotaUsed = BigInt(totalTokens);
         if (!hasError && totalTokens > 0) {
           await deductQuota(auth.userId, quotaUsed);
           triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
-          const newQuota = await getUserQuota(auth.userId);
-          const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
-          const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
-          if (total > BigInt(0) && remaining * BigInt(10) < total) {
-            const percentageUsed = Number((total - remaining) * BigInt(100) / total);
-            createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', `剩余配额不足 10%，请及时充值`, '/subscription').catch(() => {});
-            dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed }).catch(() => {});
-          }
         }
         await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId);
         return;
       }
 
-      // 普通 JSON 模式 - 多渠道支持
-      const result = await routeToUpstream('/v1/chat/completions', {
-        method: 'POST',
+      // 普通 JSON 模式
+      const result = await routeToUpstream(upstreamPath, {
+        method: (req as any).method,
         headers: { Authorization: '' },
         body: JSON.stringify(body),
       });
       const usedChannelId = result.channel.id;
-
       const responseTime = new Date();
       const responseData = await result.response.json() as any;
-
       const tokensUsed = responseData.usage?.total_tokens || 0;
       const quotaUsed = BigInt(tokensUsed);
       if (result.response.ok) {
         await deductQuota(auth.userId, quotaUsed);
         triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
-        const newQuota = await getUserQuota(auth.userId);
-        const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
-        const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
-        if (total > BigInt(0) && remaining * BigInt(10) < total) {
-          const percentageUsed = Number((total - remaining) * BigInt(100) / total);
-          createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', `剩余配额不足 10%，请及时充值`, '/subscription').catch(() => {});
-          dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed }).catch(() => {});
-        }
       }
-
       await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId);
-
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
       console.error('Gateway error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: error.message || '代理请求失败' } });
-    }
-  });
-
-  // 模型列表
-  app.get('/api/v1/models', async (_req, reply) => {
-    try {
-      const cached = await cacheGet('models:list');
-      if (cached) return reply.send(JSON.parse(cached));
-
-      const channels = await getAvailableChannels();
-      const models = channels.flatMap(c => c.models.map(m => ({
-        id: m, object: 'model', created: Math.floor(c.createdAt.getTime() / 1000), owned_by: c.name,
-      })));
-      const result = { object: 'list', data: models };
-      await cacheSet('models:list', JSON.stringify(result), 300);
-      return reply.send(result);
-    } catch (error) {
-      console.error('List models error:', error);
-      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取模型列表失败' } });
     }
   });
 }

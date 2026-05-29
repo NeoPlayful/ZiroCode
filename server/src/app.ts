@@ -18,6 +18,7 @@ import { notificationRoutes } from './routes/notifications.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { systemRoutes } from './routes/system.js';
+import { gatewayRoutes } from './routes/gateway.js';
 import { i18nMiddleware } from './i18n/middleware.js';
 
 const app = Fastify({ logger: true });
@@ -76,6 +77,7 @@ async function start() {
   app.register(webhookRoutes);
   app.register(analyticsRoutes);
   app.register(systemRoutes);
+  app.register(gatewayRoutes);
 
   const port = parseInt(process.env.PORT || '4000');
   await app.listen({ port, host: '0.0.0.0' });
