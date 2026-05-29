@@ -208,7 +208,9 @@ export default function AdminAnalytics() {
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">时间</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">用户</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">模型</th>
+                    <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">入口</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">渠道</th>
+                    <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">IP</th>
                     <th className="text-right py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">Token</th>
                     <th className="text-right py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">耗时</th>
                     <th className="text-center py-2.5 px-3 text-xs font-medium text-gray-400 uppercase">状态</th>
@@ -224,7 +226,16 @@ export default function AdminAnalytics() {
                         {log.userName || log.userId.slice(0, 8)}
                       </td>
                       <td className="py-2.5 px-3 text-xs text-gray-700 max-w-[120px] truncate" title={log.model}>{log.model}</td>
-                      <td className="py-2.5 px-3 text-xs text-gray-500">{log.channelId ? log.channelId.slice(0, 8) : '-'}</td>
+                      <td className="py-2.5 px-3 text-xs text-gray-500 max-w-[100px] truncate" title={log.routePath || ''}>{log.routePath || '-'}</td>
+                      <td className="py-2.5 px-3 text-xs">
+                        {log.channelDisplayOrder ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#FFF4F0] text-[#F97346] text-[10px] font-bold">{log.channelDisplayOrder}</span>
+                            <span className="text-gray-500">{log.channelDisplayName || ''}</span>
+                          </span>
+                        ) : '-'}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs text-gray-500">{log.clientIp || '-'}</td>
                       <td className="py-2.5 px-3 text-xs text-right text-gray-700">{log.tokensUsed}</td>
                       <td className="py-2.5 px-3 text-xs text-right text-gray-500">{log.latencyMs ? `${log.latencyMs}ms` : '-'}</td>
                       <td className="py-2.5 px-3 text-center">

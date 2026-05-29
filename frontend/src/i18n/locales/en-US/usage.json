@@ -23,7 +23,7 @@
       "noData": "No daily data"
     },
     "modelDistribution": {
-      "title": "Model Usage Distribution",
+      "title": "Model Usage (Today)",
       "times": "times"
     },
     "recentRecords": {

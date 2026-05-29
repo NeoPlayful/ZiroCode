@@ -7,7 +7,6 @@ import { authRoutes } from './routes/auth.js';
 import { keyRoutes } from './routes/keys.js';
 import { subscriptionRoutes } from './routes/subscriptions.js';
 import { userRoutes } from './routes/user.js';
-import { v1Routes } from './routes/v1.js';
 import { healthRoutes } from './routes/health.js';
 import { paymentRoutes } from './routes/payments.js';
 import { referralRoutes } from './routes/referral.js';
@@ -72,7 +71,6 @@ async function start() {
   app.register(keyRoutes);
   app.register(subscriptionRoutes);
   app.register(userRoutes);
-  app.register(v1Routes);
   app.register(healthRoutes);
   app.register(paymentRoutes);
   app.register(referralRoutes);

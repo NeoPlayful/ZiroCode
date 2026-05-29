@@ -1,15 +1,59 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+import ReactEChartsCore from 'echarts-for-react';
 
 export default function AdminDashboard() {
   const { t } = useTranslation('admin');
+  const [period, setPeriod] = useState('24h');
+  const [metric, setMetric] = useState('requests');
+
   const { data } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => fetch('/api/admin/stats').then((r) => r.json()),
   });
 
+  const { data: trends } = useQuery({
+    queryKey: ['admin-dashboard-trends', period, metric],
+    queryFn: () => fetch(`/api/admin/analytics/trends?period=${period}&metric=${metric}&granularity=${period === '24h' ? 'hour' : 'day'}`).then((r) => r.json()),
+    refetchInterval: 60000,
+  });
+
   const stats = data?.stats || {};
+
+  const trendOption = {
+    tooltip: { trigger: 'axis' as const },
+    grid: { left: 50, right: 16, top: 30, bottom: 24 },
+    xAxis: {
+      type: 'category' as const,
+      data: trends?.points?.map((p: any) => {
+        const d = new Date(p.time);
+        if (period === '24h') return `${d.getHours()}:00`;
+        return `${d.getMonth() + 1}/${d.getDate()}`;
+      }) || [],
+      axisLabel: { fontSize: 11, color: '#9CA3AF', rotate: period === '24h' ? 45 : 0 },
+      axisLine: { lineStyle: { color: '#E5E7EB' } },
+    },
+    yAxis: {
+      type: 'value' as const,
+      name: metric === 'tokens' ? 'Tokens' : t('analytics.requests') || 'Requests',
+      nameTextStyle: { fontSize: 11, color: '#9CA3AF' },
+      splitLine: { lineStyle: { color: '#F3F4F6' } },
+      axisLabel: { fontSize: 11, color: '#9CA3AF', formatter: (v: number) => v >= 1000 ? `${(v/1000).toFixed(1)}K` : String(v) },
+    },
+    series: [{
+      type: period === '24h' ? 'line' as const : 'bar' as const,
+      data: trends?.points?.map((p: any) => p.value) || [],
+      smooth: period === '24h',
+      lineStyle: period === '24h' ? { color: '#F97346', width: 2 } : undefined,
+      itemStyle: { color: '#F97346', borderRadius: period === '24h' ? undefined : [4, 4, 0, 0] },
+      barMaxWidth: period === '24h' ? undefined : 40,
+      areaStyle: period === '24h' ? {
+        color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(249,115,70,0.15)' }, { offset: 1, color: 'rgba(249,115,70,0)' }] },
+      } : undefined,
+    }],
+  };
 
   const kpiCards = [
     {
@@ -77,10 +121,28 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-3 gap-6">
         {/* Chart */}
         <div className="col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4">{t('dashboard.apiTrend')}</h3>
-          <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
-            {t('dashboard.chartPlaceholder')}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">{t('dashboard.apiTrend')}</h3>
+            <div className="flex items-center gap-2">
+              <div className="flex bg-gray-100 rounded-lg p-0.5">
+                {['24h', '7d', '30d'].map(p => (
+                  <button key={p} onClick={() => setPeriod(p)}
+                    className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${period === p ? 'bg-white text-[#111827] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+              <div className="flex bg-gray-100 rounded-lg p-0.5">
+                {['requests', 'tokens'].map(m => (
+                  <button key={m} onClick={() => setMetric(m)}
+                    className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${metric === m ? 'bg-white text-[#111827] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    {m === 'requests' ? (t('analytics.requests') || '请求量') : 'Tokens'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+          <ReactEChartsCore option={trendOption} style={{ height: 260 }} notMerge />
         </div>
 
         {/* Announcements */}

@@ -195,10 +195,12 @@ export async function userRoutes(app: FastifyInstance) {
         orderBy: { requestTime: 'asc' },
       });
 
-      // 生成24个时间段 [0..23]
+      // 生成24个时间段，以当前小时为终点
       const slots: { hour: number; label: string; models: Record<string, { tokens: number; calls: number }> }[] = [];
-      const baseHour = new Date(twentyFourHoursAgo);
+      const now = new Date();
+      const baseHour = new Date(now);
       baseHour.setMinutes(0, 0, 0);
+      baseHour.setHours(baseHour.getHours() - 23);
       for (let i = 0; i < 24; i++) {
         const h = new Date(baseHour.getTime() + i * 60 * 60 * 1000);
         slots.push({
