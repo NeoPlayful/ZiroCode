@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SparklesIcon } from '@heroicons/react/20/solid';
 import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function AboutPage() {
   const { t } = useTranslation('static');
@@ -28,6 +29,7 @@ export default function AboutPage() {
             <span>ZiroCode</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             {user ? (
               <>
                 <span className="text-sm text-gray-600">{t('nav.welcome', { name: user.name })}</span>
