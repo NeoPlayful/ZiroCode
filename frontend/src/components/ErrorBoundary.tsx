@@ -1,8 +1,10 @@
 import { Component, type ReactNode } from 'react';
+import { withTranslation } from 'react-i18next';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface Props {
   children: ReactNode;
+  t: (key: string) => string;
 }
 
 interface State {
@@ -10,7 +12,7 @@ interface State {
   error?: Error;
 }
 
-export default class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
@@ -26,17 +28,18 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.props;
       return (
         <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-sm p-8 max-w-md text-center">
             <ExclamationTriangleIcon className="w-16 h-16 text-red-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">出错了</h1>
-            <p className="text-gray-600 mb-4">应用遇到了一个错误，请刷新页面重试</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('error.title')}</h1>
+            <p className="text-gray-600 mb-4">{t('error.message')}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f]"
             >
-              刷新页面
+              {t('error.refresh')}
             </button>
           </div>
         </div>
@@ -45,3 +48,5 @@ export default class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export default withTranslation('common')(ErrorBoundary);

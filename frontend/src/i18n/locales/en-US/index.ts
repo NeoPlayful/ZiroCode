@@ -10,6 +10,9 @@ import static_pages from './static.json';
 import developer from './developer.json';
 import admin from './admin.json';
 import landing from './landing.json';
+import referral from './referral.json';
+import onboarding from './onboarding.json';
+import webhooks from './webhooks.json';
 
 export default {
   common,
@@ -24,4 +27,7 @@ export default {
   developer,
   admin,
   landing,
+  referral,
+  onboarding,
+  webhooks,
 };

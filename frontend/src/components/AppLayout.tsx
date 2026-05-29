@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 import NotificationBell from './NotificationBell'
 import AnnouncementBanner from './AnnouncementBanner'
@@ -8,17 +9,18 @@ import Footer from './Footer'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const navItems = [
-  { label: '仪表板', href: '/dashboard' },
-  { label: 'API密钥', href: '/keys' },
-  { label: '兑换订阅', href: '/subscription' },
-  { label: '使用统计', href: '/usage' },
-  { label: '定价', href: '/pricing' },
+  { labelKey: 'nav.dashboard', href: '/dashboard' },
+  { labelKey: 'nav.keys', href: '/keys' },
+  { labelKey: 'nav.subscription', href: '/subscription' },
+  { labelKey: 'nav.usage', href: '/usage' },
+  { labelKey: 'nav.pricing', href: '/pricing' },
 ]
 
 export default function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { t } = useTranslation('common')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -53,7 +55,7 @@ export default function AppLayout() {
       <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center">
         <div className="text-center">
           <SparklesIcon className="w-12 h-12 text-[#e8673a] mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">加载中...</p>
+          <p className="text-gray-600">{t('message.loading')}</p>
         </div>
       </div>
     )
@@ -89,7 +91,7 @@ export default function AppLayout() {
                     isActive ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               )
             })}
@@ -99,7 +101,7 @@ export default function AppLayout() {
                   location.pathname.startsWith('/admin') ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                管理后台
+                {t('nav.admin')}
               </Link>
             )}
           </div>
@@ -115,7 +117,7 @@ export default function AppLayout() {
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                 )}
-                <span className="font-medium text-sm">{user.name || '用户'}</span>
+                <span className="font-medium text-sm">{user.name || t('user.defaultName')}</span>
               </button>
 
               {menuOpen && (
@@ -125,15 +127,15 @@ export default function AppLayout() {
                   </div>
                   <Link to="/dashboard" onClick={() => setMenuOpen(false)}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    个人设置
+                    {t('user.menu.profile')}
                   </Link>
                   <Link to="/tickets" onClick={() => setMenuOpen(false)}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    工单中心
+                    {t('user.menu.tickets')}
                   </Link>
                   <button onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">
-                    退出登录
+                    {t('user.menu.logout')}
                   </button>
                 </div>
               )}

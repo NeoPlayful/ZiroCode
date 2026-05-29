@@ -1,0 +1,21 @@
+{
+  "welcome": {
+    "title": "Welcome to ZiroCode",
+    "description": "Let's quickly get you started"
+  },
+  "createKey": {
+    "title": "Create API Key",
+    "description": "Create your first key on the API Keys page"
+  },
+  "subscribe": {
+    "title": "Redeem or Buy Subscription",
+    "description": "Get quota on the Subscription page"
+  },
+  "start": {
+    "title": "Start Using",
+    "description": "Use your API key to call AI services"
+  },
+  "skip": "Skip",
+  "next": "Next",
+  "finish": "Finish"
+}

@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 
 export default function AdminDashboard() {
+  const { t } = useTranslation('admin');
   const { data } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => fetch('/api/admin/stats').then((r) => r.json()),
@@ -11,28 +13,28 @@ export default function AdminDashboard() {
 
   const kpiCards = [
     {
-      label: '总用户数',
+      label: t('dashboard.totalUsers'),
       value: stats.users ?? '-',
       change: '+12.5%',
       trend: 'up',
       color: 'text-[#F97346]',
     },
     {
-      label: '活跃密钥',
+      label: t('dashboard.activeKeys'),
       value: stats.activeKeys ?? '-',
       change: '+8.2%',
       trend: 'up',
       color: 'text-green-600',
     },
     {
-      label: '今日调用',
+      label: t('dashboard.todayCalls'),
       value: stats.todayCalls ?? '-',
       change: '-3.1%',
       trend: 'down',
       color: 'text-blue-600',
     },
     {
-      label: '总调用量',
+      label: t('dashboard.totalCalls'),
       value: stats.totalCalls ?? '-',
       change: '+24.8%',
       trend: 'up',
@@ -75,15 +77,15 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-3 gap-6">
         {/* Chart */}
         <div className="col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4">API使用趋势</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('dashboard.apiTrend')}</h3>
           <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
-            图表占位符
+            {t('dashboard.chartPlaceholder')}
           </div>
         </div>
 
         {/* Announcements */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4">公告</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('dashboard.announcements')}</h3>
           <div className="space-y-3">
             {[
               { title: '系统维护通知', date: '2026-05-28', badge: 'NEW' },
@@ -112,7 +114,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-6">
         {/* Recent Orders */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4">最近订单</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('dashboard.recentOrders')}</h3>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div
@@ -125,7 +127,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-semibold">¥99.00</div>
-                  <div className="text-xs text-green-600">已完成</div>
+                  <div className="text-xs text-green-600">{t('dashboard.completed')}</div>
                 </div>
               </div>
             ))}
@@ -134,12 +136,12 @@ export default function AdminDashboard() {
 
         {/* System Status */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4">系统状态</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('dashboard.systemStatus')}</h3>
           <div className="space-y-3">
             {[
-              { name: 'API服务器', status: '运行正常' },
-              { name: '数据库', status: '运行正常' },
-              { name: 'Redis缓存', status: '运行正常' },
+              { name: t('dashboard.apiServer'), status: t('dashboard.running') },
+              { name: t('dashboard.database'), status: t('dashboard.running') },
+              { name: t('dashboard.redisCache'), status: t('dashboard.running') },
             ].map((item) => (
               <div
                 key={item.name}

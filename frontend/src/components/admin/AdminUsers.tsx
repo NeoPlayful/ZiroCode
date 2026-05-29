@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { UsersIcon, UserGroupIcon, ShieldCheckIcon, PlusIcon, MagnifyingGlassIcon, PencilIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
+import { useTranslation } from 'react-i18next'
 
 export default function AdminUsers() {
   const [search, setSearch] = useState('')
@@ -8,6 +9,7 @@ export default function AdminUsers() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const { t } = useTranslation('admin')
 
   const { data } = useQuery({
     queryKey: ['admin-users', search, roleFilter, statusFilter, page, pageSize],
@@ -29,28 +31,28 @@ export default function AdminUsers() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<UsersIcon className="w-5 h-5" />}
-          label="总用户数"
+          label={t('users.kpi.totalUsers')}
           value={total}
           trend="+12%"
           trendUp={true}
         />
         <KPICard
           icon={<UserGroupIcon className="w-5 h-5" />}
-          label="活跃用户"
+          label={t('users.kpi.activeUsers')}
           value={activeUsers}
           trend="+8%"
           trendUp={true}
         />
         <KPICard
           icon={<ShieldCheckIcon className="w-5 h-5" />}
-          label="管理员数量"
+          label={t('users.kpi.adminCount')}
           value={adminCount}
           trend="0%"
           trendUp={false}
         />
         <KPICard
           icon={<PlusIcon className="w-5 h-5" />}
-          label="今日新增"
+          label={t('users.kpi.todayNew')}
           value={todayNew}
           trend="+3"
           trendUp={true}
@@ -65,7 +67,7 @@ export default function AdminUsers() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索用户..."
+              placeholder={t('users.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -78,9 +80,9 @@ export default function AdminUsers() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有角色</option>
-            <option value="ADMIN">管理员</option>
-            <option value="USER">普通用户</option>
+            <option value="all">{t('users.filter.allRoles')}</option>
+            <option value="ADMIN">{t('users.filter.admin')}</option>
+            <option value="USER">{t('users.filter.user')}</option>
           </select>
 
           {/* 状态筛选 */}
@@ -89,17 +91,17 @@ export default function AdminUsers() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有状态</option>
-            <option value="active">正常</option>
-            <option value="disabled">禁用</option>
-            <option value="banned">封禁</option>
+            <option value="all">{t('users.filter.allStatus')}</option>
+            <option value="active">{t('users.filter.active')}</option>
+            <option value="disabled">{t('users.filter.disabled')}</option>
+            <option value="banned">{t('users.filter.banned')}</option>
           </select>
         </div>
 
         {/* 新增用户按钮 */}
         <button className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
           <PlusIcon className="w-4 h-4" />
-          新增用户
+          {t('users.addUser')}
         </button>
       </div>
 
@@ -109,13 +111,13 @@ export default function AdminUsers() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">密钥</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">订阅</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.user')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.role')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.apiKey')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.subscription')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.registeredAt')}</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -129,7 +131,7 @@ export default function AdminUsers() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+            {t('users.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -137,10 +139,10 @@ export default function AdminUsers() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('users.pageSize', { size: 10 })}</option>
+              <option value={20}>{t('users.pageSize', { size: 20 })}</option>
+              <option value={50}>{t('users.pageSize', { size: 50 })}</option>
+              <option value={100}>{t('users.pageSize', { size: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -148,14 +150,14 @@ export default function AdminUsers() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+                {t('users.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+                {t('users.next')}
               </button>
             </div>
           </div>
@@ -205,7 +207,7 @@ function UserRow({ user }: any) {
             {user.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div>
-            <div className="font-medium text-gray-900">{user.name || '未命名'}</div>
+            <div className="font-medium text-gray-900">{user.name || t('users.table.unnamed')}</div>
             <div className="text-sm text-gray-500">{user.email}</div>
           </div>
         </div>
@@ -217,7 +219,7 @@ function UserRow({ user }: any) {
       </td>
       <td className="px-6 py-4">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-          {user.isActive !== false ? '正常' : '禁用'}
+          {user.isActive !== false ? t('users.filter.active') : t('users.filter.disabled')}
         </span>
       </td>
       <td className="px-6 py-4 text-sm text-gray-600">{user._count?.apiKeys || 0}</td>

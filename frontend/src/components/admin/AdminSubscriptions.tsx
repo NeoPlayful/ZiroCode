@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CreditCardIcon, CheckCircleIcon, ClockIcon, ChartBarIcon, MagnifyingGlassIcon, PencilIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
+import { useTranslation } from 'react-i18next'
 
 export default function AdminSubscriptions() {
   const [search, setSearch] = useState('')
@@ -8,6 +9,7 @@ export default function AdminSubscriptions() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const { t } = useTranslation('admin')
 
   const { data } = useQuery({
     queryKey: ['admin-subscriptions', search, typeFilter, statusFilter, page, pageSize],
@@ -30,28 +32,28 @@ export default function AdminSubscriptions() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<CreditCardIcon className="w-5 h-5" />}
-          label="总订阅数"
+          label={t('subscriptions.kpi.totalSubs')}
           value={total}
           trend="+5%"
           trendUp={true}
         />
         <KPICard
           icon={<CheckCircleIcon className="w-5 h-5" />}
-          label="活跃订阅"
+          label={t('subscriptions.kpi.activeSubs')}
           value={activeSubs}
           trend="+3%"
           trendUp={true}
         />
         <KPICard
           icon={<ClockIcon className="w-5 h-5" />}
-          label="今日到期"
+          label={t('subscriptions.kpi.expiringToday')}
           value={expiringToday}
           trend="0"
           trendUp={false}
         />
         <KPICard
           icon={<ChartBarIcon className="w-5 h-5" />}
-          label="总配额使用"
+          label={t('subscriptions.kpi.totalQuota')}
           value={`${(totalQuotaUsed / 100000000).toFixed(1)}亿`}
           trend="+12%"
           trendUp={true}
@@ -66,7 +68,7 @@ export default function AdminSubscriptions() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索用户..."
+              placeholder={t('subscriptions.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -79,10 +81,10 @@ export default function AdminSubscriptions() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有类型</option>
-            <option value="PAY_AS_YOU_GO">按量付费</option>
-            <option value="MONTHLY">月卡</option>
-            <option value="PERMANENT">永久</option>
+            <option value="all">{t('subscriptions.filter.allTypes')}</option>
+            <option value="PAY_AS_YOU_GO">{t('subscriptions.filter.payAsYouGo')}</option>
+            <option value="MONTHLY">{t('subscriptions.filter.monthly')}</option>
+            <option value="PERMANENT">{t('subscriptions.filter.permanent')}</option>
           </select>
 
           {/* 状态筛选 */}
@@ -91,9 +93,9 @@ export default function AdminSubscriptions() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有状态</option>
-            <option value="active">有效</option>
-            <option value="expired">过期</option>
+            <option value="all">{t('subscriptions.filter.allStatus')}</option>
+            <option value="active">{t('subscriptions.filter.active')}</option>
+            <option value="expired">{t('subscriptions.filter.expired')}</option>
           </select>
         </div>
       </div>
@@ -104,12 +106,12 @@ export default function AdminSubscriptions() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">配额使用</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">到期时间</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.user')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.type')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.quotaUsage')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.expiresAt')}</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('subscriptions.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -123,7 +125,7 @@ export default function AdminSubscriptions() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+            {t('subscriptions.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -131,10 +133,10 @@ export default function AdminSubscriptions() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('subscriptions.pageSize', { size: 10 })}</option>
+              <option value={20}>{t('subscriptions.pageSize', { size: 20 })}</option>
+              <option value={50}>{t('subscriptions.pageSize', { size: 50 })}</option>
+              <option value={100}>{t('subscriptions.pageSize', { size: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -142,14 +144,14 @@ export default function AdminSubscriptions() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+                {t('subscriptions.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+                {t('subscriptions.next')}
               </button>
             </div>
           </div>
@@ -191,9 +193,9 @@ function SubscriptionRow({ subscription }: any) {
   }
 
   const getTypeLabel = (type: string) => {
-    if (type === 'PAY_AS_YOU_GO') return '按量'
-    if (type === 'MONTHLY') return '月卡'
-    if (type === 'PERMANENT') return '永久'
+    if (type === 'PAY_AS_YOU_GO') return t('subscriptions.typeLabel.payAsYouGo')
+    if (type === 'MONTHLY') return t('subscriptions.typeLabel.monthly')
+    if (type === 'PERMANENT') return t('subscriptions.typeLabel.permanent')
     return type
   }
 
@@ -205,7 +207,7 @@ function SubscriptionRow({ subscription }: any) {
             {subscription.user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div>
-            <div className="font-medium text-gray-900">{subscription.user?.name || '未命名'}</div>
+            <div className="font-medium text-gray-900">{subscription.user?.name || t('subscriptions.table.unnamed')}</div>
             <div className="text-sm text-gray-500">{subscription.user?.email}</div>
           </div>
         </div>
@@ -231,11 +233,11 @@ function SubscriptionRow({ subscription }: any) {
       </td>
       <td className="px-6 py-4">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${subscription.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-          {subscription.isActive ? '有效' : '过期'}
+          {subscription.isActive ? t('subscriptions.filter.active') : t('subscriptions.filter.expired')}
         </span>
       </td>
       <td className="px-6 py-4 text-sm text-gray-500">
-        {subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleDateString() : '永久'}
+        {subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleDateString() : t('subscriptions.table.permanent')}
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">

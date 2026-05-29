@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { BellIcon } from '@heroicons/react/24/outline'
 
 export default function NotificationBell() {
+  const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -45,9 +47,9 @@ export default function NotificationBell() {
 
       {open && (
         <div className="absolute right-0 top-full mt-1 w-80 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
-          <div className="px-4 py-2 font-semibold border-b border-gray-100">通知中心</div>
+          <div className="px-4 py-2 font-semibold border-b border-gray-100">{t('notification.title')}</div>
           {notifications.length === 0 ? (
-            <div className="px-4 py-8 text-center text-gray-400 text-sm">暂无通知</div>
+            <div className="px-4 py-8 text-center text-gray-400 text-sm">{t('notification.empty')}</div>
           ) : (
             <div className="max-h-96 overflow-y-auto">
               {notifications.map((n: any) => (
@@ -71,7 +73,7 @@ export default function NotificationBell() {
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-center text-sm text-[#e8673a] hover:bg-gray-50 border-t border-gray-100"
           >
-            查看全部 →
+            {t('notification.viewAll')} →
           </Link>
         </div>
       )}

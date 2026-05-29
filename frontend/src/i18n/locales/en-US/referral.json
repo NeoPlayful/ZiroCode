@@ -1,0 +1,38 @@
+{
+  "title": "Referral Program",
+  "subtitle": "Invite friends to redeem and earn rewards",
+  "stats": {
+    "referrals": "Referrals",
+    "claimed": "Claimed",
+    "pending": "Pending"
+  },
+  "link": {
+    "title": "My Referral Link",
+    "copy": "Copy",
+    "hint": "When users registered via this link redeem and use the service, you will receive rewards"
+  },
+  "rules": {
+    "title": "Referral Rules",
+    "items": [
+      "For every 100M quota redeemed by your invitee, you earn ¥1; 500M earns ¥5, and so on.",
+      "Lifetime cashback: you earn rewards on every future purchase by your invitee.",
+      "Self-referral abuse is strictly prohibited. Violators will be banned and have their quota reset.",
+      "Withdrawals are processed around the 1st of each month (minimum ¥10)."
+    ]
+  },
+  "claim": {
+    "title": "Claimable Rewards",
+    "button": "Claim Now",
+    "buttonInProgress": "Claiming...",
+    "submitted": "Withdrawal request submitted",
+    "error": "Request failed, please try again later"
+  },
+  "empty": {
+    "title": "No rewards yet",
+    "subtitle": "Invite friends to earn rewards"
+  },
+  "history": {
+    "title": "Referral History",
+    "recent": "Recent {{count}} entries"
+  }
+}

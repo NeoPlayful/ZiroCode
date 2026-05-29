@@ -1,4 +1,46 @@
 {
+  "nav": {
+    "dashboard": "Dashboard",
+    "keys": "API Keys",
+    "subscription": "Subscription",
+    "usage": "Usage",
+    "pricing": "Pricing",
+    "admin": "Admin Console"
+  },
+  "user": {
+    "defaultName": "User",
+    "menu": {
+      "profile": "Profile",
+      "tickets": "Tickets",
+      "logout": "Logout"
+    }
+  },
+  "footer": {
+    "description": "Professional AI service platform, providing AI solutions for developers.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "about": "About",
+    "copyright": "© {{year}} ZiroCode. All rights reserved."
+  },
+  "notification": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "viewAll": "View All"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "message": "The application encountered an error. Please refresh the page and try again.",
+    "refresh": "Refresh Page"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "ticket": {
+    "selectTemplate": "Select template (optional)",
+    "allCategories": "All Categories"
+  },
   "button": {
     "submit": "Submit",
     "cancel": "Cancel",

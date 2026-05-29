@@ -1,0 +1,25 @@
+{
+  "title": "Webhook 管理",
+  "newWebhook": "+ 新建 Webhook",
+  "cancel": "取消",
+  "form": {
+    "title": "新建 Webhook",
+    "name": "名称",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com/webhook",
+    "events": "监听事件",
+    "create": "创建",
+    "eventsOptions": {
+      "QUOTA_LOW": "配额不足",
+      "QUOTA_EXHAUSTED": "配额耗尽",
+      "PAYMENT_SUCCESS": "支付成功",
+      "API_CALL_COMPLETED": "API 调用完成",
+      "SUBSCRIPTION_EXPIRING": "订阅即将过期",
+      "SUBSCRIPTION_EXPIRED": "订阅已过期"
+    }
+  },
+  "empty": "暂无 Webhook",
+  "lastSuccess": "最后成功: {{date}}",
+  "test": "测试",
+  "delete": "删除"
+}

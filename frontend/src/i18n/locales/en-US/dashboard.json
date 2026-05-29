@@ -26,5 +26,31 @@
     "statusValid": "Valid",
     "statusNone": "No Subscription",
     "purchaseCode": "Purchase Code"
+  },
+  "tutorial": {
+    "title": "Tutorials",
+    "items": {
+      "openclaw": { "title": "OpenClaw Quick Setup", "description": "Complete OpenClaw client setup in 5 minutes" },
+      "claudeCode": { "title": "Claude Code Integration", "description": "Integrate API with Claude Code" },
+      "apiKey": { "title": "API Key Guide", "description": "Create and manage your API keys" },
+      "windows": { "title": "Windows Setup Guide", "description": "Environment setup steps for Windows" },
+      "troubleshooting": { "title": "Common Issues", "description": "Quickly find and fix common problems" }
+    },
+    "badge": {
+      "hot": "HOT",
+      "new": "NEW"
+    }
+  },
+  "announcement": {
+    "title": "Announcements",
+    "badge": {
+      "update": "UPDATE"
+    },
+    "items": {
+      "claude46": { "title": "Claude 4.6 Model Launch", "description": "New Sonnet 4.6 model now available, 30% performance improvement" },
+      "maintenance": { "title": "System Maintenance Notice", "description": "System upgrade on May 30, 2:00-4:00 AM" },
+      "pricing": { "title": "Token Pricing Optimization", "description": "Optimized billing algorithm, 15% average cost reduction" },
+      "node": { "title": "New Node Online", "description": "US West node is now live, 40% latency reduction" }
+    }
   }
 }
