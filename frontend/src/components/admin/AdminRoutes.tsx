@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const API_HOST = window.location.origin
+
 function timeAgo(dateStr: string | null | undefined): string {
   if (!dateStr) return ''
   const now = Date.now()
@@ -21,6 +23,7 @@ export default function AdminRoutes() {
   const [showCreate, setShowCreate] = useState(false)
   const [editRoute, setEditRoute] = useState<any | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<any | null>(null)
+  const [copiedPath, setCopiedPath] = useState<string | null>(null)
 
   // Create form
   const [newForm, setNewForm] = useState({
@@ -59,6 +62,15 @@ export default function AdminRoutes() {
   function getChannelHealth(id: string | null | undefined): string {
     if (!id) return 'unknown'
     return channelMap[id]?.healthStatus || 'unknown'
+  }
+
+  async function copyFullUrl(path: string) {
+    const url = `${API_HOST}${path}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedPath(path)
+      setTimeout(() => setCopiedPath(null), 2000)
+    } catch {}
   }
 
   const createMutation = useMutation({
@@ -376,11 +388,11 @@ export default function AdminRoutes() {
           </div>
           {routes.map((route: any) => (
             <div key={route.id} className="px-6 py-5">
-              {/* Row 1: Name + Path + Mode + Actions */}
-              <div className="flex items-center justify-between mb-3">
+              {/* Row 1: Name + Badges + Actions */}
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <span className="text-lg font-semibold text-[#111827]">{route.displayName}</span>
-                  <code className="text-xs bg-[#F3F4F6] text-[#6B7280] px-2 py-1 rounded-md font-mono">{route.path}</code>
+                  <code className="text-xs text-[#6B7280] bg-[#F3F4F6] px-2 py-1 rounded-md font-mono">{route.path}</code>
                   <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${
                     route.mode === 'single' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'
                   }`}>
@@ -402,6 +414,24 @@ export default function AdminRoutes() {
                     {t('routes.deleteButton') || '删除'}
                   </button>
                 </div>
+              </div>
+
+              {/* Row 2: API Endpoint */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Endpoint</span>
+                <code className="text-xs bg-[#F3F4F6] text-[#6B7280] px-2.5 py-1 rounded-md font-mono max-w-[480px] truncate" title={`${API_HOST}${route.path}`}>
+                  {API_HOST}{route.path}
+                </code>
+                <button
+                  onClick={(e) => { e.stopPropagation(); copyFullUrl(route.path) }}
+                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 text-xs text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                >
+                  {copiedPath === route.path ? (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>已复制</>
+                  ) : (
+                    <><CopySvg />复制</>
+                  )}
+                </button>
               </div>
 
               {/* Row 2: Channel info */}
@@ -465,4 +495,13 @@ function HealthDot({ status }: { status: string }) {
     UNKNOWN: 'bg-gray-400',
   }
   return <span className={`inline-block w-2 h-2 rounded-full ${colors[status] || 'bg-gray-400'}`} />
+}
+
+function CopySvg() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  )
 }
