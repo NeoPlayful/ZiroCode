@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TicketIcon, ClockIcon, CheckCircleIcon, ChartBarIcon, MagnifyingGlassIcon, PencilIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 
 export default function AdminTickets() {
+  const { t } = useTranslation('admin')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
@@ -26,28 +28,28 @@ export default function AdminTickets() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<TicketIcon className="w-5 h-5" />}
-          label="总工单数"
+          label={t('tickets.kpi.totalTickets')}
           value={total}
           trend="+12"
           trendUp={true}
         />
         <KPICard
           icon={<ClockIcon className="w-5 h-5" />}
-          label="待处理"
+          label={t('tickets.kpi.pending')}
           value={pendingTickets}
           trend={`${((pendingTickets / total) * 100).toFixed(0)}%`}
           trendUp={false}
         />
         <KPICard
           icon={<CheckCircleIcon className="w-5 h-5" />}
-          label="已解决"
+          label={t('tickets.kpi.resolved')}
           value={resolvedTickets}
           trend="+8"
           trendUp={true}
         />
         <KPICard
           icon={<ChartBarIcon className="w-5 h-5" />}
-          label="平均响应时间"
+          label={t('tickets.kpi.avgResponse')}
           value={avgResponseTime}
           trend="-0.5h"
           trendUp={true}
@@ -62,7 +64,7 @@ export default function AdminTickets() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索工单..."
+              placeholder={t('tickets.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -75,11 +77,11 @@ export default function AdminTickets() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有状态</option>
-            <option value="OPEN">待处理</option>
-            <option value="PENDING">处理中</option>
-            <option value="RESOLVED">已解决</option>
-            <option value="CLOSED">已关闭</option>
+            <option value="all">{t('tickets.filter.allStatus')}</option>
+            <option value="OPEN">{t('tickets.filter.open')}</option>
+            <option value="PENDING">{t('tickets.filter.pending')}</option>
+            <option value="RESOLVED">{t('tickets.filter.resolved')}</option>
+            <option value="CLOSED">{t('tickets.filter.closed')}</option>
           </select>
 
           {/* 优先级筛选 */}
@@ -88,11 +90,11 @@ export default function AdminTickets() {
             onChange={(e) => setPriorityFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有优先级</option>
-            <option value="LOW">低</option>
-            <option value="MEDIUM">中</option>
-            <option value="HIGH">高</option>
-            <option value="URGENT">紧急</option>
+            <option value="all">{t('tickets.filter.allPriority')}</option>
+            <option value="LOW">{t('tickets.filter.low')}</option>
+            <option value="MEDIUM">{t('tickets.filter.medium')}</option>
+            <option value="HIGH">{t('tickets.filter.high')}</option>
+            <option value="URGENT">{t('tickets.filter.urgent')}</option>
           </select>
         </div>
       </div>
@@ -103,12 +105,12 @@ export default function AdminTickets() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">工单标题</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">优先级</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.title')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.user')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.priority')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.createdAt')}</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('tickets.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -122,7 +124,7 @@ export default function AdminTickets() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+            {t('tickets.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -130,10 +132,10 @@ export default function AdminTickets() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('tickets.pageSize', { count: 10 })}</option>
+              <option value={20}>{t('tickets.pageSize', { count: 20 })}</option>
+              <option value={50}>{t('tickets.pageSize', { count: 50 })}</option>
+              <option value={100}>{t('tickets.pageSize', { count: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -141,14 +143,14 @@ export default function AdminTickets() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+                {t('tickets.pagination.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+                {t('tickets.pagination.next')}
               </button>
             </div>
           </div>
@@ -178,6 +180,7 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 工单行组件
 function TicketRow({ ticket }: any) {
+  const { t } = useTranslation('admin')
   const getPriorityColor = (priority: string) => {
     if (priority === 'URGENT') return 'bg-red-50 text-red-700'
     if (priority === 'HIGH') return 'bg-orange-50 text-orange-700'
@@ -187,10 +190,10 @@ function TicketRow({ ticket }: any) {
   }
 
   const getPriorityLabel = (priority: string) => {
-    if (priority === 'URGENT') return '紧急'
-    if (priority === 'HIGH') return '高'
-    if (priority === 'MEDIUM') return '中'
-    if (priority === 'LOW') return '低'
+    if (priority === 'URGENT') return t('tickets.priorityLabel.urgent')
+    if (priority === 'HIGH') return t('tickets.priorityLabel.high')
+    if (priority === 'MEDIUM') return t('tickets.priorityLabel.medium')
+    if (priority === 'LOW') return t('tickets.priorityLabel.low')
     return priority
   }
 
@@ -202,10 +205,10 @@ function TicketRow({ ticket }: any) {
   }
 
   const getStatusLabel = (status: string) => {
-    if (status === 'OPEN') return '待处理'
-    if (status === 'PENDING') return '处理中'
-    if (status === 'RESOLVED') return '已解决'
-    if (status === 'CLOSED') return '已关闭'
+    if (status === 'OPEN') return t('tickets.statusLabel.open')
+    if (status === 'PENDING') return t('tickets.statusLabel.pending')
+    if (status === 'RESOLVED') return t('tickets.statusLabel.resolved')
+    if (status === 'CLOSED') return t('tickets.statusLabel.closed')
     return status
   }
 
@@ -222,7 +225,7 @@ function TicketRow({ ticket }: any) {
             {ticket.user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div>
-            <div className="text-sm font-medium text-gray-900">{ticket.user?.name || '未命名'}</div>
+            <div className="text-sm font-medium text-gray-900">{ticket.user?.name || t('tickets.statusLabel.unnamed')}</div>
           </div>
         </div>
       </td>

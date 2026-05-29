@@ -11,6 +11,7 @@ import {
   CommandLineIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import packageJson from '../../../package.json';
 
 interface AdminSidebarProps {
@@ -18,21 +19,23 @@ interface AdminSidebarProps {
   onTabChange: (tab: string) => void;
 }
 
-const menuItems = [
-  { key: 'dashboard', label: '概览', icon: HomeIcon },
-  { key: 'users', label: '用户管理', icon: UsersIcon },
-  { key: 'subscriptions', label: '订阅管理', icon: CreditCardIcon },
-  { key: 'redeem-codes', label: '兑换码', icon: TicketIcon },
-  { key: 'channels', label: '渠道管理', icon: ServerIcon },
-  { key: 'withdrawals', label: '提现管理', icon: BanknotesIcon },
-  { key: 'tickets', label: '工单系统', icon: ChatBubbleLeftRightIcon },
-  { key: 'announcements', label: '系统公告', icon: MegaphoneIcon },
-  { key: 'audit-logs', label: '审计日志', icon: DocumentTextIcon },
-  { key: 'batch', label: '批量操作', icon: CommandLineIcon },
-  { key: 'config', label: '系统设置', icon: Cog6ToothIcon },
-];
-
 export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
+  const { t } = useTranslation('admin');
+
+  const menuItems = [
+    { key: 'dashboard', label: t('sidebar.dashboard'), icon: HomeIcon },
+    { key: 'users', label: t('sidebar.users'), icon: UsersIcon },
+    { key: 'subscriptions', label: t('sidebar.subscriptions'), icon: CreditCardIcon },
+    { key: 'redeem-codes', label: t('sidebar.redeemCodes'), icon: TicketIcon },
+    { key: 'channels', label: t('sidebar.channels'), icon: ServerIcon },
+    { key: 'withdrawals', label: t('sidebar.withdrawals'), icon: BanknotesIcon },
+    { key: 'tickets', label: t('sidebar.tickets'), icon: ChatBubbleLeftRightIcon },
+    { key: 'announcements', label: t('sidebar.announcements'), icon: MegaphoneIcon },
+    { key: 'audit-logs', label: t('sidebar.auditLogs'), icon: DocumentTextIcon },
+    { key: 'batch', label: t('sidebar.batch'), icon: CommandLineIcon },
+    { key: 'config', label: t('sidebar.config'), icon: Cog6ToothIcon },
+  ];
+
   return (
     <aside className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -64,10 +67,10 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
       <div className="m-3 p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          <span className="text-xs text-gray-600">系统运行正常</span>
+          <span className="text-xs text-gray-600">{t('sidebar.statusNormal')}</span>
         </div>
         <div className="text-[10px] text-gray-400">
-          版本 v{packageJson.version}
+          {t('sidebar.version', { version: packageJson.version })}
         </div>
       </div>
     </aside>

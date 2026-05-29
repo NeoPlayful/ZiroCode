@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SparklesIcon, TicketIcon, CubeIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 
 export default function AdminBatch() {
+  const { t } = useTranslation('admin')
   const [count, setCount] = useState('10')
   const [quotaAmount, setQuotaAmount] = useState('100000000')
   const [type, setType] = useState('PAY_AS_YOU_GO')
@@ -17,10 +19,10 @@ export default function AdminBatch() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ count: parseInt(count), quotaAmount, type })
       })
-      setMessage({ type: 'success', text: `成功生成 ${count} 个兑换码` })
+      setMessage({ type: 'success', text: t('batch.generateForm.success', { count: count }) })
       setCount('10')
     } catch (error) {
-      setMessage({ type: 'error', text: '生成失败，请重试' })
+      setMessage({ type: 'error', text: t('batch.generateForm.error') })
     } finally {
       setLoading(false)
     }
@@ -32,30 +34,30 @@ export default function AdminBatch() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<SparklesIcon className="w-5 h-5" />}
-          label="批量操作"
-          value="快速生成"
-          trend="高效"
+          label={t('batch.kpi.batchOps')}
+          value={t('batch.kpiValue.batchOps')}
+          trend={t('batch.kpiTrend.batchOps')}
           trendUp={true}
         />
         <KPICard
           icon={<TicketIcon className="w-5 h-5" />}
-          label="兑换码"
-          value="批量生成"
-          trend="便捷"
+          label={t('batch.kpi.redeemCodes')}
+          value={t('batch.kpiValue.redeemCodes')}
+          trend={t('batch.kpiTrend.redeemCodes')}
           trendUp={true}
         />
         <KPICard
           icon={<CubeIcon className="w-5 h-5" />}
-          label="配额管理"
-          value="灵活配置"
-          trend="稳定"
+          label={t('batch.kpi.quotaMgmt')}
+          value={t('batch.kpiValue.quotaMgmt')}
+          trend={t('batch.kpiTrend.quotaMgmt')}
           trendUp={true}
         />
         <KPICard
           icon={<CheckCircleIcon className="w-5 h-5" />}
-          label="自动化"
-          value="一键完成"
-          trend="可靠"
+          label={t('batch.kpi.automation')}
+          value={t('batch.kpiValue.automation')}
+          trend={t('batch.kpiTrend.automation')}
           trendUp={true}
         />
       </div>
@@ -67,8 +69,8 @@ export default function AdminBatch() {
             <SparklesIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">批量生成兑换码</h3>
-            <p className="text-sm text-gray-500">快速创建多个兑换码，支持不同类型和配额</p>
+            <h3 className="text-xl font-semibold text-gray-900">{t('batch.generateForm.title')}</h3>
+            <p className="text-sm text-gray-500">{t('batch.generateForm.subtitle')}</p>
           </div>
         </div>
 
@@ -81,7 +83,7 @@ export default function AdminBatch() {
 
         <div className="grid grid-cols-4 gap-6 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">生成数量</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.count')}</label>
             <input
               value={count}
               onChange={e => setCount(e.target.value)}
@@ -91,11 +93,11 @@ export default function AdminBatch() {
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
               placeholder="10"
             />
-            <p className="mt-1 text-xs text-gray-500">最多可生成 1000 个</p>
+            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.countHint')}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">配额金额</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.quotaAmount')}</label>
             <input
               value={quotaAmount}
               onChange={e => setQuotaAmount(e.target.value)}
@@ -103,21 +105,21 @@ export default function AdminBatch() {
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
               placeholder="100000000"
             />
-            <p className="mt-1 text-xs text-gray-500">{(Number(quotaAmount) / 100000000).toFixed(1)} 亿 tokens</p>
+            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.quotaHint', { amount: (Number(quotaAmount) / 100000000).toFixed(1) })}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">兑换码类型</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.type')}</label>
             <select
               value={type}
               onChange={e => setType(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
             >
-              <option value="PAY_AS_YOU_GO">按量付费</option>
-              <option value="MONTHLY">月卡</option>
-              <option value="PERMANENT">永久</option>
+              <option value="PAY_AS_YOU_GO">{t('batch.generateForm.types.payAsYouGo')}</option>
+              <option value="MONTHLY">{t('batch.generateForm.types.monthly')}</option>
+              <option value="PERMANENT">{t('batch.generateForm.types.permanent')}</option>
             </select>
-            <p className="mt-1 text-xs text-gray-500">选择兑换码的订阅类型</p>
+            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.typeHint')}</p>
           </div>
 
           <div>
@@ -126,7 +128,7 @@ export default function AdminBatch() {
               disabled={loading}
               className="w-full px-4 py-3 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-5"
             >
-              {loading ? '生成中...' : '开始批量生成'}
+              {loading ? t('batch.generateForm.submitting') : t('batch.generateForm.submit')}
             </button>
           </div>
         </div>

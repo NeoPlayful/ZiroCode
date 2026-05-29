@@ -1,0 +1,25 @@
+{
+  "title": "Webhook Management",
+  "newWebhook": "+ New Webhook",
+  "cancel": "Cancel",
+  "form": {
+    "title": "Create Webhook",
+    "name": "Name",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com/webhook",
+    "events": "Events",
+    "create": "Create",
+    "eventsOptions": {
+      "QUOTA_LOW": "Low Quota",
+      "QUOTA_EXHAUSTED": "Quota Exhausted",
+      "PAYMENT_SUCCESS": "Payment Success",
+      "API_CALL_COMPLETED": "API Call Completed",
+      "SUBSCRIPTION_EXPIRING": "Subscription Expiring",
+      "SUBSCRIPTION_EXPIRED": "Subscription Expired"
+    }
+  },
+  "empty": "No webhooks yet",
+  "lastSuccess": "Last success: {{date}}",
+  "test": "Test",
+  "delete": "Delete"
+}

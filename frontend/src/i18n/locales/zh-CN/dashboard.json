@@ -26,5 +26,31 @@
     "statusValid": "有效",
     "statusNone": "无订阅",
     "purchaseCode": "购买兑换码"
+  },
+  "tutorial": {
+    "title": "官方教程",
+    "items": {
+      "openclaw": { "title": "OpenClaw 快速配置", "description": "5分钟完成 OpenClaw 客户端配置" },
+      "claudeCode": { "title": "Claude Code 接入教程", "description": "将 API 接入 Claude Code 使用" },
+      "apiKey": { "title": "API Key 获取指南", "description": "创建和管理您的 API 密钥" },
+      "windows": { "title": "Windows 配置指南", "description": "Windows 系统环境配置步骤" },
+      "troubleshooting": { "title": "常见报错解决方案", "description": "快速定位和解决常见问题" }
+    },
+    "badge": {
+      "hot": "HOT",
+      "new": "NEW"
+    }
+  },
+  "announcement": {
+    "title": "系统公告",
+    "badge": {
+      "update": "更新"
+    },
+    "items": {
+      "claude46": { "title": "Claude 4.6 模型上线", "description": "全新 Sonnet 4.6 模型现已可用，性能提升 30%" },
+      "maintenance": { "title": "系统维护通知", "description": "5月30日凌晨2:00-4:00进行系统升级" },
+      "pricing": { "title": "Token 计费优化", "description": "优化计费算法，平均降低 15% 成本" },
+      "node": { "title": "新增节点上线", "description": "美西节点已上线，延迟降低 40%" }
+    }
   }
 }

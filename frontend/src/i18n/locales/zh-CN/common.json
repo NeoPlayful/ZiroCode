@@ -1,4 +1,46 @@
 {
+  "nav": {
+    "dashboard": "仪表板",
+    "keys": "API密钥",
+    "subscription": "兑换订阅",
+    "usage": "使用统计",
+    "pricing": "定价",
+    "admin": "管理后台"
+  },
+  "user": {
+    "defaultName": "用户",
+    "menu": {
+      "profile": "个人设置",
+      "tickets": "工单中心",
+      "logout": "退出登录"
+    }
+  },
+  "footer": {
+    "description": "专业的AI服务平台，为开发者提供AI解决方案。",
+    "privacy": "隐私政策",
+    "terms": "使用条款",
+    "about": "关于",
+    "copyright": "© {{year}} ZiroCode. All rights reserved."
+  },
+  "notification": {
+    "title": "通知中心",
+    "empty": "暂无通知",
+    "viewAll": "查看全部"
+  },
+  "error": {
+    "title": "出错了",
+    "message": "应用遇到了一个错误，请刷新页面重试",
+    "refresh": "刷新页面"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统"
+  },
+  "ticket": {
+    "selectTemplate": "选择模板（可选）",
+    "allCategories": "全部分类"
+  },
   "button": {
     "submit": "提交",
     "cancel": "取消",

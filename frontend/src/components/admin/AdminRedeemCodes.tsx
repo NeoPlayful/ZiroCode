@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TicketIcon, CheckCircleIcon, XCircleIcon, PlusIcon, MagnifyingGlassIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
 
 export default function AdminRedeemCodes() {
+  const { t } = useTranslation('admin')
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -43,28 +45,28 @@ export default function AdminRedeemCodes() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<TicketIcon className="w-5 h-5" />}
-          label="总兑换码数"
+          label={t('redeemCodes.kpi.totalCodes')}
           value={total}
           trend="+8"
           trendUp={true}
         />
         <KPICard
           icon={<CheckCircleIcon className="w-5 h-5" />}
-          label="已使用"
+          label={t('redeemCodes.kpi.used')}
           value={usedCodes}
           trend={`${((usedCodes / total) * 100).toFixed(0)}%`}
           trendUp={false}
         />
         <KPICard
           icon={<XCircleIcon className="w-5 h-5" />}
-          label="未使用"
+          label={t('redeemCodes.kpi.unused')}
           value={unusedCodes}
           trend={`${((unusedCodes / total) * 100).toFixed(0)}%`}
           trendUp={true}
         />
         <KPICard
           icon={<PlusIcon className="w-5 h-5" />}
-          label="今日生成"
+          label={t('redeemCodes.kpi.todayGenerated')}
           value={todayGenerated}
           trend="+5"
           trendUp={true}
@@ -74,10 +76,10 @@ export default function AdminRedeemCodes() {
       {/* 生成表单 */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">生成兑换码</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('redeemCodes.generateForm.title')}</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">配额</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('redeemCodes.generateForm.quota')}</label>
               <input
                 value={quota}
                 onChange={e => setQuota(e.target.value)}
@@ -86,19 +88,19 @@ export default function AdminRedeemCodes() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">类型</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('redeemCodes.generateForm.type')}</label>
               <select
                 value={type}
                 onChange={e => setType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
               >
-                <option value="PAY_AS_YOU_GO">按量付费</option>
-                <option value="MONTHLY">月卡</option>
-                <option value="PERMANENT">永久</option>
+                <option value="PAY_AS_YOU_GO">{t('redeemCodes.generateForm.types.payAsYouGo')}</option>
+                <option value="MONTHLY">{t('redeemCodes.generateForm.types.monthly')}</option>
+                <option value="PERMANENT">{t('redeemCodes.generateForm.types.permanent')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">数量</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('redeemCodes.generateForm.count')}</label>
               <input
                 value={count}
                 onChange={e => setCount(e.target.value)}
@@ -113,13 +115,13 @@ export default function AdminRedeemCodes() {
               onClick={generate}
               className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
             >
-              生成
+              {t('redeemCodes.generateForm.generate')}
             </button>
             <button
               onClick={() => setShowForm(false)}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
             >
-              取消
+              {t('redeemCodes.generateForm.cancel')}
             </button>
           </div>
         </div>
@@ -133,7 +135,7 @@ export default function AdminRedeemCodes() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索兑换码..."
+              placeholder={t('redeemCodes.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -146,10 +148,10 @@ export default function AdminRedeemCodes() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有类型</option>
-            <option value="PAY_AS_YOU_GO">按量付费</option>
-            <option value="MONTHLY">月卡</option>
-            <option value="PERMANENT">永久</option>
+            <option value="all">{t('redeemCodes.filter.allTypes')}</option>
+            <option value="PAY_AS_YOU_GO">{t('redeemCodes.filter.payAsYouGo')}</option>
+            <option value="MONTHLY">{t('redeemCodes.filter.monthly')}</option>
+            <option value="PERMANENT">{t('redeemCodes.filter.permanent')}</option>
           </select>
 
           {/* 状态筛选 */}
@@ -158,10 +160,10 @@ export default function AdminRedeemCodes() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有状态</option>
-            <option value="active">有效</option>
-            <option value="used">已用完</option>
-            <option value="disabled">禁用</option>
+            <option value="all">{t('redeemCodes.filter.allStatus')}</option>
+            <option value="active">{t('redeemCodes.filter.active')}</option>
+            <option value="used">{t('redeemCodes.filter.used')}</option>
+            <option value="disabled">{t('redeemCodes.filter.disabled')}</option>
           </select>
         </div>
 
@@ -171,7 +173,7 @@ export default function AdminRedeemCodes() {
           className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
-          生成兑换码
+          {t('redeemCodes.generateBtn')}
         </button>
       </div>
 
@@ -181,12 +183,12 @@ export default function AdminRedeemCodes() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">兑换码</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">配额</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">使用进度</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.code')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.quota')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.type')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.usage')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('redeemCodes.table.createdAt')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -200,7 +202,7 @@ export default function AdminRedeemCodes() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+            {t('redeemCodes.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -208,10 +210,10 @@ export default function AdminRedeemCodes() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('redeemCodes.pageSize', { count: 10 })}</option>
+              <option value={20}>{t('redeemCodes.pageSize', { count: 20 })}</option>
+              <option value={50}>{t('redeemCodes.pageSize', { count: 50 })}</option>
+              <option value={100}>{t('redeemCodes.pageSize', { count: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -219,14 +221,14 @@ export default function AdminRedeemCodes() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+                {t('redeemCodes.pagination.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+                {t('redeemCodes.pagination.next')}
               </button>
             </div>
           </div>
@@ -256,6 +258,7 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 兑换码行组件
 function CodeRow({ code }: any) {
+  const { t } = useTranslation('admin')
   const [copied, setCopied] = useState(false)
 
   const copyCode = () => {
@@ -272,9 +275,9 @@ function CodeRow({ code }: any) {
   }
 
   const getTypeLabel = (type: string) => {
-    if (type === 'PAY_AS_YOU_GO') return '按量'
-    if (type === 'MONTHLY') return '月卡'
-    if (type === 'PERMANENT') return '永久'
+    if (type === 'PAY_AS_YOU_GO') return t('redeemCodes.typeLabel.payAsYouGo')
+    if (type === 'MONTHLY') return t('redeemCodes.typeLabel.monthly')
+    if (type === 'PERMANENT') return t('redeemCodes.typeLabel.permanent')
     return type
   }
 
@@ -291,7 +294,7 @@ function CodeRow({ code }: any) {
           >
             <ClipboardDocumentIcon className="w-4 h-4" />
           </button>
-          {copied && <span className="text-xs text-green-600">已复制</span>}
+          {copied && <span className="text-xs text-green-600">{t('redeemCodes.copied')}</span>}
         </div>
       </td>
       <td className="px-6 py-4 text-sm text-gray-600">
@@ -318,7 +321,7 @@ function CodeRow({ code }: any) {
       </td>
       <td className="px-6 py-4">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${code.isActive && code.usedCount < code.maxUses ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-          {code.isActive && code.usedCount < code.maxUses ? '有效' : code.usedCount >= code.maxUses ? '已用完' : '禁用'}
+          {code.isActive && code.usedCount < code.maxUses ? t('redeemCodes.statusLabel.active') : code.usedCount >= code.maxUses ? t('redeemCodes.statusLabel.used') : t('redeemCodes.statusLabel.disabled')}
         </span>
       </td>
       <td className="px-6 py-4 text-sm text-gray-500">

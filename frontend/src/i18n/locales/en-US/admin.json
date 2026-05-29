@@ -1,4 +1,408 @@
 {
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "subscriptions": "Subscriptions",
+    "redeemCodes": "Redeem Codes",
+    "channels": "Channels",
+    "withdrawals": "Withdrawals",
+    "tickets": "Tickets",
+    "announcements": "Announcements",
+    "auditLogs": "Audit Logs",
+    "batch": "Batch",
+    "config": "Settings",
+    "statusNormal": "System Running Normally",
+    "version": "Version v{{version}}"
+  },
+  "dashboard": {
+    "totalUsers": "Total Users",
+    "activeKeys": "Active Keys",
+    "todayCalls": "Today's Calls",
+    "totalCalls": "Total Calls",
+    "apiTrend": "API Usage Trends",
+    "chartPlaceholder": "Chart Placeholder",
+    "announcements": "Announcements",
+    "recentOrders": "Recent Orders",
+    "systemStatus": "System Status",
+    "apiServer": "API Server",
+    "database": "Database",
+    "redis": "Redis Cache",
+    "running": "Running",
+    "completed": "Completed"
+  },
+  "users": {
+    "title": "User Management",
+    "kpi": {
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "adminCount": "Admins",
+      "todayNew": "New Today"
+    },
+    "search": "Search users...",
+    "filter": {
+      "allRoles": "All Roles",
+      "admin": "Admin",
+      "user": "User",
+      "allStatus": "All Status",
+      "active": "Active",
+      "disabled": "Disabled",
+      "banned": "Banned"
+    },
+    "addUser": "Add User",
+    "table": {
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "keys": "Keys",
+      "subscription": "Subscription",
+      "registeredAt": "Registered At",
+      "actions": "Actions",
+      "unnamed": "Unnamed"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "subscriptions": {
+    "title": "Subscription Management",
+    "kpi": {
+      "totalSubs": "Total Subscriptions",
+      "activeSubs": "Active Subscriptions",
+      "expiringToday": "Expiring Today",
+      "totalQuota": "Total Quota Used"
+    },
+    "search": "Search users...",
+    "filter": {
+      "allTypes": "All Types",
+      "payAsYouGo": "Pay As You Go",
+      "monthly": "Monthly",
+      "permanent": "Permanent",
+      "allStatus": "All Status",
+      "active": "Active",
+      "expired": "Expired"
+    },
+    "table": {
+      "user": "User",
+      "type": "Type",
+      "quotaUsage": "Quota Usage",
+      "status": "Status",
+      "expiresAt": "Expires At",
+      "actions": "Actions",
+      "unnamed": "Unnamed",
+      "permanent": "Permanent"
+    },
+    "typeLabel": {
+      "payAsYouGo": "PayGo",
+      "monthly": "Monthly",
+      "permanent": "Permanent"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "redeemCodes": {
+    "title": "Redeem Code Management",
+    "kpi": {
+      "totalCodes": "Total Codes",
+      "used": "Used",
+      "unused": "Unused",
+      "todayGenerated": "Generated Today"
+    },
+    "generateForm": {
+      "title": "Generate Redeem Code",
+      "quota": "Quota",
+      "type": "Type",
+      "count": "Count",
+      "quotaPlaceholder": "100000000",
+      "countPlaceholder": "1",
+      "generate": "Generate",
+      "cancel": "Cancel",
+      "types": {
+        "payAsYouGo": "Pay As You Go",
+        "monthly": "Monthly",
+        "permanent": "Permanent"
+      }
+    },
+    "search": "Search codes...",
+    "generateBtn": "Generate Codes",
+    "filter": {
+      "allTypes": "All Types",
+      "payAsYouGo": "Pay As You Go",
+      "monthly": "Monthly",
+      "permanent": "Permanent",
+      "allStatus": "All Status",
+      "active": "Active",
+      "used": "Used Up",
+      "disabled": "Disabled"
+    },
+    "table": {
+      "code": "Code",
+      "quota": "Quota",
+      "type": "Type",
+      "usage": "Usage",
+      "status": "Status",
+      "createdAt": "Created At"
+    },
+    "copied": "Copied",
+    "statusLabel": {
+      "active": "Active",
+      "used": "Used Up",
+      "disabled": "Disabled"
+    },
+    "typeLabel": {
+      "payAsYouGo": "PayGo",
+      "monthly": "Monthly",
+      "permanent": "Permanent"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "channels": {
+    "title": "Channel Management",
+    "kpi": {
+      "totalChannels": "Total Channels",
+      "activeChannels": "Active Channels",
+      "totalModels": "Total Models",
+      "avgPriority": "Avg Priority"
+    },
+    "form": {
+      "title": "Add Channel",
+      "name": "Name",
+      "namePlaceholder": "Channel name",
+      "displayName": "Display Name",
+      "displayNamePlaceholder": "Display name",
+      "baseUrl": "Base URL",
+      "baseUrlPlaceholder": "https://api.example.com",
+      "apiKey": "API Key",
+      "apiKeyPlaceholder": "sk-...",
+      "models": "Models",
+      "modelsPlaceholder": "gpt-4,gpt-3.5-turbo",
+      "priority": "Priority",
+      "priorityPlaceholder": "0",
+      "create": "Create",
+      "cancel": "Cancel"
+    },
+    "search": "Search channels...",
+    "addBtn": "Add Channel",
+    "filter": {
+      "allStatus": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Channel Name",
+      "baseUrl": "Base URL",
+      "modelCount": "Models",
+      "priority": "Priority",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "test": "Test",
+    "testSuccess": "Test successful",
+    "testFailed": "Test failed",
+    "statusLabel": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "withdrawals": {
+    "title": "Withdrawal Management",
+    "kpi": {
+      "totalWithdrawals": "Total Withdrawals",
+      "pendingReview": "Pending Review",
+      "approved": "Approved",
+      "totalAmount": "Total Amount"
+    },
+    "search": "Search users...",
+    "filter": {
+      "allStatus": "All Status",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "user": "User",
+      "amount": "Amount",
+      "status": "Status",
+      "appliedAt": "Applied At",
+      "actions": "Actions"
+    },
+    "empty": "No withdrawal requests",
+    "approve": "Approve",
+    "statusLabel": {
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "tickets": {
+    "title": "Ticket Management",
+    "kpi": {
+      "totalTickets": "Total Tickets",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "avgResponse": "Avg Response"
+    },
+    "search": "Search tickets...",
+    "filter": {
+      "allStatus": "All Status",
+      "allPriority": "All Priority",
+      "open": "Open",
+      "pending": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "table": {
+      "title": "Ticket Title",
+      "user": "User",
+      "priority": "Priority",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "priorityLabel": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "statusLabel": {
+      "open": "Open",
+      "pending": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "announcements": {
+    "title": "Announcement Management",
+    "kpi": {
+      "total": "Total",
+      "active": "Active",
+      "todayPublished": "Published Today",
+      "totalReads": "Total Reads"
+    },
+    "form": {
+      "title": "New Announcement",
+      "header": "Title",
+      "headerPlaceholder": "Enter announcement title",
+      "content": "Content",
+      "contentPlaceholder": "Enter announcement content",
+      "publish": "Publish",
+      "cancel": "Cancel"
+    },
+    "search": "Search announcements...",
+    "addBtn": "New Announcement",
+    "filter": {
+      "allStatus": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "title": "Title",
+      "status": "Status",
+      "reads": "Reads",
+      "publishedAt": "Published At",
+      "actions": "Actions"
+    },
+    "statusLabel": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "kpi": {
+      "totalLogs": "Total Logs",
+      "todayLogs": "Today's Logs",
+      "activeUsers": "Active Users",
+      "mostCommon": "Most Common"
+    },
+    "search": "Search logs...",
+    "filter": {
+      "allActions": "All Actions",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "login": "Login"
+    },
+    "table": {
+      "action": "Action",
+      "resource": "Resource",
+      "userId": "User ID",
+      "time": "Time"
+    },
+    "empty": "No audit logs",
+    "pagination": "Showing {{from}} - {{to}} of {{total}}",
+    "pageSize": "{{size}} / page",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "batch": {
+    "title": "Batch Operations",
+    "kpi": {
+      "batchOps": "Batch Ops",
+      "redeemCodes": "Redeem Codes",
+      "quotaMgmt": "Quota Mgmt",
+      "automation": "Automation"
+    },
+    "kpiValue": {
+      "batchOps": "Quick Generate",
+      "redeemCodes": "Batch Generate",
+      "quotaMgmt": "Flexible Config",
+      "automation": "One-Click"
+    },
+    "kpiTrend": {
+      "batchOps": "Efficient",
+      "redeemCodes": "Convenient",
+      "quotaMgmt": "Stable",
+      "automation": "Reliable"
+    },
+    "generateForm": {
+      "title": "Batch Generate Codes",
+      "subtitle": "Quickly create multiple redeem codes with different types and quotas",
+      "count": "Count",
+      "countPlaceholder": "10",
+      "countHint": "Max 1000 codes",
+      "quota": "Quota Amount",
+      "quotaPlaceholder": "100000000",
+      "quotaHint": "{{amount}} billion tokens",
+      "type": "Code Type",
+      "typeHint": "Select subscription type",
+      "types": {
+        "payAsYouGo": "Pay As You Go",
+        "monthly": "Monthly",
+        "permanent": "Permanent"
+      },
+      "submit": "Batch Generate",
+      "submitting": "Generating...",
+      "success": "Successfully generated {{count}} codes",
+      "error": "Generation failed, please retry"
+    }
+  },
   "admin": {
     "permissionRequired": "Admin permission required",
     "config": {

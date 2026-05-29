@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DocumentTextIcon, ClockIcon, UserGroupIcon, ChartBarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export default function AdminAuditLogs() {
@@ -7,6 +8,7 @@ export default function AdminAuditLogs() {
   const [actionFilter, setActionFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const { t } = useTranslation('admin')
 
   const { data } = useQuery({
     queryKey: ['admin-audit-logs', search, actionFilter, page, pageSize],
@@ -32,28 +34,28 @@ export default function AdminAuditLogs() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<DocumentTextIcon className="w-5 h-5" />}
-          label="总日志数"
+          label={t('auditLogs.kpi.totalLogs')}
           value={total}
           trend="+24"
           trendUp={true}
         />
         <KPICard
           icon={<ClockIcon className="w-5 h-5" />}
-          label="今日日志"
+          label={t('auditLogs.kpi.todayLogs')}
           value={todayLogs}
           trend="+12"
           trendUp={true}
         />
         <KPICard
           icon={<UserGroupIcon className="w-5 h-5" />}
-          label="活跃用户"
+          label={t('auditLogs.kpi.activeUsers')}
           value={uniqueUsers}
           trend="+3"
           trendUp={true}
         />
         <KPICard
           icon={<ChartBarIcon className="w-5 h-5" />}
-          label="最常操作"
+          label={t('auditLogs.kpi.mostCommonAction')}
           value={mostCommonAction}
           trend="稳定"
           trendUp={true}
@@ -68,7 +70,7 @@ export default function AdminAuditLogs() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索日志..."
+              placeholder={t('auditLogs.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -81,11 +83,11 @@ export default function AdminAuditLogs() {
             onChange={(e) => setActionFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有操作</option>
-            <option value="CREATE">创建</option>
-            <option value="UPDATE">更新</option>
-            <option value="DELETE">删除</option>
-            <option value="LOGIN">登录</option>
+            <option value="all">{t('auditLogs.filter.allActions')}</option>
+            <option value="CREATE">{t('auditLogs.filter.create')}</option>
+            <option value="UPDATE">{t('auditLogs.filter.update')}</option>
+            <option value="DELETE">{t('auditLogs.filter.delete')}</option>
+            <option value="LOGIN">{t('auditLogs.filter.login')}</option>
           </select>
         </div>
       </div>
@@ -96,10 +98,10 @@ export default function AdminAuditLogs() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">资源</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">用户ID</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('auditLogs.table.action')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('auditLogs.table.resource')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('auditLogs.table.userId')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('auditLogs.table.time')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -109,7 +111,7 @@ export default function AdminAuditLogs() {
               {logs.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
-                    暂无审计日志
+                    {t('auditLogs.empty')}
                   </td>
                 </tr>
               )}
@@ -120,7 +122,7 @@ export default function AdminAuditLogs() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+{t('auditLogs.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -128,10 +130,10 @@ export default function AdminAuditLogs() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('auditLogs.pageSize', { size: 10 })}</option>
+              <option value={20}>{t('auditLogs.pageSize', { size: 20 })}</option>
+              <option value={50}>{t('auditLogs.pageSize', { size: 50 })}</option>
+              <option value={100}>{t('auditLogs.pageSize', { size: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -139,14 +141,14 @@ export default function AdminAuditLogs() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+{t('auditLogs.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+{t('auditLogs.next')}
               </button>
             </div>
           </div>

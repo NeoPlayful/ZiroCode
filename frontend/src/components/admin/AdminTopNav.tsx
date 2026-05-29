@@ -1,5 +1,6 @@
 import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { SparklesIcon } from '@heroicons/react/20/solid';
+import { useTranslation } from 'react-i18next';
 
 interface AdminTopNavProps {
   activeTab: string;
@@ -16,6 +17,8 @@ const navItems = [
 ];
 
 export default function AdminTopNav({ activeTab, onTabChange }: AdminTopNavProps) {
+  const { t } = useTranslation('common');
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">

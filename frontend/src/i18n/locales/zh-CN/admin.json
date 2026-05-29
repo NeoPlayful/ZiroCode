@@ -1,4 +1,408 @@
 {
+  "sidebar": {
+    "dashboard": "概览",
+    "users": "用户管理",
+    "subscriptions": "订阅管理",
+    "redeemCodes": "兑换码",
+    "channels": "渠道管理",
+    "withdrawals": "提现管理",
+    "tickets": "工单系统",
+    "announcements": "系统公告",
+    "auditLogs": "审计日志",
+    "batch": "批量操作",
+    "config": "系统设置",
+    "statusNormal": "系统运行正常",
+    "version": "版本 v{{version}}"
+  },
+  "dashboard": {
+    "totalUsers": "总用户数",
+    "activeKeys": "活跃密钥",
+    "todayCalls": "今日调用",
+    "totalCalls": "总调用量",
+    "apiTrend": "API使用趋势",
+    "chartPlaceholder": "图表占位符",
+    "announcements": "公告",
+    "recentOrders": "最近订单",
+    "systemStatus": "系统状态",
+    "apiServer": "API服务器",
+    "database": "数据库",
+    "redis": "Redis缓存",
+    "running": "运行正常",
+    "completed": "已完成"
+  },
+  "users": {
+    "title": "用户管理",
+    "kpi": {
+      "totalUsers": "总用户数",
+      "activeUsers": "活跃用户",
+      "adminCount": "管理员数量",
+      "todayNew": "今日新增"
+    },
+    "search": "搜索用户...",
+    "filter": {
+      "allRoles": "所有角色",
+      "admin": "管理员",
+      "user": "普通用户",
+      "allStatus": "所有状态",
+      "active": "正常",
+      "disabled": "禁用",
+      "banned": "封禁"
+    },
+    "addUser": "新增用户",
+    "table": {
+      "user": "用户",
+      "role": "角色",
+      "status": "状态",
+      "keys": "密钥",
+      "subscription": "订阅",
+      "registeredAt": "注册时间",
+      "actions": "操作",
+      "unnamed": "未命名"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "subscriptions": {
+    "title": "订阅管理",
+    "kpi": {
+      "totalSubs": "总订阅数",
+      "activeSubs": "活跃订阅",
+      "expiringToday": "今日到期",
+      "totalQuota": "总配额使用"
+    },
+    "search": "搜索用户...",
+    "filter": {
+      "allTypes": "所有类型",
+      "payAsYouGo": "按量付费",
+      "monthly": "月卡",
+      "permanent": "永久",
+      "allStatus": "所有状态",
+      "active": "有效",
+      "expired": "过期"
+    },
+    "table": {
+      "user": "用户",
+      "type": "类型",
+      "quotaUsage": "配额使用",
+      "status": "状态",
+      "expiresAt": "到期时间",
+      "actions": "操作",
+      "unnamed": "未命名",
+      "permanent": "永久"
+    },
+    "typeLabel": {
+      "payAsYouGo": "按量",
+      "monthly": "月卡",
+      "permanent": "永久"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "redeemCodes": {
+    "title": "兑换码管理",
+    "kpi": {
+      "totalCodes": "总兑换码数",
+      "used": "已使用",
+      "unused": "未使用",
+      "todayGenerated": "今日生成"
+    },
+    "generateForm": {
+      "title": "生成兑换码",
+      "quota": "配额",
+      "type": "类型",
+      "count": "数量",
+      "quotaPlaceholder": "100000000",
+      "countPlaceholder": "1",
+      "generate": "生成",
+      "cancel": "取消",
+      "types": {
+        "payAsYouGo": "按量付费",
+        "monthly": "月卡",
+        "permanent": "永久"
+      }
+    },
+    "search": "搜索兑换码...",
+    "generateBtn": "生成兑换码",
+    "filter": {
+      "allTypes": "所有类型",
+      "payAsYouGo": "按量付费",
+      "monthly": "月卡",
+      "permanent": "永久",
+      "allStatus": "所有状态",
+      "active": "有效",
+      "used": "已用完",
+      "disabled": "禁用"
+    },
+    "table": {
+      "code": "兑换码",
+      "quota": "配额",
+      "type": "类型",
+      "usage": "使用进度",
+      "status": "状态",
+      "createdAt": "创建时间"
+    },
+    "copied": "已复制",
+    "statusLabel": {
+      "active": "有效",
+      "used": "已用完",
+      "disabled": "禁用"
+    },
+    "typeLabel": {
+      "payAsYouGo": "按量",
+      "monthly": "月卡",
+      "permanent": "永久"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "channels": {
+    "title": "渠道管理",
+    "kpi": {
+      "totalChannels": "总渠道数",
+      "activeChannels": "启用渠道",
+      "totalModels": "总模型数",
+      "avgPriority": "平均优先级"
+    },
+    "form": {
+      "title": "新增渠道",
+      "name": "名称",
+      "namePlaceholder": "渠道名称",
+      "displayName": "显示名称",
+      "displayNamePlaceholder": "显示名称",
+      "baseUrl": "Base URL",
+      "baseUrlPlaceholder": "https://api.example.com",
+      "apiKey": "API Key",
+      "apiKeyPlaceholder": "sk-...",
+      "models": "模型列表",
+      "modelsPlaceholder": "gpt-4,gpt-3.5-turbo",
+      "priority": "优先级",
+      "priorityPlaceholder": "0",
+      "create": "创建",
+      "cancel": "取消"
+    },
+    "search": "搜索渠道...",
+    "addBtn": "新增渠道",
+    "filter": {
+      "allStatus": "所有状态",
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "table": {
+      "name": "渠道名称",
+      "baseUrl": "Base URL",
+      "modelCount": "模型数",
+      "priority": "优先级",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "test": "测试",
+    "testSuccess": "测试成功",
+    "testFailed": "测试失败",
+    "statusLabel": {
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "withdrawals": {
+    "title": "提现管理",
+    "kpi": {
+      "totalWithdrawals": "总提现数",
+      "pendingReview": "待审核",
+      "approved": "已通过",
+      "totalAmount": "总金额"
+    },
+    "search": "搜索用户...",
+    "filter": {
+      "allStatus": "所有状态",
+      "pending": "待审核",
+      "approved": "已通过",
+      "rejected": "已拒绝"
+    },
+    "table": {
+      "user": "用户",
+      "amount": "金额",
+      "status": "状态",
+      "appliedAt": "申请时间",
+      "actions": "操作"
+    },
+    "empty": "暂无提现申请",
+    "approve": "批准",
+    "statusLabel": {
+      "approved": "已通过",
+      "pending": "待审核",
+      "rejected": "已拒绝"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "tickets": {
+    "title": "工单管理",
+    "kpi": {
+      "totalTickets": "总工单数",
+      "pending": "待处理",
+      "resolved": "已解决",
+      "avgResponse": "平均响应时间"
+    },
+    "search": "搜索工单...",
+    "filter": {
+      "allStatus": "所有状态",
+      "allPriority": "所有优先级",
+      "open": "待处理",
+      "pending": "处理中",
+      "resolved": "已解决",
+      "closed": "已关闭",
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "urgent": "紧急"
+    },
+    "table": {
+      "title": "工单标题",
+      "user": "用户",
+      "priority": "优先级",
+      "status": "状态",
+      "createdAt": "创建时间",
+      "actions": "操作"
+    },
+    "priorityLabel": {
+      "urgent": "紧急",
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "statusLabel": {
+      "open": "待处理",
+      "pending": "处理中",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "announcements": {
+    "title": "公告管理",
+    "kpi": {
+      "total": "总公告数",
+      "active": "启用公告",
+      "todayPublished": "今日发布",
+      "totalReads": "总阅读量"
+    },
+    "form": {
+      "title": "新建公告",
+      "header": "标题",
+      "headerPlaceholder": "输入公告标题",
+      "content": "内容",
+      "contentPlaceholder": "输入公告内容",
+      "publish": "发布",
+      "cancel": "取消"
+    },
+    "search": "搜索公告...",
+    "addBtn": "新建公告",
+    "filter": {
+      "allStatus": "所有状态",
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "table": {
+      "title": "标题",
+      "status": "状态",
+      "reads": "阅读量",
+      "publishedAt": "发布时间",
+      "actions": "操作"
+    },
+    "statusLabel": {
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "auditLogs": {
+    "title": "审计日志",
+    "kpi": {
+      "totalLogs": "总日志数",
+      "todayLogs": "今日日志",
+      "activeUsers": "活跃用户",
+      "mostCommon": "最常操作"
+    },
+    "search": "搜索日志...",
+    "filter": {
+      "allActions": "所有操作",
+      "create": "创建",
+      "update": "更新",
+      "delete": "删除",
+      "login": "登录"
+    },
+    "table": {
+      "action": "操作",
+      "resource": "资源",
+      "userId": "用户ID",
+      "time": "时间"
+    },
+    "empty": "暂无审计日志",
+    "pagination": "显示 {{from}} - {{to}} 条，共 {{total}} 条",
+    "pageSize": "{{size}} / 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "batch": {
+    "title": "批量操作",
+    "kpi": {
+      "batchOps": "批量操作",
+      "redeemCodes": "兑换码",
+      "quotaMgmt": "配额管理",
+      "automation": "自动化"
+    },
+    "kpiValue": {
+      "batchOps": "快速生成",
+      "redeemCodes": "批量生成",
+      "quotaMgmt": "灵活配置",
+      "automation": "一键完成"
+    },
+    "kpiTrend": {
+      "batchOps": "高效",
+      "redeemCodes": "便捷",
+      "quotaMgmt": "稳定",
+      "automation": "可靠"
+    },
+    "generateForm": {
+      "title": "批量生成兑换码",
+      "subtitle": "快速创建多个兑换码，支持不同类型和配额",
+      "count": "生成数量",
+      "countPlaceholder": "10",
+      "countHint": "最多可生成 1000 个",
+      "quota": "配额金额",
+      "quotaPlaceholder": "100000000",
+      "quotaHint": "{{amount}} 亿 tokens",
+      "type": "兑换码类型",
+      "typeHint": "选择兑换码的订阅类型",
+      "types": {
+        "payAsYouGo": "按量付费",
+        "monthly": "月卡",
+        "permanent": "永久"
+      },
+      "submit": "开始批量生成",
+      "submitting": "生成中...",
+      "success": "成功生成 {{count}} 个兑换码",
+      "error": "生成失败，请重试"
+    }
+  },
   "admin": {
     "permissionRequired": "需要管理员权限",
     "config": {

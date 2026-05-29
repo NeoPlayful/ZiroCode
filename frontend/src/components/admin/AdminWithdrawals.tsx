@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BanknotesIcon, ClockIcon, CheckCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, PencilIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 
 export default function AdminWithdrawals() {
@@ -7,6 +8,7 @@ export default function AdminWithdrawals() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const { t } = useTranslation('admin')
 
   const { data, refetch } = useQuery({
     queryKey: ['admin-withdrawals', search, statusFilter, page, pageSize],
@@ -30,28 +32,28 @@ export default function AdminWithdrawals() {
       <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<BanknotesIcon className="w-5 h-5" />}
-          label="总提现数"
+          label={t('withdrawals.kpi.totalWithdrawals')}
           value={total}
           trend="+8"
           trendUp={true}
         />
         <KPICard
           icon={<ClockIcon className="w-5 h-5" />}
-          label="待审核"
+          label={t('withdrawals.kpi.pending')}
           value={pendingWithdrawals}
           trend={`${((pendingWithdrawals / total) * 100 || 0).toFixed(0)}%`}
           trendUp={false}
         />
         <KPICard
           icon={<CheckCircleIcon className="w-5 h-5" />}
-          label="已通过"
+          label={t('withdrawals.kpi.approved')}
           value={approvedWithdrawals}
           trend="+5"
           trendUp={true}
         />
         <KPICard
           icon={<CurrencyDollarIcon className="w-5 h-5" />}
-          label="总金额"
+          label={t('withdrawals.kpi.totalAmount')}
           value={`¥${totalAmount.toFixed(2)}`}
           trend="+12%"
           trendUp={true}
@@ -66,7 +68,7 @@ export default function AdminWithdrawals() {
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索用户..."
+              placeholder={t('withdrawals.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
@@ -79,10 +81,10 @@ export default function AdminWithdrawals() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
-            <option value="all">所有状态</option>
-            <option value="PENDING">待审核</option>
-            <option value="APPROVED">已通过</option>
-            <option value="REJECTED">已拒绝</option>
+            <option value="all">{t('withdrawals.filter.allStatus')}</option>
+            <option value="PENDING">{t('withdrawals.filter.pending')}</option>
+            <option value="APPROVED">{t('withdrawals.filter.approved')}</option>
+            <option value="REJECTED">{t('withdrawals.filter.rejected')}</option>
           </select>
         </div>
       </div>
@@ -93,11 +95,11 @@ export default function AdminWithdrawals() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">申请时间</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('withdrawals.table.user')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('withdrawals.table.amount')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('withdrawals.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('withdrawals.table.createdAt')}</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('withdrawals.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -107,7 +109,7 @@ export default function AdminWithdrawals() {
               {withdrawals.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                    暂无提现申请
+                    {t('withdrawals.empty')}
                   </td>
                 </tr>
               )}
@@ -118,7 +120,7 @@ export default function AdminWithdrawals() {
         {/* 表格底部 - 分页 */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            显示 {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} 条，共 {total} 条
+{t('withdrawals.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -126,10 +128,10 @@ export default function AdminWithdrawals() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             >
-              <option value={10}>10 / 页</option>
-              <option value={20}>20 / 页</option>
-              <option value={50}>50 / 页</option>
-              <option value={100}>100 / 页</option>
+              <option value={10}>{t('withdrawals.pageSize', { size: 10 })}</option>
+              <option value={20}>{t('withdrawals.pageSize', { size: 20 })}</option>
+              <option value={50}>{t('withdrawals.pageSize', { size: 50 })}</option>
+              <option value={100}>{t('withdrawals.pageSize', { size: 100 })}</option>
             </select>
             <div className="flex items-center gap-1">
               <button
@@ -137,14 +139,14 @@ export default function AdminWithdrawals() {
                 disabled={page === 1}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                上一页
+{t('withdrawals.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一页
+{t('withdrawals.next')}
               </button>
             </div>
           </div>
@@ -174,6 +176,8 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 提现行组件
 function WithdrawalRow({ withdrawal, onApprove }: any) {
+  const { t } = useTranslation('admin')
+
   const getStatusColor = (status: string) => {
     if (status === 'APPROVED') return 'bg-green-50 text-green-700'
     if (status === 'PENDING') return 'bg-yellow-50 text-yellow-700'
@@ -182,9 +186,9 @@ function WithdrawalRow({ withdrawal, onApprove }: any) {
   }
 
   const getStatusLabel = (status: string) => {
-    if (status === 'APPROVED') return '已通过'
-    if (status === 'PENDING') return '待审核'
-    if (status === 'REJECTED') return '已拒绝'
+    if (status === 'APPROVED') return t('withdrawals.statusLabel.approved')
+    if (status === 'PENDING') return t('withdrawals.statusLabel.pending')
+    if (status === 'REJECTED') return t('withdrawals.statusLabel.rejected')
     return status
   }
 
@@ -196,7 +200,7 @@ function WithdrawalRow({ withdrawal, onApprove }: any) {
             {withdrawal.user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div>
-            <div className="font-medium text-gray-900">{withdrawal.user?.name || '未命名'}</div>
+            <div className="font-medium text-gray-900">{withdrawal.user?.name || t('withdrawals.unnamed')}</div>
             <div className="text-sm text-gray-500">{withdrawal.user?.email}</div>
           </div>
         </div>
@@ -219,7 +223,7 @@ function WithdrawalRow({ withdrawal, onApprove }: any) {
               onClick={() => onApprove(withdrawal.id)}
               className="px-3 py-1.5 text-xs bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors font-medium"
             >
-              批准
+{t('withdrawals.approve')}
             </button>
           )}
           <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">

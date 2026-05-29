@@ -1,13 +1,15 @@
 import { useTheme } from '../hooks/useTheme';
+import { useTranslation } from 'react-i18next';
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation('common');
 
   const themes = [
-    { value: 'light' as const, icon: SunIcon, label: '浅色' },
-    { value: 'dark' as const, icon: MoonIcon, label: '深色' },
-    { value: 'system' as const, icon: ComputerDesktopIcon, label: '系统' },
+    { value: 'light' as const, icon: SunIcon, label: t('theme.light') },
+    { value: 'dark' as const, icon: MoonIcon, label: t('theme.dark') },
+    { value: 'system' as const, icon: ComputerDesktopIcon, label: t('theme.system') },
   ];
 
   return (

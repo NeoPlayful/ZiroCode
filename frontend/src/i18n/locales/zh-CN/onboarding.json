@@ -1,0 +1,21 @@
+{
+  "welcome": {
+    "title": "欢迎使用 ZiroCode",
+    "description": "让我们快速了解如何开始使用平台"
+  },
+  "createKey": {
+    "title": "创建 API 密钥",
+    "description": "在\"API 密钥\"页面创建您的第一个密钥"
+  },
+  "subscribe": {
+    "title": "兑换或购买订阅",
+    "description": "在\"订阅管理\"页面获取配额"
+  },
+  "start": {
+    "title": "开始使用",
+    "description": "使用您的 API 密钥调用 AI 服务"
+  },
+  "skip": "跳过",
+  "next": "下一步",
+  "finish": "完成"
+}
