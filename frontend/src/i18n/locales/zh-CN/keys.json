@@ -13,26 +13,25 @@
     "title": "创建新密钥",
     "nameLabel": "密钥名称",
     "namePlaceholder": "例如：生产环境",
-    "rateLimitLabel": "速率限制（次/分钟）",
-    "maxTokensLabel": "最大 Token",
+    "rateLimitLabel": "速率限制（0 为不限制，次/分钟）",
     "creating": "创建中...",
     "createButton": "创建",
     "cancelButton": "取消"
   },
   "emptyState": {
-    "message": "还没有创建 API 密钥",
-    "button": "创建第一个密钥"
+    "title": "还没有API密钥",
+    "message": "创建第一个密钥以开始调用模型",
+    "button": "创建 API Key"
   },
   "table": {
-    "name": "名称",
-    "key": "密钥",
-    "status": "状态",
     "lastUsed": "最后使用",
-    "actions": "操作",
-    "statusActive": "启用",
-    "statusDisabled": "禁用",
+    "createdAt": "创建于",
+    "statusActive": "活跃",
+    "statusDisabled": "已禁用",
     "neverUsed": "从未使用",
     "deleteConfirm": "确定删除此密钥？",
-    "deleteButton": "删除"
+    "deleteButton": "删除",
+    "disableButton": "禁用",
+    "enableButton": "启用"
   }
 }
