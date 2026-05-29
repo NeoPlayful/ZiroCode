@@ -1,0 +1,11 @@
+{
+  "admin": {
+    "permissionRequired": "需要管理员权限",
+    "config": {
+      "title": "系统配置",
+      "siteName": "站点名称",
+      "defaultQuota": "默认配额",
+      "save": "保存"
+    }
+  }
+}

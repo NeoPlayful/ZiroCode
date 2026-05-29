@@ -1,0 +1,38 @@
+{
+  "title": "API Keys",
+  "subtitle": "Manage your API access keys",
+  "createButton": "+ Create Key",
+  "createSuccess": {
+    "title": "Key Created Successfully",
+    "warning": "Please copy this key immediately. It will not be shown again after closing.",
+    "copied": "✓ Copied",
+    "copyButton": "Copy Key",
+    "closeButton": "Close"
+  },
+  "createDialog": {
+    "title": "Create New Key",
+    "nameLabel": "Key Name",
+    "namePlaceholder": "e.g.: Production Environment",
+    "rateLimitLabel": "Rate Limit (requests/minute)",
+    "maxTokensLabel": "Max Tokens",
+    "creating": "Creating...",
+    "createButton": "Create",
+    "cancelButton": "Cancel"
+  },
+  "emptyState": {
+    "message": "No API keys created yet",
+    "button": "Create First Key"
+  },
+  "table": {
+    "name": "Name",
+    "key": "Key",
+    "status": "Status",
+    "lastUsed": "Last Used",
+    "actions": "Actions",
+    "statusActive": "Active",
+    "statusDisabled": "Disabled",
+    "neverUsed": "Never Used",
+    "deleteConfirm": "Are you sure to delete this key?",
+    "deleteButton": "Delete"
+  }
+}

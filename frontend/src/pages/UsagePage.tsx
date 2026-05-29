@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 export default function UsagePage() {
+  const { t } = useTranslation('usage');
   const [days, setDays] = useState(7);
 
   const { data, isLoading } = useQuery({
@@ -33,14 +35,14 @@ export default function UsagePage() {
     <main className="max-w-[1280px] mx-auto px-8 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">使用统计</h1>
-            <p className="text-sm text-gray-500 mt-1">查看您的 API 调用情况</p>
+            <h1 className="text-2xl font-bold">{t('usage.title')}</h1>
+            <p className="text-sm text-gray-500 mt-1">{t('usage.subtitle')}</p>
           </div>
           <div className="flex gap-1">
             {[7, 30].map(d => (
               <button key={d} onClick={() => setDays(d)}
                 className={`px-3 py-1.5 rounded-md text-sm ${days === d ? 'bg-[#e8673a] text-white' : 'bg-white text-gray-600 border border-gray-200'}`}>
-                近{d}天
+                {t('usage.lastDays', { days: d })}
               </button>
             ))}
           </div>
@@ -49,15 +51,15 @@ export default function UsagePage() {
         {/* 汇总卡片 */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="text-sm text-gray-500 mb-1">总调用次数</div>
+            <div className="text-sm text-gray-500 mb-1">{t('usage.summary.totalCalls')}</div>
             <div className="text-2xl font-bold">{total.calls.toLocaleString()}</div>
           </div>
           <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="text-sm text-gray-500 mb-1">总 Token 数</div>
+            <div className="text-sm text-gray-500 mb-1">{t('usage.summary.totalTokens')}</div>
             <div className="text-2xl font-bold">{total.tokens.toLocaleString()}</div>
           </div>
           <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="text-sm text-gray-500 mb-1">消耗配额</div>
+            <div className="text-sm text-gray-500 mb-1">{t('usage.summary.quotaConsumed')}</div>
             <div className="text-2xl font-bold">{total.quota.toLocaleString()}</div>
           </div>
         </div>
@@ -65,14 +67,14 @@ export default function UsagePage() {
         {recent.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
             <div className="text-4xl mb-3">📊</div>
-            <p className="text-gray-500">暂无使用记录</p>
-            <p className="text-sm text-gray-400 mt-1">调用 API 后将在此显示统计数据</p>
+            <p className="text-gray-500">{t('usage.emptyState.message')}</p>
+            <p className="text-sm text-gray-400 mt-1">{t('usage.emptyState.hint')}</p>
           </div>
         ) : (
           <>
             {/* 每日趋势 */}
             <div className="bg-white rounded-xl p-5 border border-gray-200 mb-6">
-              <h3 className="font-semibold mb-4">每日调用趋势</h3>
+              <h3 className="font-semibold mb-4">{t('usage.dailyTrends.title')}</h3>
               {daily.length > 0 ? (
                 <div className="flex items-end gap-2 h-40">
                   {daily.map((d: any) => {
@@ -90,14 +92,14 @@ export default function UsagePage() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400 text-center py-8">暂无每日数据</p>
+                <p className="text-sm text-gray-400 text-center py-8">{t('usage.dailyTrends.noData')}</p>
               )}
             </div>
 
             {/* 模型分布 */}
             {byModel.length > 0 && (
               <div className="bg-white rounded-xl p-5 border border-gray-200 mb-6">
-                <h3 className="font-semibold mb-4">模型使用分布</h3>
+                <h3 className="font-semibold mb-4">{t('usage.modelDistribution.title')}</h3>
                 <div className="space-y-3">
                   {byModel.map((m: any) => {
                     const totalCalls = byModel.reduce((s: number, x: any) => s + x.calls, 0);
@@ -106,7 +108,7 @@ export default function UsagePage() {
                       <div key={m.model}>
                         <div className="flex justify-between text-sm mb-1">
                           <span>{m.model}</span>
-                          <span className="text-gray-500">{m.calls} 次 / {m.tokens.toLocaleString()} tokens</span>
+                          <span className="text-gray-500">{m.calls} {t('usage.modelDistribution.times')} / {m.tokens.toLocaleString()} tokens</span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
                           <div className="bg-[#e8673a] h-2 rounded-full" style={{ width: `${pct}%` }} />
@@ -120,15 +122,15 @@ export default function UsagePage() {
 
             {/* 最近记录 */}
             <div className="bg-white rounded-xl p-5 border border-gray-200">
-              <h3 className="font-semibold mb-4">最近调用记录</h3>
+              <h3 className="font-semibold mb-4">{t('usage.recentRecords.title')}</h3>
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="text-left px-2 py-2 text-xs text-gray-400 font-medium">时间</th>
-                    <th className="text-left px-2 py-2 text-xs text-gray-400 font-medium">模型</th>
-                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">Token</th>
-                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">配额</th>
-                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">状态</th>
+                    <th className="text-left px-2 py-2 text-xs text-gray-400 font-medium">{t('usage.recentRecords.time')}</th>
+                    <th className="text-left px-2 py-2 text-xs text-gray-400 font-medium">{t('usage.recentRecords.model')}</th>
+                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">{t('usage.recentRecords.token')}</th>
+                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">{t('usage.recentRecords.quota')}</th>
+                    <th className="text-right px-2 py-2 text-xs text-gray-400 font-medium">{t('usage.recentRecords.status')}</th>
                   </tr>
                 </thead>
                 <tbody>

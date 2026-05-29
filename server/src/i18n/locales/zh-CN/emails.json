@@ -1,0 +1,22 @@
+{
+  "passwordReset": {
+    "subject": "重置密码",
+    "greeting": "您好",
+    "body": "您收到此邮件是因为我们收到了您账户的密码重置请求。",
+    "action": "重置密码",
+    "expiry": "此链接将在 1 小时后过期。",
+    "ignore": "如果您没有请求重置密码，请忽略此邮件。"
+  },
+  "emailVerification": {
+    "subject": "验证邮箱",
+    "greeting": "欢迎",
+    "body": "感谢您注册！请点击下面的按钮验证您的邮箱地址。",
+    "action": "验证邮箱",
+    "expiry": "此链接将在 24 小时后过期。"
+  },
+  "welcome": {
+    "subject": "欢迎加入",
+    "greeting": "欢迎",
+    "body": "感谢您注册我们的服务！"
+  }
+}

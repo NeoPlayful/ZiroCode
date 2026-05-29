@@ -18,6 +18,7 @@ import { notificationRoutes } from './routes/notifications.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { systemRoutes } from './routes/system.js';
+import { i18nMiddleware } from './i18n/middleware.js';
 
 const app = Fastify({ logger: true });
 
@@ -57,6 +58,8 @@ async function start() {
   await app.register(swaggerUi, {
     routePrefix: '/api/docs',
   });
+
+  app.addHook('onRequest', i18nMiddleware);
 
   app.register(authRoutes);
   app.register(keyRoutes);

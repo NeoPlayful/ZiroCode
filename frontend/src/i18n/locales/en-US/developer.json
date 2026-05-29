@@ -1,0 +1,49 @@
+{
+  "developer": {
+    "title": "API Documentation",
+    "authentication": "Authentication",
+    "authCookie": "Browser automatically carries session cookie",
+    "authBearer": "Authorization: Bearer YOUR_API_KEY",
+    "statusCodes": "Status Codes",
+    "errorCodes": "Error Codes",
+    "statusCode": "Status Code",
+    "errorCode": "Error Code",
+    "description": "Description",
+    "status": {
+      "200": "Success",
+      "400": "Bad Request",
+      "401": "Unauthorized",
+      "403": "Forbidden",
+      "404": "Not Found",
+      "500": "Internal Server Error"
+    },
+    "errors": {
+      "UNAUTHORIZED": "Unauthorized",
+      "FORBIDDEN": "Forbidden",
+      "NOT_FOUND": "Not Found",
+      "BAD_REQUEST": "Bad Request",
+      "INTERNAL": "Internal Server Error",
+      "QUOTA_EXHAUSTED": "Quota Exhausted"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "basicInfo": "Basic Information",
+    "changePassword": "Change Password",
+    "email": "Email",
+    "role": "Role",
+    "referralCode": "Referral Code",
+    "nickname": "Nickname",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "save": "Save",
+    "saving": "Saving...",
+    "changePasswordBtn": "Change Password",
+    "changing": "Changing...",
+    "updateSuccess": "Profile updated successfully",
+    "passwordChangeSuccess": "Password changed successfully",
+    "fetchError": "Failed to fetch profile",
+    "updateError": "Update failed",
+    "changeError": "Change failed"
+  }
+}

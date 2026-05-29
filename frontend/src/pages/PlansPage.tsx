@@ -1,18 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckIcon } from '@heroicons/react/24/outline';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-200 rounded ${className || ''}`} />;
 }
 
-function formatQuota(value: number): string {
-  if (value >= 100_000_000) return (value / 100_000_000).toFixed(1) + '亿';
-  if (value >= 10_000) return (value / 10_000).toFixed(1) + '万';
+function formatQuota(value: number, t: any): string {
+  if (value >= 100_000_000) return (value / 100_000_000).toFixed(1) + t('subscription:numberFormat.hundredMillion');
+  if (value >= 10_000) return (value / 10_000).toFixed(1) + t('subscription:numberFormat.tenThousand');
   return value.toLocaleString();
 }
 
 export default function PlansPage() {
+  const { t } = useTranslation('subscription');
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
 
@@ -20,7 +22,7 @@ export default function PlansPage() {
     queryKey: ['plans'],
     queryFn: async () => {
       const res = await fetch('/api/subscriptions/plans', { credentials: 'include' });
-      if (!res.ok) throw new Error('获取套餐列表失败');
+      if (!res.ok) throw new Error(t('plans.error.fetchFailed'));
       return res.json();
     },
   });
@@ -35,14 +37,14 @@ export default function PlansPage() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error?.message || '购买失败');
+        throw new Error(err.error?.message || t('plans.error.purchaseFailed'));
       }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      setMessage('购买成功！');
+      setMessage(t('plans.purchaseSuccess'));
       setTimeout(() => setMessage(''), 3000);
     },
   });
@@ -65,8 +67,8 @@ export default function PlansPage() {
   return (
     <div className="min-h-screen bg-[#f0ebe3]">
       <main className="max-w-6xl mx-auto px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">订阅套餐</h1>
-        <p className="text-gray-600 mb-8">选择适合您的套餐方案</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('plans.title')}</h1>
+        <p className="text-gray-600 mb-8">{t('plans.subtitle')}</p>
 
         {message && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
@@ -85,18 +87,18 @@ export default function PlansPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-2">
                   <CheckIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">配额：{formatQuota(Number(plan.quotaAmount))}</span>
+                  <span className="text-sm text-gray-700">{t('plans.quota')}{formatQuota(Number(plan.quotaAmount), t)}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-gray-700">
-                    类型：{plan.type === 'PAY_AS_YOU_GO' ? '按量付费' : plan.type === 'MONTHLY' ? '月卡' : '永久'}
+                    {t('plans.type')}{t(`types.${plan.type}`)}
                   </span>
                 </div>
                 {plan.durationDays && (
                   <div className="flex items-start gap-2">
                     <CheckIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">有效期：{plan.durationDays} 天</span>
+                    <span className="text-sm text-gray-700">{t('plans.duration', { days: plan.durationDays })}</span>
                   </div>
                 )}
               </div>
@@ -106,7 +108,7 @@ export default function PlansPage() {
                 disabled={buyPlan.isPending}
                 className="w-full px-6 py-3 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f] disabled:opacity-50 font-medium"
               >
-                {buyPlan.isPending ? '购买中...' : '立即购买'}
+                {buyPlan.isPending ? t('plans.purchasing') : t('plans.buyNow')}
               </button>
             </div>
           ))}

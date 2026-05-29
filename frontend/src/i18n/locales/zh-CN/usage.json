@@ -1,0 +1,48 @@
+{
+  "usage": {
+    "title": "使用统计",
+    "subtitle": "查看您的 API 调用情况",
+    "lastDays": "近{{days}}天",
+    "summary": {
+      "totalCalls": "总调用次数",
+      "totalTokens": "总 Token 数",
+      "quotaConsumed": "消耗配额"
+    },
+    "emptyState": {
+      "message": "暂无使用记录",
+      "hint": "调用 API 后将在此显示统计数据"
+    },
+    "dailyTrends": {
+      "title": "每日调用趋势",
+      "noData": "暂无每日数据"
+    },
+    "modelDistribution": {
+      "title": "模型使用分布",
+      "times": "次"
+    },
+    "recentRecords": {
+      "title": "最近调用记录",
+      "time": "时间",
+      "model": "模型",
+      "token": "Token",
+      "quota": "配额",
+      "status": "状态"
+    }
+  },
+  "analytics": {
+    "title": "数据分析",
+    "exportCSV": "导出 CSV",
+    "summary": {
+      "totalCalls": "总调用次数",
+      "totalTokens": "总 Token 数",
+      "totalCost": "总费用"
+    },
+    "costTrends": {
+      "title": "每日费用趋势",
+      "yAxisLabel": "费用 (元)"
+    },
+    "modelDistribution": {
+      "title": "模型使用分布"
+    }
+  }
+}

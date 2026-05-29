@@ -1,0 +1,38 @@
+{
+  "title": "API 密钥",
+  "subtitle": "管理您的 API 访问密钥",
+  "createButton": "+ 创建密钥",
+  "createSuccess": {
+    "title": "密钥创建成功",
+    "warning": "请立即复制此密钥，关闭后将不再显示完整密钥。",
+    "copied": "✓ 已复制",
+    "copyButton": "复制密钥",
+    "closeButton": "关闭"
+  },
+  "createDialog": {
+    "title": "创建新密钥",
+    "nameLabel": "密钥名称",
+    "namePlaceholder": "例如：生产环境",
+    "rateLimitLabel": "速率限制（次/分钟）",
+    "maxTokensLabel": "最大 Token",
+    "creating": "创建中...",
+    "createButton": "创建",
+    "cancelButton": "取消"
+  },
+  "emptyState": {
+    "message": "还没有创建 API 密钥",
+    "button": "创建第一个密钥"
+  },
+  "table": {
+    "name": "名称",
+    "key": "密钥",
+    "status": "状态",
+    "lastUsed": "最后使用",
+    "actions": "操作",
+    "statusActive": "启用",
+    "statusDisabled": "禁用",
+    "neverUsed": "从未使用",
+    "deleteConfirm": "确定删除此密钥？",
+    "deleteButton": "删除"
+  }
+}

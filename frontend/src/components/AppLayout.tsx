@@ -5,6 +5,7 @@ import { SparklesIcon } from '@heroicons/react/20/solid'
 import NotificationBell from './NotificationBell'
 import AnnouncementBanner from './AnnouncementBanner'
 import Footer from './Footer'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const navItems = [
   { label: '仪表板', href: '/dashboard' },
@@ -103,6 +104,7 @@ export default function AppLayout() {
             )}
           </div>
           {user && <NotificationBell />}
+          {user && <div className="ml-2"><LanguageSwitcher /></div>}
           {user && (
             <div className="relative flex-shrink-0 ml-2" ref={menuRef}>
               <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center gap-2 cursor-pointer">

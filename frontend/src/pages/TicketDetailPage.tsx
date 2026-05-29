@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { useTranslation } from 'react-i18next'
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: '待处理', color: 'bg-yellow-100 text-yellow-700' },
-  IN_PROGRESS: { label: '处理中', color: 'bg-blue-100 text-blue-700' },
-  RESOLVED: { label: '已解决', color: 'bg-green-100 text-green-700' },
-  CLOSED: { label: '已关闭', color: 'bg-gray-100 text-gray-500' },
+const statusColors: Record<string, string> = {
+  OPEN: 'bg-yellow-100 text-yellow-700',
+  IN_PROGRESS: 'bg-blue-100 text-blue-700',
+  RESOLVED: 'bg-green-100 text-green-700',
+  CLOSED: 'bg-gray-100 text-gray-500',
 }
 
 export default function TicketDetailPage() {
+  const { t } = useTranslation('tickets');
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -21,7 +23,8 @@ export default function TicketDetailPage() {
     queryFn: () => fetch(`/api/tickets/${id}`).then(r => r.json()),
   })
   const ticket = data?.ticket
-  const s = ticket ? (statusLabels[ticket.status] || { label: ticket.status, color: 'bg-gray-100' }) : { label: '', color: '' }
+  const statusColor = ticket ? (statusColors[ticket.status] || 'bg-gray-100') : ''
+  const statusLabel = ticket ? t(`tickets.status.${ticket.status}`) : ''
 
   const replyMutation = useMutation({
     mutationFn: (content: string) => fetch(`/api/tickets/${id}/reply`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) }),
@@ -42,21 +45,21 @@ export default function TicketDetailPage() {
 
   if (!ticket) return (
     <div className="max-w-[900px] mx-auto px-8 py-16 text-center text-gray-400">
-      <p>工单不存在</p>
-      <button onClick={() => navigate('/tickets')} className="text-[#e8673a] text-sm mt-2">返回工单列表</button>
+      <p>{t('tickets.notFound')}</p>
+      <button onClick={() => navigate('/tickets')} className="text-[#e8673a] text-sm mt-2">{t('tickets.backToList')}</button>
     </div>
   )
 
   return (
     <div className="max-w-[900px] mx-auto px-8 py-8">
       <button onClick={() => navigate('/tickets')} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
-        <ArrowLeftIcon className="w-4 h-4" /> 返回工单列表
+        <ArrowLeftIcon className="w-4 h-4" /> {t('tickets.backToList')}
       </button>
 
       <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">{ticket.title}</h1>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>{statusLabel}</span>
         </div>
         <p className="text-sm text-gray-700 whitespace-pre-wrap mb-2">{ticket.content}</p>
         <p className="text-xs text-gray-400">{new Date(ticket.createdAt).toLocaleString()}</p>
@@ -65,8 +68,8 @@ export default function TicketDetailPage() {
       {ticket.replies?.map((r: any) => (
         <div key={r.id} className={`bg-white rounded-xl border border-gray-200 p-4 mb-3 ${r.isStaff ? 'border-[#e8673a] bg-[#fef3ee]' : ''}`}>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium">{r.isStaff ? '管理员' : '我'}</span>
-            {r.isStaff && <span className="text-xs bg-[#e8673a] text-white px-1.5 py-0.5 rounded">官方</span>}
+            <span className="text-sm font-medium">{r.isStaff ? t('tickets.reply.admin') : t('tickets.reply.me')}</span>
+            {r.isStaff && <span className="text-xs bg-[#e8673a] text-white px-1.5 py-0.5 rounded">{t('tickets.reply.official')}</span>}
           </div>
           <p className="text-sm text-gray-700 whitespace-pre-wrap">{r.content}</p>
           <p className="text-xs text-gray-400 mt-1">{new Date(r.createdAt).toLocaleString()}</p>
@@ -76,11 +79,11 @@ export default function TicketDetailPage() {
       {ticket.status !== 'CLOSED' && (
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <textarea value={replyContent} onChange={e => setReplyContent(e.target.value)} rows={3}
-            placeholder="输入回复..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-[#e8673a]" />
+            placeholder={t('tickets.reply.placeholder')} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-[#e8673a]" />
           <div className="flex justify-end">
             <button onClick={() => replyMutation.mutate(replyContent)}
               disabled={!replyContent.trim()}
-              className="bg-[#e8673a] hover:bg-[#d4562a] text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50">回复</button>
+              className="bg-[#e8673a] hover:bg-[#d4562a] text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50">{t('tickets.reply.submit')}</button>
           </div>
         </div>
       )}

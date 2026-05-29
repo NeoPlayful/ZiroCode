@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 export default function NotificationsPage() {
+  const { t } = useTranslation('notifications')
   const [page, setPage] = useState(1)
   const queryClient = useQueryClient()
 
@@ -44,13 +46,13 @@ export default function NotificationsPage() {
   return (
     <div className="max-w-4xl mx-auto px-8 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">通知中心</h1>
+        <h1 className="text-2xl font-bold">{t('notifications.title')}</h1>
         {notifications.some((n: any) => !n.isRead) && (
           <button
             onClick={() => markAllRead.mutate()}
             className="px-4 py-2 text-sm bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f]"
           >
-            全部标记为已读
+            {t('notifications.markAllRead')}
           </button>
         )}
       </div>
@@ -58,7 +60,7 @@ export default function NotificationsPage() {
       {notifications.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <div className="text-4xl mb-4">🔔</div>
-          <div>暂无通知</div>
+          <div>{t('notifications.emptyState')}</div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -80,7 +82,7 @@ export default function NotificationsPage() {
                     onClick={() => markRead.mutate(n.id)}
                     className="ml-4 text-sm text-[#e8673a] hover:underline"
                   >
-                    标记已读
+                    {t('notifications.markRead')}
                   </button>
                 )}
               </div>
@@ -96,17 +98,17 @@ export default function NotificationsPage() {
             disabled={page === 1}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
           >
-            上一页
+            {t('notifications.pagination.previous')}
           </button>
           <span className="text-sm text-gray-600">
-            第 {page} 页 / 共 {Math.ceil(total / 20)} 页
+            {t('notifications.pagination.pageInfo', { page, total: Math.ceil(total / 20) })}
           </span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={page >= Math.ceil(total / 20)}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
           >
-            下一页
+            {t('notifications.pagination.next')}
           </button>
         </div>
       )}

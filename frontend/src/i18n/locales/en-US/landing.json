@@ -1,0 +1,26 @@
+{
+  "landing": {
+    "hero": {
+      "title": "Unified\nAI Model API Gateway",
+      "subtitle": "Compatible with OpenAI API format, unified access to Claude, OpenAI, Gemini, OpenClaw and other mainstream models. More stable, lower cost.",
+      "getApiKey": "Get API Key",
+      "viewDocs": "View Docs",
+      "copy": "Copy",
+      "copied": "Copied",
+      "supportedPlatforms": "Supported Platforms"
+    }
+  },
+  "verifyEmail": {
+    "verifying": "Verifying email...",
+    "successTitle": "Verification Successful",
+    "errorTitle": "Verification Failed",
+    "goToLogin": "Go to Login",
+    "backToLogin": "Back to Login",
+    "errors": {
+      "missingToken": "Missing verification token",
+      "verifySuccess": "Email verified successfully",
+      "verifyFailed": "Verification failed",
+      "networkError": "Network error, please try again later"
+    }
+  }
+}

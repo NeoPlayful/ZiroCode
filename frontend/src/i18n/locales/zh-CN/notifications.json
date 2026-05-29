@@ -1,0 +1,19 @@
+{
+  "notifications": {
+    "title": "通知中心",
+    "markAllRead": "全部标记为已读",
+    "markRead": "标记已读",
+    "emptyState": "暂无通知",
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页",
+      "pageInfo": "第 {{page}} 页 / 共 {{total}} 页"
+    }
+  },
+  "announcements": {
+    "title": "公告中心",
+    "emptyState": "暂无公告",
+    "unread": "未读",
+    "markRead": "标记已读"
+  }
+}

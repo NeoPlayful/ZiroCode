@@ -154,6 +154,29 @@ export async function ticketRoutes(app: FastifyInstance) {
     }
   });
 
+  // 更新工单
+  app.put('/api/tickets/:id', async (req, reply) => {
+    try {
+      const user = await requireAuth(req, reply);
+      const { id } = req.params as any;
+      const { title, content, status, priority } = req.body as any;
+      const ticket = await prisma.ticket.findUnique({ where: { id } });
+      if (!ticket || ticket.userId !== user.userId) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '工单不存在' } });
+      }
+      const updateData: any = {};
+      if (title) updateData.title = title;
+      if (content) updateData.content = content;
+      if (status) updateData.status = status;
+      if (priority) updateData.priority = priority;
+      const updated = await prisma.ticket.update({ where: { id }, data: updateData });
+      return reply.send({ ticket: updated });
+    } catch (error) {
+      console.error('Update ticket error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新工单失败' } });
+    }
+  });
+
   // 回复工单
   app.post('/api/tickets/:id/reply', async (req, reply) => {
     try {

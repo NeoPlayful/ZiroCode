@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SparklesIcon } from '@heroicons/react/20/solid';
+import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 
 export default function LandingPage() {
+  const { t: tStatic } = useTranslation('static');
+  const { t } = useTranslation('landing');
   const navigate = useNavigate();
 
   const { data } = useQuery({
@@ -18,9 +21,9 @@ export default function LandingPage() {
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
       if (btn) {
-        btn.textContent = '已复制';
+        btn.textContent = t('landing.hero.copied');
         setTimeout(() => {
-          btn.textContent = '复制';
+          btn.textContent = t('landing.hero.copy');
         }, 2000);
       }
     });
@@ -38,12 +41,12 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">欢迎，{user.name}</span>
+                <span className="text-sm text-gray-600">{tStatic('static.nav.welcome', { name: user.name })}</span>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  进入控制台
+                  {tStatic('static.nav.dashboard')}
                 </button>
               </>
             ) : (
@@ -52,13 +55,13 @@ export default function LandingPage() {
                   onClick={() => navigate('/auth/login')}
                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
                 >
-                  登录
+                  {tStatic('static.nav.login')}
                 </button>
                 <button
                   onClick={() => navigate('/auth/register')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  注册
+                  {tStatic('static.nav.register')}
                 </button>
               </>
             )}
@@ -75,13 +78,13 @@ export default function LandingPage() {
 
         <div className="max-w-[900px] text-center relative z-10">
           {/* Hero Title */}
-          <h1 className="text-7xl font-bold leading-tight mb-6 tracking-tight">
-            统一的<br />AI 模型接口网关
+          <h1 className="text-7xl font-bold leading-tight mb-6 tracking-tight" style={{ whiteSpace: 'pre-line' }}>
+            {t('landing.hero.title')}
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl text-gray-600 leading-relaxed mb-12 max-w-[600px] mx-auto">
-            兼容 OpenAI API 格式，统一接入 Claude、OpenAI、Gemini、OpenClaw 等主流模型。更稳定、更低成本。
+            {t('landing.hero.subtitle')}
           </p>
 
           {/* API Box */}
@@ -93,7 +96,7 @@ export default function LandingPage() {
               onClick={copyAPI}
               className="copy-btn bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:text-black transition-colors"
             >
-              复制
+              {t('landing.hero.copy')}
             </button>
           </div>
 
@@ -103,20 +106,20 @@ export default function LandingPage() {
               onClick={() => navigate('/auth/register')}
               className="px-8 py-3.5 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-xl text-base font-medium transition-all hover:-translate-y-0.5"
             >
-              获取 API Key
+              {t('landing.hero.getApiKey')}
             </button>
             <button
               onClick={() => navigate('/docs')}
               className="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-black rounded-xl text-base font-medium border border-gray-200 transition-colors"
             >
-              查看文档
+              {t('landing.hero.viewDocs')}
             </button>
           </div>
 
           {/* Platforms */}
           <div className="mt-20">
             <div className="text-sm text-gray-400 uppercase tracking-widest mb-8">
-              支持的平台
+              {t('landing.hero.supportedPlatforms')}
             </div>
             <div className="grid grid-cols-4 md:grid-cols-6 gap-8 max-w-[1000px] mx-auto">
               {['OpenAI', 'Claude', 'Gemini', 'OpenRouter', 'DeepSeek', 'OpenClaw',

@@ -1,0 +1,11 @@
+{
+  "admin": {
+    "permissionRequired": "Admin permission required",
+    "config": {
+      "title": "System Configuration",
+      "siteName": "Site Name",
+      "defaultQuota": "Default Quota",
+      "save": "Save"
+    }
+  }
+}

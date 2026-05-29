@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SparklesIcon } from '@heroicons/react/20/solid';
+import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 
 export default function PrivacyPage() {
+  const { t } = useTranslation('static');
   const navigate = useNavigate();
 
   const { data } = useQuery({
@@ -24,12 +26,12 @@ export default function PrivacyPage() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">欢迎，{user.name}</span>
+                <span className="text-sm text-gray-600">{t('static.nav.welcome', { name: user.name })}</span>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  进入控制台
+                  {t('static.nav.dashboard')}
                 </button>
               </>
             ) : (
@@ -38,13 +40,13 @@ export default function PrivacyPage() {
                   onClick={() => navigate('/auth/login')}
                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
                 >
-                  登录
+                  {t('static.nav.login')}
                 </button>
                 <button
                   onClick={() => navigate('/auth/register')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  注册
+                  {t('static.nav.register')}
                 </button>
               </>
             )}
@@ -53,7 +55,7 @@ export default function PrivacyPage() {
       </nav>
 
       <main className="flex-1 max-w-[900px] mx-auto px-6 py-16">
-        <h1 className="text-4xl font-bold mb-8">隐私政策</h1>
+        <h1 className="text-4xl font-bold mb-8">{t('static.privacy.title')}</h1>
 
         <div className="prose prose-gray max-w-none space-y-6 text-gray-700 leading-relaxed">
           <section>
@@ -123,7 +125,7 @@ export default function PrivacyPage() {
             <p>如有任何关于隐私政策的问题，请通过工单系统联系我们。</p>
           </section>
 
-          <p className="text-sm text-gray-500 mt-8">最后更新时间：2026年5月</p>
+          <p className="text-sm text-gray-500 mt-8">{t('static.privacy.lastUpdated')}</p>
         </div>
       </main>
 

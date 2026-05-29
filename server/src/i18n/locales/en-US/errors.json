@@ -1,0 +1,15 @@
+{
+  "INTERNAL": "Internal server error",
+  "BAD_REQUEST": "Bad request",
+  "UNAUTHORIZED": "Unauthorized",
+  "FORBIDDEN": "Forbidden",
+  "NOT_FOUND": "Not found",
+  "CONFLICT": "Conflict",
+  "INVALID_INPUT": "Invalid input",
+  "INVALID_PASSWORD": "Invalid password",
+  "USER_NOT_FOUND": "User not found",
+  "EMAIL_EXISTS": "Email already exists",
+  "INVALID_TOKEN": "Invalid or expired token",
+  "QUOTA_EXCEEDED": "Quota exceeded",
+  "RATE_LIMIT": "Too many requests"
+}

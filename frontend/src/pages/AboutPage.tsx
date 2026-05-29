@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SparklesIcon } from '@heroicons/react/20/solid';
+import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 
 export default function AboutPage() {
+  const { t } = useTranslation('static');
   const navigate = useNavigate();
 
   const { data } = useQuery({
@@ -24,12 +26,12 @@ export default function AboutPage() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">欢迎，{user.name}</span>
+                <span className="text-sm text-gray-600">{t('static.nav.welcome', { name: user.name })}</span>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  进入控制台
+                  {t('static.nav.dashboard')}
                 </button>
               </>
             ) : (
@@ -38,13 +40,13 @@ export default function AboutPage() {
                   onClick={() => navigate('/auth/login')}
                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
                 >
-                  登录
+                  {t('static.nav.login')}
                 </button>
                 <button
                   onClick={() => navigate('/auth/register')}
                   className="px-4 py-2 bg-[#F97346] hover:bg-[#e8673a] text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  注册
+                  {t('static.nav.register')}
                 </button>
               </>
             )}
@@ -53,21 +55,21 @@ export default function AboutPage() {
       </nav>
 
       <main className="flex-1 max-w-[900px] mx-auto px-6 py-16">
-        <h1 className="text-4xl font-bold mb-8">关于 ZiroCode</h1>
+        <h1 className="text-4xl font-bold mb-8">{t('static.about.title')}</h1>
 
         <div className="prose prose-gray max-w-none space-y-6 text-gray-700 leading-relaxed">
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">我们是谁</h2>
-            <p>ZiroCode 是一个专业的 AI 模型接口网关服务平台，致力于为开发者提供统一、稳定、高效的 AI 模型访问解决方案。</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.whoWeAre')}</h2>
+            <p>{t('static.about.whoWeAreContent')}</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">我们的使命</h2>
-            <p>让 AI 技术更易用、更可靠、更经济。我们相信，通过提供统一的接口网关，可以大幅降低开发者接入多个 AI 模型的复杂度和成本。</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.mission')}</h2>
+            <p>{t('static.about.missionContent')}</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">核心优势</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.advantages')}</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>统一接口</strong>：兼容 OpenAI API 格式，一套代码接入所有主流模型</li>
               <li><strong>高可用性</strong>：多节点部署，智能负载均衡，保障服务稳定</li>
@@ -78,8 +80,8 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">支持的模型</h2>
-            <p>我们支持业界主流的 AI 模型提供商，包括：</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.supportedModels')}</h2>
+            <p>{t('static.about.supportedModelsContent')}</p>
             <div className="grid grid-cols-3 gap-4 mt-4">
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">OpenAI</div>
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">Claude</div>
@@ -89,12 +91,12 @@ export default function AboutPage() {
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">Grok</div>
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">Moonshot</div>
               <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">Mistral</div>
-              <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">更多...</div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">{t('static.about.more')}</div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">适用场景</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.useCases')}</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>AI 应用开发：快速集成多种 AI 能力</li>
               <li>智能客服系统：构建高效的对话机器人</li>
@@ -105,15 +107,15 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">联系我们</h2>
-            <p>如果您有任何问题、建议或合作意向，欢迎通过以下方式联系我们：</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('static.about.contact')}</h2>
+            <p>{t('static.about.contactContent')}</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>工单系统：登录后台提交工单</li>
               <li>技术文档：查看详细的 API 文档和使用指南</li>
             </ul>
           </section>
 
-          <p className="text-sm text-gray-500 mt-8">© 2026 ZiroCode. All rights reserved.</p>
+          <p className="text-sm text-gray-500 mt-8">{t('static.about.copyright')}</p>
         </div>
       </main>
 

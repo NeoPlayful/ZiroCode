@@ -1,0 +1,48 @@
+{
+  "usage": {
+    "title": "Usage Statistics",
+    "subtitle": "View your API call status",
+    "lastDays": "Last {{days}} days",
+    "summary": {
+      "totalCalls": "Total Calls",
+      "totalTokens": "Total Tokens",
+      "quotaConsumed": "Quota Consumed"
+    },
+    "emptyState": {
+      "message": "No usage records",
+      "hint": "Statistics will be displayed here after calling API"
+    },
+    "dailyTrends": {
+      "title": "Daily Call Trends",
+      "noData": "No daily data"
+    },
+    "modelDistribution": {
+      "title": "Model Usage Distribution",
+      "times": "times"
+    },
+    "recentRecords": {
+      "title": "Recent Call Records",
+      "time": "Time",
+      "model": "Model",
+      "token": "Token",
+      "quota": "Quota",
+      "status": "Status"
+    }
+  },
+  "analytics": {
+    "title": "Data Analysis",
+    "exportCSV": "Export CSV",
+    "summary": {
+      "totalCalls": "Total Calls",
+      "totalTokens": "Total Tokens",
+      "totalCost": "Total Cost"
+    },
+    "costTrends": {
+      "title": "Daily Cost Trends",
+      "yAxisLabel": "Cost (CNY)"
+    },
+    "modelDistribution": {
+      "title": "Model Usage Distribution"
+    }
+  }
+}

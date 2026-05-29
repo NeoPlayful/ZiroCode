@@ -1,0 +1,82 @@
+{
+  "title": "Subscription Management",
+  "subtitle": "Manage your subscriptions and quota",
+  "numberFormat": {
+    "hundredMillion": "00M",
+    "tenThousand": "0K"
+  },
+  "types": {
+    "PAY_AS_YOU_GO": "Pay-as-you-go",
+    "MONTHLY": "Monthly",
+    "PERMANENT": "Permanent"
+  },
+  "redeem": {
+    "title": "Redeem Subscription",
+    "subtitle": "Enter redemption code to activate or recharge your subscription",
+    "placeholder": "Enter redemption code",
+    "button": "Redeem",
+    "redeeming": "Redeeming...",
+    "error": "Redemption failed",
+    "success": "Redemption successful! Got {{quota}}00M quota"
+  },
+  "emptyState": {
+    "message": "No subscriptions",
+    "hint": "Use redemption code to activate your first subscription"
+  },
+  "status": {
+    "active": "Active",
+    "expired": "Expired"
+  },
+  "details": {
+    "expires": "Expires:",
+    "usage": "Usage",
+    "monthlyQuota": "Monthly Quota (This Month)"
+  },
+  "pricing": {
+    "title": "Choose a Plan",
+    "subtitle": "Choose as needed, flexible payment",
+    "recommended": "Recommended",
+    "monthly": "/month",
+    "startingFrom": "starting from",
+    "quota": "Quota: {{amount}}00M Tokens",
+    "buyNow": "Buy Now",
+    "emptyMessage": "No available plans",
+    "error": {
+      "createPayment": "Failed to create payment",
+      "network": "Network error, please try again later"
+    },
+    "features": {
+      "PAY_AS_YOU_GO": [
+        "Pay as you go, charge only for what you use",
+        "Never expires",
+        "Suitable for light usage"
+      ],
+      "MONTHLY": [
+        "Fixed monthly quota",
+        "Auto-resets daily at 8:00 AM",
+        "Suitable for frequent calls",
+        "Best value for money"
+      ],
+      "PERMANENT": [
+        "One-time purchase, valid forever",
+        "No time limit",
+        "Suitable for long-term use",
+        "Best deal"
+      ]
+    }
+  },
+  "plans": {
+    "title": "Subscription Plans",
+    "subtitle": "Choose a plan that suits you",
+    "quota": "Quota:",
+    "type": "Type:",
+    "duration": "Valid for: {{days}} days",
+    "buyNow": "Buy Now",
+    "purchasing": "Purchasing...",
+    "purchaseSuccess": "Purchase successful!",
+    "error": {
+      "fetchFailed": "Failed to get plans list",
+      "purchaseFailed": "Purchase failed"
+    }
+  }
+}

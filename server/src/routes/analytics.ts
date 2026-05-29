@@ -3,6 +3,24 @@ import { prisma } from '../lib/db.js';
 import { requireAuth } from '../lib/api-utils.js';
 
 export async function analyticsRoutes(app: FastifyInstance) {
+  // 使用量统计
+  app.get('/api/analytics/usage', async (req, reply) => {
+    try {
+      const user = await requireAuth(req, reply);
+      const logs = await prisma.apiUsageLog.findMany({
+        where: { userId: user.userId },
+        select: { tokensUsed: true, quotaUsed: true, requestTime: true },
+      });
+      const totalCalls = logs.length;
+      const totalTokens = logs.reduce((sum, l) => sum + l.tokensUsed, 0);
+      const totalQuota = logs.reduce((sum, l) => sum + Number(l.quotaUsed), 0);
+      return reply.send({ totalCalls, totalTokens, totalQuota });
+    } catch (error) {
+      console.error('Analytics usage error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取使用量统计失败' } });
+    }
+  });
+
   // 总览统计
   app.get('/api/analytics/overview', async (req, reply) => {
     try {

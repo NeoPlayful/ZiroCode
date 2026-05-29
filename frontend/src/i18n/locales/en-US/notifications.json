@@ -1,0 +1,19 @@
+{
+  "notifications": {
+    "title": "Notification Center",
+    "markAllRead": "Mark All as Read",
+    "markRead": "Mark as Read",
+    "emptyState": "No notifications",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {{page}} / Total {{total}}"
+    }
+  },
+  "announcements": {
+    "title": "Announcement Center",
+    "emptyState": "No announcements",
+    "unread": "Unread",
+    "markRead": "Mark as Read"
+  }
+}

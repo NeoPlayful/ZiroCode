@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation('landing');
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
@@ -11,7 +13,7 @@ export default function VerifyEmailPage() {
     const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
-      setMessage('缺少验证令牌');
+      setMessage(t('landing.verifyEmail.errors.missingToken'));
       return;
     }
 
@@ -25,18 +27,18 @@ export default function VerifyEmailPage() {
         if (res.ok) {
           const data = await res.json();
           setStatus('success');
-          setMessage(data.message || '邮箱验证成功');
+          setMessage(data.message || t('landing.verifyEmail.errors.verifySuccess'));
         } else {
           const err = await res.json();
           setStatus('error');
-          setMessage(err.error?.message || '验证失败');
+          setMessage(err.error?.message || t('landing.verifyEmail.errors.verifyFailed'));
         }
       })
       .catch(() => {
         setStatus('error');
-        setMessage('网络错误，请稍后重试');
+        setMessage(t('landing.verifyEmail.errors.networkError'));
       });
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   return (
     <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center px-4">
@@ -44,20 +46,20 @@ export default function VerifyEmailPage() {
         {status === 'loading' && (
           <>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e8673a] mx-auto mb-4"></div>
-            <p className="text-gray-600">正在验证邮箱...</p>
+            <p className="text-gray-600">{t('landing.verifyEmail.verifying')}</p>
           </>
         )}
 
         {status === 'success' && (
           <>
             <CheckCircleIcon className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">验证成功</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('landing.verifyEmail.successTitle')}</h1>
             <p className="text-gray-600 mb-6">{message}</p>
             <Link
               to="/auth/login"
               className="inline-block px-6 py-3 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f]"
             >
-              前往登录
+              {t('landing.verifyEmail.goToLogin')}
             </Link>
           </>
         )}
@@ -65,13 +67,13 @@ export default function VerifyEmailPage() {
         {status === 'error' && (
           <>
             <XCircleIcon className="w-16 h-16 text-red-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">验证失败</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('landing.verifyEmail.errorTitle')}</h1>
             <p className="text-gray-600 mb-6">{message}</p>
             <Link
               to="/auth/login"
               className="inline-block px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
             >
-              返回登录
+              {t('landing.verifyEmail.backToLogin')}
             </Link>
           </>
         )}
