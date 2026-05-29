@@ -353,6 +353,147 @@ export default function AdminChannels() {
           </div>
         </>
       )}
+
+      {/* Create Dialog */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowCreate(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('channels.form.title') || '新增渠道'}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.name') || '名称'}</label>
+                <input value={newForm.name} onChange={e => setNewForm({ ...newForm, name: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.namePlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
+                <input value={newForm.displayName} onChange={e => setNewForm({ ...newForm, displayName: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.displayNamePlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
+                <input value={newForm.baseUrl} onChange={e => setNewForm({ ...newForm, baseUrl: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.baseUrlPlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
+                <input value={newForm.apiKey} onChange={e => setNewForm({ ...newForm, apiKey: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.apiKeyPlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.models') || '模型列表'}</label>
+                <ModelMultiSelect value={newForm.models} onChange={models => setNewForm({ ...newForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.priority') || '优先级'}</label>
+                  <input value={newForm.priority} onChange={e => setNewForm({ ...newForm, priority: e.target.value })} type="number"
+                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.priorityPlaceholder')} />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.weight') || '权重'}</label>
+                  <input value={newForm.weight} onChange={e => setNewForm({ ...newForm, weight: e.target.value })} type="number"
+                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.weightPlaceholder')} />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => createMutation.mutate({ name: newForm.name, displayName: newForm.displayName, baseUrl: newForm.baseUrl, apiKey: newForm.apiKey, models: newForm.models, priority: parseInt(newForm.priority) || 0, weight: parseInt(newForm.weight) || 1 })}
+                disabled={createMutation.isPending}
+                className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {createMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.create') || '创建')}
+              </button>
+              <button onClick={() => setShowCreate(false)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('channels.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Dialog */}
+      {editChannel && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditChannel(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('channels.form.editTitle') || '编辑渠道'}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.name') || '名称'}</label>
+                <input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
+                <input value={editForm.displayName} onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
+                <input value={editForm.baseUrl} onChange={e => setEditForm({ ...editForm, baseUrl: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
+                <input value={editForm.apiKey} onChange={e => setEditForm({ ...editForm, apiKey: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.apiKeyHint')} />
+                <p className="text-xs text-gray-400 mt-1">{t('channels.form.apiKeyHint') || '留空则不修改'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.models') || '模型列表'}</label>
+                <ModelMultiSelect value={editForm.models} onChange={models => setEditForm({ ...editForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.priority') || '优先级'}</label>
+                  <input value={editForm.priority} onChange={e => setEditForm({ ...editForm, priority: e.target.value })} type="number"
+                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.weight') || '权重'}</label>
+                  <input value={editForm.weight} onChange={e => setEditForm({ ...editForm, weight: e.target.value })} type="number"
+                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => editMutation.mutate({ id: editChannel.id, data: { name: editForm.name, displayName: editForm.displayName, baseUrl: editForm.baseUrl, apiKey: editForm.apiKey || undefined, models: editForm.models, priority: parseInt(editForm.priority) || 0, weight: parseInt(editForm.weight) || 1 } })}
+                disabled={editMutation.isPending}
+                className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {editMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.save') || '保存')}
+              </button>
+              <button onClick={() => setEditChannel(null)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('channels.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Dialog */}
+      {deleteChannel && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setDeleteChannel(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-2">{t('channels.deleteConfirm') || '确定删除此渠道？'}</h3>
+            {deleteChannel.routeRefs?.length > 0 && (
+              <p className="text-sm text-amber-600 mb-2">{t('channels.deleteConfirmWithRefs', { count: deleteChannel.routeRefs.length }) || `该渠道被 ${deleteChannel.routeRefs.length} 个路由引用`}</p>
+            )}
+            <p className="text-sm text-[#6B7280] mb-4">{t('channels.deleteConfirmMessage') || '将永久删除该渠道，此操作不可撤销。'}</p>
+            <div className="flex gap-2">
+              <button onClick={() => deleteMutation.mutate(deleteChannel.id)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 h-10 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {deleteMutation.isPending ? '删除中...' : (t('channels.deleteButton') || '删除')}
+              </button>
+              <button onClick={() => setDeleteChannel(null)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('channels.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

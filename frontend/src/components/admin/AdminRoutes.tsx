@@ -30,7 +30,7 @@ export default function AdminRoutes() {
     path: '', displayName: '', mode: 'single',
     primaryChannelId: '', backupChannelId: '',
     channelIds: [] as string[], strategy: 'round_robin',
-    status: 'active', activeChannel: 'primary',
+    status: 'active', activeChannel: 'primary', billingMultiplier: '1.0',
   })
 
   // Edit form
@@ -38,7 +38,7 @@ export default function AdminRoutes() {
     path: '', displayName: '', mode: 'single',
     primaryChannelId: '', backupChannelId: '',
     channelIds: [] as string[], strategy: 'round_robin',
-    isActive: true, status: 'active', activeChannel: 'primary',
+    isActive: true, status: 'active', activeChannel: 'primary', billingMultiplier: '1.0',
   })
 
   const { data: routesData, isLoading } = useQuery({
@@ -92,7 +92,7 @@ export default function AdminRoutes() {
       }),
     onSuccess: () => {
       setShowCreate(false)
-      setNewForm({ path: '', displayName: '', mode: 'single', primaryChannelId: '', backupChannelId: '', channelIds: [], strategy: 'round_robin', status: 'active', activeChannel: 'primary' })
+      setNewForm({ path: '', displayName: '', mode: 'single', primaryChannelId: '', backupChannelId: '', channelIds: [], strategy: 'round_robin', status: 'active', activeChannel: 'primary', billingMultiplier: '1.0' })
       queryClient.invalidateQueries({ queryKey: ['admin-routes'] })
     },
   })
@@ -133,6 +133,7 @@ export default function AdminRoutes() {
       isActive: route.isActive,
       status: route.status || 'active',
       activeChannel: route.activeChannel || 'primary',
+      billingMultiplier: String(route.billingMultiplier ?? '1.0'),
     })
     setEditRoute(route)
   }
@@ -196,6 +197,11 @@ export default function AdminRoutes() {
                   }`}>
                     {route.isActive ? (t('routes.status.active') || '启用') : (t('routes.status.inactive') || '禁用')}
                   </span>
+                  {route.billingMultiplier != null && Number(route.billingMultiplier) !== 1.0 && (
+                    <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium bg-[#FFF4F0] text-[#F97346]">
+                      ×{Number(route.billingMultiplier).toFixed(1)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => openEdit(route)}
@@ -267,6 +273,215 @@ export default function AdminRoutes() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Create Dialog */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowCreate(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('routes.form.title') || '新增路由'}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.path') || '路径'}</label>
+                <input value={newForm.path} onChange={e => setNewForm({ ...newForm, path: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder="/codex" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.displayName') || '名称'}</label>
+                <input value={newForm.displayName} onChange={e => setNewForm({ ...newForm, displayName: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder="Codex API" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.mode') || '模式'}</label>
+                <select value={newForm.mode} onChange={e => setNewForm({ ...newForm, mode: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                  <option value="single">{t('routes.mode.single') || '单一渠道'}</option>
+                  <option value="load_balance">{t('routes.mode.loadBalance') || '负载均衡'}</option>
+                </select>
+              </div>
+              {newForm.mode === 'single' ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
+                    <select value={newForm.primaryChannelId} onChange={e => setNewForm({ ...newForm, primaryChannelId: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="">--</option>
+                      {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
+                    <select value={newForm.backupChannelId} onChange={e => setNewForm({ ...newForm, backupChannelId: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="">--</option>
+                      {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.channels') || '渠道池'}</label>
+                    <div className="border border-[#ECEFF3] rounded-xl p-2 max-h-32 overflow-y-auto">
+                      {channels.map((c: any) => (
+                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
+                          <input type="checkbox" checked={newForm.channelIds.includes(c.id)}
+                            onChange={() => setNewForm({ ...newForm, channelIds: newForm.channelIds.includes(c.id) ? newForm.channelIds.filter(id => id !== c.id) : [...newForm.channelIds, c.id] })}
+                            className="rounded border-gray-300" />
+                          {c.displayName || c.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.strategy') || '策略'}</label>
+                    <select value={newForm.strategy} onChange={e => setNewForm({ ...newForm, strategy: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="round_robin">{t('routes.strategies.roundRobin') || '轮询'}</option>
+                      <option value="weighted">{t('routes.strategies.weighted') || '加权轮询'}</option>
+                    </select>
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
+                <input value={newForm.billingMultiplier} onChange={e => setNewForm({ ...newForm, billingMultiplier: e.target.value })}
+                  type="number" step="0.1" min="0.1"
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => createMutation.mutate({ ...newForm, billingMultiplier: parseFloat(newForm.billingMultiplier) || 1.0 })}
+                disabled={createMutation.isPending}
+                className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {createMutation.isPending ? (t('routes.form.saving') || '保存中...') : (t('routes.form.create') || '创建')}
+              </button>
+              <button onClick={() => setShowCreate(false)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('routes.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Dialog */}
+      {editRoute && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditRoute(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('routes.form.editTitle') || '编辑路由'}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.path') || '路径'}</label>
+                <input value={editForm.path} onChange={e => setEditForm({ ...editForm, path: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.displayName') || '名称'}</label>
+                <input value={editForm.displayName} onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={editForm.isActive}
+                    onChange={() => setEditForm({ ...editForm, isActive: !editForm.isActive })}
+                    className="rounded border-gray-300" />
+                  <span className="text-sm text-[#6B7280]">{t('routes.status.active') || '启用'}</span>
+                </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.mode') || '模式'}</label>
+                <select value={editForm.mode} onChange={e => setEditForm({ ...editForm, mode: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                  <option value="single">{t('routes.mode.single') || '单一渠道'}</option>
+                  <option value="load_balance">{t('routes.mode.loadBalance') || '负载均衡'}</option>
+                </select>
+              </div>
+              {editForm.mode === 'single' ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
+                    <select value={editForm.primaryChannelId} onChange={e => setEditForm({ ...editForm, primaryChannelId: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="">--</option>
+                      {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
+                    <select value={editForm.backupChannelId} onChange={e => setEditForm({ ...editForm, backupChannelId: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="">--</option>
+                      {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.channels') || '渠道池'}</label>
+                    <div className="border border-[#ECEFF3] rounded-xl p-2 max-h-32 overflow-y-auto">
+                      {channels.map((c: any) => (
+                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
+                          <input type="checkbox" checked={editForm.channelIds.includes(c.id)}
+                            onChange={() => setEditForm({ ...editForm, channelIds: editForm.channelIds.includes(c.id) ? editForm.channelIds.filter(id => id !== c.id) : [...editForm.channelIds, c.id] })}
+                            className="rounded border-gray-300" />
+                          {c.displayName || c.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.strategy') || '策略'}</label>
+                    <select value={editForm.strategy} onChange={e => setEditForm({ ...editForm, strategy: e.target.value })}
+                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      <option value="round_robin">{t('routes.strategies.roundRobin') || '轮询'}</option>
+                      <option value="weighted">{t('routes.strategies.weighted') || '加权轮询'}</option>
+                    </select>
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
+                <input value={editForm.billingMultiplier} onChange={e => setEditForm({ ...editForm, billingMultiplier: e.target.value })}
+                  type="number" step="0.1" min="0.1"
+                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => editMutation.mutate({ id: editRoute.id, data: { ...editForm, billingMultiplier: parseFloat(editForm.billingMultiplier) || 1.0 } })}
+                disabled={editMutation.isPending}
+                className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {editMutation.isPending ? (t('routes.form.saving') || '保存中...') : (t('routes.form.save') || '保存')}
+              </button>
+              <button onClick={() => setEditRoute(null)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('routes.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Dialog */}
+      {deleteRoute && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setDeleteRoute(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] mb-2">{t('routes.deleteConfirm') || '确定删除此路由？'}</h3>
+            <p className="text-sm text-[#6B7280] mb-4">{t('routes.deleteConfirmMessage') || '将永久删除该路由，此操作不可撤销。'}</p>
+            <div className="flex gap-2">
+              <button onClick={() => deleteMutation.mutate(deleteRoute.id)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 h-10 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                {deleteMutation.isPending ? '删除中...' : (t('routes.deleteButton') || '删除')}
+              </button>
+              <button onClick={() => setDeleteRoute(null)}
+                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                {t('routes.form.cancel') || '取消'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

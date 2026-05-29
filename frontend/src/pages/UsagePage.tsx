@@ -164,16 +164,16 @@ function HourlyTrendChart({ data, t }: { data: any; t: any }) {
         trigger: 'axis',
         backgroundColor: 'rgba(34,34,34,0.9)',
         borderColor: 'transparent',
-        textStyle: { color: '#fff', fontSize: 13, fontWeight: 600 },
+        textStyle: { color: '#fff', fontSize: 12, fontWeight: 600 },
         padding: 10,
         formatter(params: any) {
           const time = params[0].axisValue;
           return `
-            <div style="font-size:14px;font-weight:700;margin-bottom:6px;">⏰ ${time}</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px;">⏰ ${time}</div>
             ${params.map((item: any) => `
-              <div style="display:flex;align-items:center;gap:4px;line-height:22px;">
-                <span style="width:10px;height:10px;border:2px solid ${item.color};background:#fff;display:inline-block;flex-shrink:0;"></span>
-                <span style="font-size:12px;white-space:nowrap;">${item.seriesName}: 💰 ${Number(item.value).toLocaleString()} (📞 ${item.data?.calls || 0}次)</span>
+              <div style="display:flex;align-items:center;gap:4px;line-height:20px;">
+                <span style="width:8px;height:8px;border:2px solid ${item.color};background:#fff;display:inline-block;flex-shrink:0;"></span>
+                <span style="font-size:11px;white-space:nowrap;">${item.seriesName}: ${Number(item.value).toLocaleString()} (${item.data?.calls || 0}次)</span>
               </div>
             `).join('')}
           `;
@@ -184,7 +184,7 @@ function HourlyTrendChart({ data, t }: { data: any; t: any }) {
         icon: 'circle',
         itemWidth: 14,
         itemHeight: 14,
-        textStyle: { color: '#6b7280', fontSize: 12 },
+        textStyle: { color: '#6b7280', fontSize: 11 },
       },
       xAxis: {
         type: 'category',
@@ -193,7 +193,7 @@ function HourlyTrendChart({ data, t }: { data: any; t: any }) {
         name: `⏰ ${t('usage.dailyTrends.timeLabel')}`,
         nameLocation: 'middle',
         nameGap: 35,
-        nameTextStyle: { fontWeight: 700, fontSize: 13, color: '#1f2937' },
+        nameTextStyle: { fontWeight: 700, fontSize: 12, color: '#1f2937' },
         axisLine: { lineStyle: { color: '#d1d5db' } },
         axisTick: { show: false },
         axisLabel: { color: '#6b7280', fontSize: 11, interval: 0 },
@@ -204,7 +204,7 @@ function HourlyTrendChart({ data, t }: { data: any; t: any }) {
         nameLocation: 'middle',
         nameGap: 60,
         max: Math.ceil(maxVal * 1.2),
-        nameTextStyle: { fontWeight: 700, fontSize: 13, color: '#1f2937' },
+        nameTextStyle: { fontWeight: 700, fontSize: 12, color: '#1f2937' },
         axisLabel: { color: '#6b7280', fontSize: 11, formatter: (v: number) => v.toLocaleString() },
         splitLine: { lineStyle: { color: '#eef0f4' } },
       },
@@ -240,18 +240,18 @@ function HourlyTrendChart({ data, t }: { data: any; t: any }) {
       background: '#fff', marginBottom: 24, padding: '28px 36px 20px',
       borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
     }}>
-      <h2 style={{ margin: 0, fontSize: 24, color: '#111827', fontWeight: 700 }}>
+      <h2 style={{ margin: 0, fontSize: 20, color: '#111827', fontWeight: 700 }}>
         {t('usage.dailyTrends.title')}
       </h2>
-      <p style={{ margin: '12px 0 20px', fontSize: 16, color: '#6b7280' }}>
+      <p style={{ margin: '8px 0 16px', fontSize: 14, color: '#6b7280' }}>
         {t('usage.dailyTrends.subtitle')}
       </p>
 
-      <div ref={chartRef} style={{ width: '100%', height: 430 }} />
+      <div ref={chartRef} style={{ width: '100%', height: 300 }} />
 
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        color: '#64748b', fontSize: 15, padding: '8px 4px 0',
+        color: '#64748b', fontSize: 13, padding: '8px 4px 0',
       }}>
         <span>📊 {t('usage.dailyTrends.footer')}</span>
         <span>{t('usage.dailyTrends.modelCount', { n: totalModels })}，{t('usage.dailyTrends.callCount', { n: totalCalls.toLocaleString() })}</span>

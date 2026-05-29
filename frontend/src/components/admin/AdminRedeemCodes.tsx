@@ -17,17 +17,14 @@ export default function AdminRedeemCodes() {
 
   const { data, refetch } = useQuery({
     queryKey: ['admin-redeem-codes', search, typeFilter, statusFilter, page, pageSize],
-    queryFn: () => fetch('/api/admin/redeem-codes').then(r => r.json())
+    queryFn: () => fetch(`/api/admin/redeem-codes?${new URLSearchParams({ search, typeFilter, statusFilter, page: String(page), pageSize: String(pageSize) })}`).then(r => r.json())
   })
 
   const codes = data?.codes || []
-  const total = codes.length
-  const usedCodes = codes.filter((c: any) => c.usedCount >= c.maxUses).length
-  const unusedCodes = codes.filter((c: any) => c.usedCount < c.maxUses && c.isActive).length
-  const todayGenerated = codes.filter((c: any) => {
-    const today = new Date().toDateString()
-    return new Date(c.createdAt).toDateString() === today
-  }).length
+  const total = data?.total || 0
+  const usedCodes = data?.usedCount || 0
+  const unusedCodes = data?.unusedCount || 0
+  const todayGenerated = data?.todayGenerated || 0
 
   async function generate() {
     await fetch('/api/admin/redeem-codes', {
@@ -54,14 +51,14 @@ export default function AdminRedeemCodes() {
           icon={<CheckCircleIcon className="w-5 h-5" />}
           label={t('redeemCodes.kpi.used')}
           value={usedCodes}
-          trend={`${((usedCodes / total) * 100).toFixed(0)}%`}
+          trend={`${total > 0 ? ((usedCodes / total) * 100).toFixed(0) : 0}%`}
           trendUp={false}
         />
         <KPICard
           icon={<XCircleIcon className="w-5 h-5" />}
           label={t('redeemCodes.kpi.unused')}
           value={unusedCodes}
-          trend={`${((unusedCodes / total) * 100).toFixed(0)}%`}
+          trend={`${total > 0 ? ((unusedCodes / total) * 100).toFixed(0) : 0}%`}
           trendUp={true}
         />
         <KPICard
@@ -137,7 +134,7 @@ export default function AdminRedeemCodes() {
               type="text"
               placeholder={t('redeemCodes.search')}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             />
           </div>
@@ -145,7 +142,7 @@ export default function AdminRedeemCodes() {
           {/* 类型筛选 */}
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('redeemCodes.filter.allTypes')}</option>
@@ -157,7 +154,7 @@ export default function AdminRedeemCodes() {
           {/* 状态筛选 */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('redeemCodes.filter.allStatus')}</option>

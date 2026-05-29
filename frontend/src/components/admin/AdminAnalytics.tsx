@@ -21,7 +21,7 @@ export default function AdminAnalytics() {
   // Trends
   const { data: trends } = useQuery({
     queryKey: ['admin-analytics-trends', period, metric],
-    queryFn: () => fetch(`/api/admin/analytics/trends?period=${period}&metric=${metric}`).then(r => r.json()),
+    queryFn: () => fetch(`/api/admin/analytics/trends?period=${period}&metric=${metric}&granularity=${period === '24h' ? 'hour' : 'day'}`).then(r => r.json()),
   })
 
   // Model rankings
@@ -53,23 +53,24 @@ export default function AdminAnalytics() {
         const d = new Date(p.time)
         return period === '24h' ? `${d.getHours()}:00` : `${d.getMonth() + 1}/${d.getDate()}`
       }) || [],
-      axisLabel: { fontSize: 11, color: '#9CA3AF' },
+      axisLabel: { fontSize: 11, color: '#9CA3AF', rotate: period === '24h' ? 45 : 0 },
       axisLine: { lineStyle: { color: '#E5E7EB' } },
     },
     yAxis: {
       type: 'value' as const,
       splitLine: { lineStyle: { color: '#F3F4F6' } },
-      axisLabel: { fontSize: 11, color: '#9CA3AF' },
+      axisLabel: { fontSize: 11, color: '#9CA3AF', formatter: (v: number) => v >= 1000 ? `${(v/1000).toFixed(1)}K` : String(v) },
     },
     series: [{
-      type: 'line' as const,
+      type: period === '24h' ? 'line' as const : 'bar' as const,
       data: trends?.points?.map((p: any) => p.value) || [],
-      smooth: true,
-      lineStyle: { color: '#F97346', width: 2 },
-      itemStyle: { color: '#F97346' },
-      areaStyle: {
+      smooth: period === '24h',
+      lineStyle: period === '24h' ? { color: '#F97346', width: 2 } : undefined,
+      itemStyle: { color: '#F97346', borderRadius: period === '24h' ? undefined : [4, 4, 0, 0] },
+      barMaxWidth: period === '24h' ? undefined : 40,
+      areaStyle: period === '24h' ? {
         color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(249,115,70,0.15)' }, { offset: 1, color: 'rgba(249,115,70,0)' }] },
-      },
+      } : undefined,
     }],
   }
 

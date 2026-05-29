@@ -448,6 +448,7 @@ model ApiRoute {
   mode             String   @default("single")
   isActive         Boolean  @default(true)
   status           String   @default("active")
+  billingMultiplier Float   @default(1.0)
 
   // Single mode
   primaryChannelId String?
