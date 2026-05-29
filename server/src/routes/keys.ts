@@ -12,12 +12,15 @@ export async function keyRoutes(app: FastifyInstance) {
 
       const keys = await prisma.apiKey.findMany({
         where: { userId: session.userId as string },
-        select: { id: true, name: true, key: true, isActive: true, lastUsedAt: true, createdAt: true },
+        select: {
+          id: true, name: true, key: true, isActive: true, rateLimit: true, lastUsedAt: true, createdAt: true,
+          _count: { select: { usageLogs: { where: { requestTime: { gte: new Date(Date.now() - 30 * 86400000) } } } } },
+        },
         orderBy: { createdAt: 'desc' },
       });
 
       return reply.send({
-        keys: keys.map(k => ({ ...k, key: k.key.slice(0, 7) + '...' + k.key.slice(-4) })),
+        keys: keys.map(k => ({ ...k, monthlyCalls: k._count.usageLogs, _count: undefined })),
       });
     } catch (error) {
       console.error('List keys error:', error);
@@ -41,7 +44,7 @@ export async function keyRoutes(app: FastifyInstance) {
           key: rawKey,
           name,
           ...(ipWhitelist && { ipWhitelist }),
-          ...(rateLimit && { rateLimit }),
+          ...(rateLimit !== undefined && { rateLimit }),
           ...(allowedModels && { allowedModels }),
           ...(maxTokens && { maxTokens }),
         }

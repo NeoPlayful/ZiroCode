@@ -13,26 +13,25 @@
     "title": "Create New Key",
     "nameLabel": "Key Name",
     "namePlaceholder": "e.g.: Production Environment",
-    "rateLimitLabel": "Rate Limit (requests/minute)",
-    "maxTokensLabel": "Max Tokens",
+    "rateLimitLabel": "Rate Limit (0 = unlimited, requests/min)",
     "creating": "Creating...",
     "createButton": "Create",
     "cancelButton": "Cancel"
   },
   "emptyState": {
-    "message": "No API keys created yet",
-    "button": "Create First Key"
+    "title": "No API Keys Yet",
+    "message": "Create your first key to start calling models",
+    "button": "Create API Key"
   },
   "table": {
-    "name": "Name",
-    "key": "Key",
-    "status": "Status",
-    "lastUsed": "Last Used",
-    "actions": "Actions",
+    "lastUsed": "Last used",
+    "createdAt": "Created",
     "statusActive": "Active",
     "statusDisabled": "Disabled",
-    "neverUsed": "Never Used",
+    "neverUsed": "Never used",
     "deleteConfirm": "Are you sure to delete this key?",
-    "deleteButton": "Delete"
+    "deleteButton": "Delete",
+    "disableButton": "Disable",
+    "enableButton": "Enable"
   }
 }
