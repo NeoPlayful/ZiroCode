@@ -187,6 +187,7 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 用户行组件
 function UserRow({ user }: any) {
+  const { t } = useTranslation('admin')
   const getStatusColor = (status: string) => {
     if (status === 'active' || user.isActive !== false) return 'bg-green-50 text-green-700'
     if (status === 'disabled') return 'bg-gray-50 text-gray-600'

@@ -181,6 +181,7 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 订阅行组件
 function SubscriptionRow({ subscription }: any) {
+  const { t } = useTranslation('admin')
   const quotaTotal = Number(subscription.quotaTotal || 0)
   const quotaUsed = Number(subscription.quotaUsed || 0)
   const usagePercent = quotaTotal > 0 ? (quotaUsed / quotaTotal) * 100 : 0

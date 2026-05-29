@@ -228,6 +228,7 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 
 // 公告行组件
 function AnnouncementRow({ announcement }: any) {
+  const { t } = useTranslation('admin')
   return (
     <tr className="hover:bg-gray-50/50 transition-colors">
       <td className="px-6 py-4">
@@ -236,7 +237,7 @@ function AnnouncementRow({ announcement }: any) {
       </td>
       <td className="px-6 py-4">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${announcement.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'}`}>
-          {announcement.isActive ? '启用' : '禁用'}
+          {announcement.isActive ? t('announcements.statusLabel.active') : t('announcements.statusLabel.inactive')}
         </span>
       </td>
       <td className="px-6 py-4 text-sm text-gray-600">
