@@ -277,6 +277,7 @@
       "displayName": "名称",
       "mode": "模式",
       "status": "状态",
+      "billingMultiplier": "计费倍率",
       "create": "创建",
       "save": "保存",
       "saving": "保存中...",

@@ -70,13 +70,16 @@ export async function gatewayRoutes(app: FastifyInstance) {
       // 最长前缀匹配路由
       const routes = await prisma.apiRoute.findMany({
         where: { isActive: true },
-        select: { id: true, path: true, mode: true, primaryChannelId: true, backupChannelId: true, activeChannel: true, channelIds: true, strategy: true },
+        select: { id: true, path: true, mode: true, primaryChannelId: true, backupChannelId: true, activeChannel: true, channelIds: true, strategy: true, billingMultiplier: true },
       });
 
       const matchedPath = matchRoute(routes, urlPath);
       if (!matchedPath) {
         return reply.status(404).send({ error: { code: 'NOT_FOUND', message: `No route matching "${urlPath}"` } });
       }
+
+      const matchedRouteInfo = routes.find(r => r.path === matchedPath);
+      const billingMultiplier = matchedRouteInfo?.billingMultiplier || 1.0;
 
       // 认证
       const auth = await validateApiKey((req as any).headers.authorization || null);
@@ -146,7 +149,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
           reply.raw.end();
         }
         const responseTime = new Date();
-        const quotaUsed = BigInt(totalTokens);
+        const quotaUsed = BigInt(Math.ceil(totalTokens * billingMultiplier));
         if (!hasError && totalTokens > 0) {
           await deductQuota(auth.userId, quotaUsed);
           triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
@@ -172,7 +175,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
       const responseTime = new Date();
       const responseData = await result.response.json() as any;
       const tokensUsed = responseData.usage?.total_tokens || 0;
-      const quotaUsed = BigInt(tokensUsed);
+      const quotaUsed = BigInt(Math.ceil(tokensUsed * billingMultiplier));
       if (result.response.ok) {
         await deductQuota(auth.userId, quotaUsed);
         triggerReferralReward(auth.userId, quotaUsed).catch(() => {});

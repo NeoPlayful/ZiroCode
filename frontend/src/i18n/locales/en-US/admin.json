@@ -277,6 +277,7 @@
       "displayName": "Name",
       "mode": "Mode",
       "status": "Status",
+      "billingMultiplier": "Billing Multiplier",
       "create": "Create",
       "save": "Save",
       "saving": "Saving...",

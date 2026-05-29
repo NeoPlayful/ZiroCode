@@ -89,8 +89,36 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const codes = await prisma.redeemCode.findMany({ orderBy: { createdAt: 'desc' } });
-      return reply.send({ codes });
+      const query = req.query as any;
+      const page = parseInt(query.page || '1');
+      const pageSize = parseInt(query.pageSize || '20');
+      const search = query.search || '';
+      const typeFilter = query.typeFilter || 'all';
+      const statusFilter = query.statusFilter || 'all';
+
+      const where: any = {};
+      if (search) where.code = { contains: search, mode: 'insensitive' };
+      if (typeFilter !== 'all') where.type = typeFilter;
+      if (statusFilter === 'active') where.isActive = true;
+      else if (statusFilter === 'disabled') where.isActive = false;
+
+      const [codes, total] = await Promise.all([
+        prisma.redeemCode.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.redeemCode.count({ where }),
+      ]);
+
+      const [totalCount, usedCount, todayCount] = await Promise.all([
+        prisma.redeemCode.count(),
+        prisma.redeemCode.count({ where: { usedCount: { gte: 1 } } }),
+        prisma.redeemCode.count({ where: { createdAt: { gte: new Date(new Date().setHours(0,0,0,0)) } } }),
+      ]);
+
+      return reply.send({ codes, total, page, pageSize, totalCount, usedCount, unusedCount: totalCount - usedCount, todayGenerated: todayCount });
     } catch (error) {
       console.error('Admin redeem codes error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取兑换码列表失败' } });
@@ -457,6 +485,7 @@ export async function adminRoutes(app: FastifyInstance) {
           strategy: data.strategy || 'round_robin',
           status: data.status || 'active',
           activeChannel: data.activeChannel || 'primary',
+          billingMultiplier: data.billingMultiplier ?? 1.0,
         },
       });
       return reply.send({ route });
@@ -489,6 +518,7 @@ export async function adminRoutes(app: FastifyInstance) {
       if (data.activeChannel !== undefined) updateData.activeChannel = data.activeChannel;
       if (data.channelIds !== undefined) updateData.channelIds = data.channelIds;
       if (data.strategy !== undefined) updateData.strategy = data.strategy;
+      if (data.billingMultiplier !== undefined) updateData.billingMultiplier = data.billingMultiplier;
 
       const route = await prisma.apiRoute.update({ where: { id }, data: updateData });
       return reply.send({ route });
