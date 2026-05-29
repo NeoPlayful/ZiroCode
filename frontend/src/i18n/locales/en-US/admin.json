@@ -13,7 +13,8 @@
     "batch": "Batch",
     "config": "Settings",
     "statusNormal": "System Running Normally",
-    "version": "Version v{{version}}"
+    "version": "Version v{{version}}",
+    "analytics": "Analytics"
   },
   "dashboard": {
     "totalUsers": "Total Users",
@@ -280,6 +281,12 @@
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel"
+    },
+    "kpi": {
+      "totalRoutes": "Total Routes",
+      "activeRoutes": "Active Routes",
+      "singleMode": "Single Mode",
+      "withBackup": "With Backup"
     }
   },
   "withdrawals": {
@@ -479,6 +486,28 @@
       "siteName": "Site Name",
       "defaultQuota": "Default Quota",
       "save": "Save"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "overview": "Today's Overview",
+    "requests": "Requests",
+    "tokens": "Token Usage",
+    "activeUsers": "Active Users",
+    "errorRate": "Error Rate",
+    "trend": "Trend",
+    "models": "Model Rankings",
+    "channels": "Channel Report",
+    "log": "Request Log",
+    "period": {
+      "24h": "24 Hours",
+      "7d": "7 Days",
+      "30d": "30 Days"
+    },
+    "metric": {
+      "requests": "Requests",
+      "tokens": "Tokens",
+      "latency": "Latency"
     }
   }
 }

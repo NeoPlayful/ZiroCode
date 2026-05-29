@@ -329,6 +329,10 @@ model ApiUsageLog {
   statusCode   Int
   error        String?
   channelId    String?
+  latencyMs    Int?
+  clientIp     String?
+  cost         Float?
+  routePath    String?
   requestTime  DateTime @default(now())
   responseTime DateTime
 
@@ -340,6 +344,60 @@ model ApiUsageLog {
   @@index([model, requestTime])
   @@index([channelId])
   @@index([requestTime])
+  @@index([statusCode])
+}
+
+// API 使用日志小时级聚合表
+model ApiUsageHourly {
+  id            String   @id @default(cuid())
+  timeBucket    DateTime
+  model         String
+  channelId     String?
+  routePath     String?
+  requestCount  Int      @default(0)
+  successCount  Int      @default(0)
+  errorCount    Int      @default(0)
+  totalTokens   BigInt   @default(0)
+  totalLatency  BigInt   @default(0)
+  totalQuota    BigInt   @default(0)
+
+  @@unique([timeBucket, model, channelId, routePath])
+  @@index([timeBucket])
+  @@index([channelId])
+  @@index([model])
+}
+
+// API 使用日志天级聚合表
+model ApiUsageDaily {
+  id            String   @id @default(cuid())
+  date          DateTime
+  model         String
+  channelId     String?
+  routePath     String?
+  requestCount  Int      @default(0)
+  successCount  Int      @default(0)
+  errorCount    Int      @default(0)
+  totalTokens   BigInt   @default(0)
+  totalLatency  BigInt   @default(0)
+  totalQuota    BigInt   @default(0)
+
+  @@unique([date, model, channelId, routePath])
+  @@index([date])
+  @@index([channelId])
+}
+
+// 渠道健康检查审计表
+model HealthCheckLog {
+  id              String   @id @default(cuid())
+  channelId       String
+  channelName     String
+  previousStatus  String
+  newStatus       String
+  message         String?
+  checkedAt       DateTime @default(now())
+
+  @@index([channelId])
+  @@index([checkedAt])
 }
 
 // 订阅套餐定价表
