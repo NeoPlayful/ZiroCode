@@ -1,0 +1,30 @@
+{
+  "welcome": "Welcome back, {{name}}",
+  "subtitle": "This is your quota usage overview",
+  "defaultUserName": "User",
+  "numberFormat": {
+    "hundredMillion": "00M",
+    "tenThousand": "0K"
+  },
+  "error": {
+    "fetchFailed": "Failed to fetch data",
+    "loadFailed": "Failed to load data, please refresh and try again",
+    "refreshButton": "Refresh Page"
+  },
+  "quota": {
+    "title": "Remaining Quota",
+    "subtitle": "Current available quota balance",
+    "payAsYouGo": "Pay-as-you-go",
+    "monthly": "Monthly Card"
+  },
+  "subscription": {
+    "activeTitle": "Active Subscriptions",
+    "plansUnit": "plans",
+    "viewDetails": "View Details",
+    "statusTitle": "Subscription Status",
+    "statusPermanent": "Permanent",
+    "statusValid": "Valid",
+    "statusNone": "No Subscription",
+    "purchaseCode": "Purchase Code"
+  }
+}

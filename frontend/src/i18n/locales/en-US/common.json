@@ -1,0 +1,18 @@
+{
+  "button": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back"
+  },
+  "message": {
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "confirm_delete": "Confirm delete?"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "developer": {
+    "title": "API 文档",
+    "authentication": "认证方式",
+    "authCookie": "浏览器自动携带 session cookie",
+    "authBearer": "Authorization: Bearer YOUR_API_KEY",
+    "statusCodes": "状态码",
+    "errorCodes": "错误码",
+    "statusCode": "状态码",
+    "errorCode": "错误码",
+    "description": "说明",
+    "status": {
+      "200": "请求成功",
+      "400": "请求参数错误",
+      "401": "未登录",
+      "403": "权限不足",
+      "404": "资源不存在",
+      "500": "服务器错误"
+    },
+    "errors": {
+      "UNAUTHORIZED": "未登录",
+      "FORBIDDEN": "权限不足",
+      "NOT_FOUND": "资源不存在",
+      "BAD_REQUEST": "请求参数错误",
+      "INTERNAL": "服务器内部错误",
+      "QUOTA_EXHAUSTED": "配额已用完"
+    }
+  },
+  "profile": {
+    "title": "个人资料",
+    "basicInfo": "基本信息",
+    "changePassword": "修改密码",
+    "email": "邮箱",
+    "role": "角色",
+    "referralCode": "推荐码",
+    "nickname": "昵称",
+    "oldPassword": "旧密码",
+    "newPassword": "新密码",
+    "save": "保存",
+    "saving": "保存中...",
+    "changePasswordBtn": "修改密码",
+    "changing": "修改中...",
+    "updateSuccess": "资料更新成功",
+    "passwordChangeSuccess": "密码修改成功",
+    "fetchError": "获取用户资料失败",
+    "updateError": "更新失败",
+    "changeError": "修改失败"
+  }
+}

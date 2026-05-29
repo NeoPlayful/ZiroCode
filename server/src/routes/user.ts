@@ -78,6 +78,30 @@ export async function userRoutes(app: FastifyInstance) {
     }
   });
 
+  app.put('/api/user/language', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const { language } = req.body as { language?: string };
+      if (!language || !['zh-CN', 'en-US'].includes(language)) {
+        return reply.status(400).send({ error: { code: 'INVALID_INPUT', message: '语言参数无效' } });
+      }
+
+      const user = await prisma.user.update({
+        where: { id: session.userId as string },
+        data: { language },
+        select: { id: true, email: true, name: true, language: true },
+      });
+
+      return reply.send(user);
+    } catch (error) {
+      console.error('Update language error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新语言偏好失败' } });
+    }
+  });
+
   app.put('/api/user/password', async (req, reply) => {
     try {
       const token = req.cookies?.[COOKIE_NAME];

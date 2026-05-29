@@ -1,13 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { SparklesIcon, CheckIcon } from '@heroicons/react/20/solid'
 
-const features: Record<string, string[]> = {
-  PAY_AS_YOU_GO: ['按量计费，用多少扣多少', '永不过期', '适合轻度使用'],
-  MONTHLY: ['每月固定配额', '每日 8:00 自动重置', '适合频繁调用', '性价比高'],
-  PERMANENT: ['一次性购买，永久有效', '不限时间', '适合长期使用', '最超值的选择'],
-}
-
 export default function PricingPage() {
+  const { t } = useTranslation('subscription');
   const { data, isLoading } = useQuery({
     queryKey: ['plans'],
     queryFn: () => fetch('/api/payments/plans').then(r => r.json()),
@@ -23,21 +19,21 @@ export default function PricingPage() {
       })
       if (!res.ok) {
         const err = await res.json()
-        alert(err.error?.message || '创建支付失败')
+        alert(err.error?.message || t('pricing.error.createPayment'))
         return
       }
       const data = await res.json()
       if (data.url) window.location.href = data.url
     } catch {
-      alert('网络错误，请稍后重试')
+      alert(t('pricing.error.network'))
     }
   }
 
   return (
     <div className="max-w-[1000px] mx-auto px-8 py-10">
       <div className="text-center mb-10">
-        <h1 className="text-2xl font-bold mb-2">选择套餐</h1>
-        <p className="text-gray-500">按需选择，灵活付费</p>
+        <h1 className="text-2xl font-bold mb-2">{t('pricing.title')}</h1>
+        <p className="text-gray-500">{t('pricing.subtitle')}</p>
       </div>
 
       {isLoading ? (
@@ -55,7 +51,7 @@ export default function PricingPage() {
       ) : plans.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <SparklesIcon className="w-12 h-12 mx-auto mb-3" />
-          <p>暂无可用套餐</p>
+          <p>{t('pricing.emptyMessage')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-6">
@@ -64,19 +60,19 @@ export default function PricingPage() {
               plan.type === 'MONTHLY' ? 'border-[#e8673a] shadow-md' : 'border-gray-200'
             }`}>
               {plan.type === 'MONTHLY' && (
-                <span className="text-xs font-semibold text-[#e8673a] bg-[#fde8df] px-2.5 py-0.5 rounded-full self-start mb-2">推荐</span>
+                <span className="text-xs font-semibold text-[#e8673a] bg-[#fde8df] px-2.5 py-0.5 rounded-full self-start mb-2">{t('pricing.recommended')}</span>
               )}
               <h2 className="text-lg font-bold mb-1">{plan.name}</h2>
               <div className="mb-4">
                 <span className="text-3xl font-bold">¥{Number(plan.price).toFixed(2)}</span>
-                {plan.type === 'MONTHLY' && <span className="text-gray-400 text-sm">/月</span>}
-                {plan.type === 'PAY_AS_YOU_GO' && <span className="text-gray-400 text-sm ml-1">起</span>}
+                {plan.type === 'MONTHLY' && <span className="text-gray-400 text-sm">{t('pricing.monthly')}</span>}
+                {plan.type === 'PAY_AS_YOU_GO' && <span className="text-gray-400 text-sm ml-1">{t('pricing.startingFrom')}</span>}
               </div>
               <p className="text-sm text-gray-500 mb-4">
-                配额：{(Number(plan.quotaAmount) / 100000000).toFixed(0)} 亿 Token
+                {t('pricing.quota', { amount: (Number(plan.quotaAmount) / 100000000).toFixed(0) })}
               </p>
               <ul className="space-y-2 mb-6 flex-1">
-                {(features[plan.type] || []).map((f: string, i: number) => (
+                {(t(`pricing.features.${plan.type}`, { returnObjects: true }) as string[] || []).map((f: string, i: number) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                     <CheckIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />{f}
                   </li>
@@ -88,7 +84,7 @@ export default function PricingPage() {
                     ? 'bg-[#e8673a] hover:bg-[#d4562a] text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}>
-                立即购买
+                {t('pricing.buyNow')}
               </button>
             </div>
           ))}

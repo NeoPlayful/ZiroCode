@@ -1,0 +1,46 @@
+{
+  "tickets": {
+    "title": "Tickets",
+    "subtitle": "Submit issues or suggestions, we will respond as soon as possible",
+    "export": "Export",
+    "createNew": "New Ticket",
+    "backToList": "Back to Ticket List",
+    "notFound": "Ticket not found",
+    "status": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In Progress",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed",
+      "all": "All Status"
+    },
+    "priority": {
+      "LOW": "Low",
+      "NORMAL": "Normal",
+      "HIGH": "High",
+      "URGENT": "Urgent"
+    },
+    "form": {
+      "selectTemplate": "Select Template",
+      "title": "Title",
+      "description": "Describe your issue in detail...",
+      "category": "Category",
+      "priority": "Priority",
+      "cancel": "Cancel",
+      "submit": "Submit"
+    },
+    "search": {
+      "placeholder": "Search title or content..."
+    },
+    "emptyState": {
+      "message": "No tickets",
+      "hint": "Create your first ticket"
+    },
+    "reply": {
+      "admin": "Admin",
+      "me": "Me",
+      "official": "Official",
+      "placeholder": "Enter reply...",
+      "submit": "Reply"
+    }
+  }
+}

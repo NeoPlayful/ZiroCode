@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import ReferralSection from '../components/ReferralSection';
 import TutorialAndAnnouncement from '../components/TutorialAndAnnouncement';
 import { BoltIcon, BanknotesIcon, CalendarDaysIcon, CheckCircleIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/16/solid';
@@ -27,17 +28,18 @@ function DashboardSkeleton() {
   );
 }
 
-function formatQuota(value: number): string {
-  if (value >= 100_000_000) return (value / 100_000_000).toFixed(1) + '亿';
-  if (value >= 10_000) return (value / 10_000).toFixed(1) + '万';
+function formatQuota(value: number, t: any): string {
+  if (value >= 100_000_000) return (value / 100_000_000).toFixed(1) + t('dashboard:numberFormat.hundredMillion');
+  if (value >= 10_000) return (value / 10_000).toFixed(1) + t('dashboard:numberFormat.tenThousand');
   return value.toLocaleString();
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation('dashboard');
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => fetch('/api/user/dashboard').then(r => {
-      if (!r.ok) throw new Error('获取数据失败');
+      if (!r.ok) throw new Error(t('error.fetchFailed'));
       return r.json();
     }),
   });
@@ -56,24 +58,24 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center">
         <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
           <ExclamationTriangleIcon className="w-10 h-10 text-[#e8673a] mx-auto mb-2" />
-          <p className="text-gray-600 mb-4">加载数据失败，请刷新页面重试</p>
+          <p className="text-gray-600 mb-4">{t('error.loadFailed')}</p>
           <button onClick={() => window.location.reload()} className="bg-[#e8673a] text-white px-6 py-2 rounded-lg text-sm">
-            刷新页面
+            {t('error.refreshButton')}
           </button>
         </div>
       </div>
     );
   }
 
-  const user = data?.user || { name: '用户' };
+  const user = data?.user || { name: t('defaultUserName') };
   const quota = data?.quota || { payAsYouGo: { remaining: 0 }, monthly: { remaining: null } };
   const subs = data?.subscriptions || [];
 
   return (
     <div className="min-h-screen bg-[#f0ebe3]">
       <main className="max-w-[1280px] mx-auto px-8 py-8">
-        <h1 className="text-3xl font-bold mb-1">欢迎回来，{user.name}</h1>
-        <p className="text-gray-500 text-sm mb-6">这是您的配额使用概览</p>
+        <h1 className="text-3xl font-bold mb-1">{t('welcome', { name: user.name })}</h1>
+        <p className="text-gray-500 text-sm mb-6">{t('subtitle')}</p>
 
         {/* 公告 */}
         {announcements.length > 0 && (
@@ -98,8 +100,8 @@ export default function DashboardPage() {
                 <BoltIcon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="font-semibold text-base">剩余配额</div>
-                <p className="text-gray-400 text-xs">当前可用额度余量</p>
+                <div className="font-semibold text-base">{t('quota.title')}</div>
+                <p className="text-gray-400 text-xs">{t('quota.subtitle')}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -108,8 +110,8 @@ export default function DashboardPage() {
                   <BanknotesIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <div className="text-xs text-gray-600">按量额度</div>
-                  <div className="text-xl font-bold">{formatQuota(quota.payAsYouGo.remaining)}</div>
+                  <div className="text-xs text-gray-600">{t('quota.payAsYouGo')}</div>
+                  <div className="text-xl font-bold">{formatQuota(quota.payAsYouGo.remaining, t)}</div>
                 </div>
               </div>
               <div className="bg-[#edfaf3] border border-[#b8ecd4] rounded-lg p-3 flex items-center gap-2">
@@ -117,8 +119,8 @@ export default function DashboardPage() {
                   <CalendarDaysIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <div className="text-xs text-gray-600">月卡额度</div>
-                  <div className="text-xl font-bold">{quota.monthly?.remaining !== null && quota.monthly?.remaining !== undefined ? formatQuota(quota.monthly.remaining) : '0'}</div>
+                  <div className="text-xs text-gray-600">{t('quota.monthly')}</div>
+                  <div className="text-xl font-bold">{quota.monthly?.remaining !== null && quota.monthly?.remaining !== undefined ? formatQuota(quota.monthly.remaining, t) : '0'}</div>
                 </div>
               </div>
             </div>
@@ -130,12 +132,12 @@ export default function DashboardPage() {
                 <CheckCircleIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="text-sm text-gray-500">活跃订阅</div>
-                <div className="text-lg font-bold">{subs.length} 个套餐</div>
+                <div className="text-sm text-gray-500">{t('subscription.activeTitle')}</div>
+                <div className="text-lg font-bold">{subs.length} {t('subscription.plansUnit')}</div>
               </div>
             </div>
             <a href="/subscription" className="block w-full bg-[#e8673a] hover:bg-[#d4562a] text-white py-2.5 rounded-lg text-sm font-medium text-center">
-              查看详情
+              {t('subscription.viewDetails')}
             </a>
           </div>
 
@@ -145,12 +147,12 @@ export default function DashboardPage() {
                 <ShieldCheckIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="text-sm text-gray-500">订阅状态</div>
-                <div className="text-lg font-bold">{subs.some((s: any) => s.type === 'PERMANENT') ? '永久有效' : subs.length > 0 ? '有效' : '无订阅'}</div>
+                <div className="text-sm text-gray-500">{t('subscription.statusTitle')}</div>
+                <div className="text-lg font-bold">{subs.some((s: any) => s.type === 'PERMANENT') ? t('subscription.statusPermanent') : subs.length > 0 ? t('subscription.statusValid') : t('subscription.statusNone')}</div>
               </div>
             </div>
             <a href="/subscription" className="block w-full bg-[#e8673a] hover:bg-[#d4562a] text-white py-2.5 rounded-lg text-sm font-medium text-center">
-              购买兑换码
+              {t('subscription.purchaseCode')}
             </a>
           </div>
         </div>

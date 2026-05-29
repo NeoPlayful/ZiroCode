@@ -1,0 +1,30 @@
+{
+  "welcome": "欢迎回来，{{name}}",
+  "subtitle": "这是您的配额使用概览",
+  "defaultUserName": "用户",
+  "numberFormat": {
+    "hundredMillion": "亿",
+    "tenThousand": "万"
+  },
+  "error": {
+    "fetchFailed": "获取数据失败",
+    "loadFailed": "加载数据失败，请刷新页面重试",
+    "refreshButton": "刷新页面"
+  },
+  "quota": {
+    "title": "剩余配额",
+    "subtitle": "当前可用额度余量",
+    "payAsYouGo": "按量额度",
+    "monthly": "月卡额度"
+  },
+  "subscription": {
+    "activeTitle": "活跃订阅",
+    "plansUnit": "个套餐",
+    "viewDetails": "查看详情",
+    "statusTitle": "订阅状态",
+    "statusPermanent": "永久有效",
+    "statusValid": "有效",
+    "statusNone": "无订阅",
+    "purchaseCode": "购买兑换码"
+  }
+}

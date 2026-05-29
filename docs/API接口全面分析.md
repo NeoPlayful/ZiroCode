@@ -78,9 +78,9 @@
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/api/payment/stripe/checkout` | 创建 Stripe 支付 |
-| POST | `/api/payment/stripe/webhook` | Stripe 回调 |
-| GET | `/api/payment/history` | 支付历史 |
+| POST | `/api/payments/stripe/checkout` | 创建 Stripe 支付 |
+| POST | `/api/payments/stripe/webhook` | Stripe 回调 |
+| GET | `/api/payments/history` | 支付历史 |
 
 ## 九、统计分析 (Analytics)
 

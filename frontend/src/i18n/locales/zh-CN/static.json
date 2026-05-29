@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "welcome": "欢迎，{{name}}",
+    "dashboard": "进入控制台",
+    "login": "登录",
+    "register": "注册"
+  },
+  "about": {
+    "title": "关于 ZiroCode",
+    "whoWeAre": "我们是谁",
+    "whoWeAreContent": "ZiroCode 是一个专业的 AI 模型接口网关服务平台，致力于为开发者提供统一、稳定、高效的 AI 模型访问解决方案。",
+    "mission": "我们的使命",
+    "missionContent": "让 AI 技术更易用、更可靠、更经济。我们相信，通过提供统一的接口网关，可以大幅降低开发者接入多个 AI 模型的复杂度和成本。",
+    "advantages": "核心优势",
+    "supportedModels": "支持的模型",
+    "supportedModelsContent": "我们支持业界主流的 AI 模型提供商，包括：",
+    "useCases": "适用场景",
+    "contact": "联系我们",
+    "contactContent": "如果您有任何问题、建议或合作意向，欢迎通过以下方式联系我们：",
+    "more": "更多...",
+    "copyright": "© 2026 ZiroCode. All rights reserved."
+  },
+  "terms": {
+    "title": "使用条款",
+    "lastUpdated": "最后更新时间：2026年5月"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新时间：2026年5月"
+  }
+}

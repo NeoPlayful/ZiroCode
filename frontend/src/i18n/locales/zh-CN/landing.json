@@ -1,0 +1,26 @@
+{
+  "landing": {
+    "hero": {
+      "title": "统一的\nAI 模型接口网关",
+      "subtitle": "兼容 OpenAI API 格式，统一接入 Claude、OpenAI、Gemini、OpenClaw 等主流模型。更稳定、更低成本。",
+      "getApiKey": "获取 API Key",
+      "viewDocs": "查看文档",
+      "copy": "复制",
+      "copied": "已复制",
+      "supportedPlatforms": "支持的平台"
+    }
+  },
+  "verifyEmail": {
+    "verifying": "正在验证邮箱...",
+    "successTitle": "验证成功",
+    "errorTitle": "验证失败",
+    "goToLogin": "前往登录",
+    "backToLogin": "返回登录",
+    "errors": {
+      "missingToken": "缺少验证令牌",
+      "verifySuccess": "邮箱验证成功",
+      "verifyFailed": "验证失败",
+      "networkError": "网络错误，请稍后重试"
+    }
+  }
+}

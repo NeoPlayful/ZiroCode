@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "welcome": "Welcome, {{name}}",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register"
+  },
+  "about": {
+    "title": "About ZiroCode",
+    "whoWeAre": "Who We Are",
+    "whoWeAreContent": "ZiroCode is a professional AI model API gateway service platform, dedicated to providing developers with unified, stable, and efficient AI model access solutions.",
+    "mission": "Our Mission",
+    "missionContent": "Make AI technology more accessible, reliable, and economical. We believe that by providing a unified API gateway, we can significantly reduce the complexity and cost for developers to integrate multiple AI models.",
+    "advantages": "Core Advantages",
+    "supportedModels": "Supported Models",
+    "supportedModelsContent": "We support mainstream AI model providers in the industry, including:",
+    "useCases": "Use Cases",
+    "contact": "Contact Us",
+    "contactContent": "If you have any questions, suggestions, or cooperation intentions, please contact us through the following methods:",
+    "more": "More...",
+    "copyright": "© 2026 ZiroCode. All rights reserved."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated: May 2026"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated: May 2026"
+  }
+}

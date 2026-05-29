@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 export default function KeysPage() {
+  const { t } = useTranslation('keys');
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
@@ -44,12 +46,12 @@ export default function KeysPage() {
     <main className="max-w-[1280px] mx-auto px-8 py-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">API 密钥</h1>
-          <p className="text-sm text-gray-500 mt-1">管理您的 API 访问密钥</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('subtitle')}</p>
           </div>
           <button onClick={() => { setShowCreate(true); setNewKeyResult(null); }}
             className="bg-[#e8673a] hover:bg-[#d4562a] text-white px-4 py-2 rounded-lg text-sm font-medium">
-            + 创建密钥
+            {t('createButton')}
           </button>
         </div>
 
@@ -59,37 +61,37 @@ export default function KeysPage() {
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
               {newKeyResult ? (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">密钥创建成功</h3>
-                  <p className="text-sm text-gray-500 mb-3">请立即复制此密钥，关闭后将不再显示完整密钥。</p>
+                  <h3 className="font-semibold text-lg mb-2">{t('createSuccess.title')}</h3>
+                  <p className="text-sm text-gray-500 mb-3">{t('createSuccess.warning')}</p>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3 font-mono text-sm break-all">{newKeyResult}</div>
                   <div className="flex gap-2">
                     <button onClick={() => copyKey(newKeyResult)} className="flex-1 bg-[#e8673a] text-white py-2 rounded-lg text-sm">
-                      {copySuccess ? '✓ 已复制' : '复制密钥'}
+                      {copySuccess ? t('createSuccess.copied') : t('createSuccess.copyButton')}
                     </button>
                     <button onClick={() => { setShowCreate(false); setNewKeyResult(null); }}
-                      className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">关闭</button>
+                      className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">{t('createSuccess.closeButton')}</button>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <h3 className="font-semibold text-lg mb-4">创建新密钥</h3>
-                  <label className="block text-sm font-medium mb-1">密钥名称</label>
+                  <h3 className="font-semibold text-lg mb-4">{t('createDialog.title')}</h3>
+                  <label className="block text-sm font-medium mb-1">{t('createDialog.nameLabel')}</label>
                   <input value={newKeyName} onChange={e => setNewKeyName(e.target.value)}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:border-[#e8673a]"
-                    placeholder="例如：生产环境" />
-                  <label className="block text-sm font-medium mb-1">速率限制（次/分钟）</label>
+                    placeholder={t('createDialog.namePlaceholder')} />
+                  <label className="block text-sm font-medium mb-1">{t('createDialog.rateLimitLabel')}</label>
                   <input value={rateLimit} onChange={e => setRateLimit(e.target.value)} type="number"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:border-[#e8673a]" />
-                  <label className="block text-sm font-medium mb-1">最大 Token</label>
+                  <label className="block text-sm font-medium mb-1">{t('createDialog.maxTokensLabel')}</label>
                   <input value={maxTokens} onChange={e => setMaxTokens(e.target.value)} type="number"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-[#e8673a]" />
                   <div className="flex gap-2">
                     <button onClick={() => createMutation.mutate({ name: newKeyName, rateLimit: parseInt(rateLimit), maxTokens: parseInt(maxTokens) })} disabled={!newKeyName || createMutation.isPending}
                       className="flex-1 bg-[#e8673a] text-white py-2 rounded-lg text-sm disabled:opacity-50">
-                      {createMutation.isPending ? '创建中...' : '创建'}
+                      {createMutation.isPending ? t('createDialog.creating') : t('createDialog.createButton')}
                     </button>
                     <button onClick={() => setShowCreate(false)}
-                      className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">取消</button>
+                      className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">{t('createDialog.cancelButton')}</button>
                   </div>
                 </div>
               )}
@@ -105,9 +107,9 @@ export default function KeysPage() {
         ) : keys.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
           <div className="text-4xl mb-3">🔑</div>
-            <p className="text-gray-500 mb-4">还没有创建 API 密钥</p>
+            <p className="text-gray-500 mb-4">{t('emptyState.message')}</p>
             <button onClick={() => setShowCreate(true)} className="bg-[#e8673a] text-white px-5 py-2 rounded-lg text-sm font-medium">
-              创建第一个密钥
+              {t('emptyState.button')}
             </button>
           </div>
         ) : (
@@ -115,11 +117,11 @@ export default function KeysPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">名称</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">密钥</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">状态</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">最后使用</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">操作</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{t('table.name')}</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{t('table.key')}</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{t('table.status')}</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">{t('table.lastUsed')}</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">{t('table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,13 +131,13 @@ export default function KeysPage() {
                     <td className="px-4 py-3 text-sm font-mono text-gray-500">{key.key}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${key.isActive ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                        {key.isActive ? '启用' : '禁用'}
+                        {key.isActive ? t('table.statusActive') : t('table.statusDisabled')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">{key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : '从未使用'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-400">{key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : t('table.neverUsed')}</td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => { if (confirm('确定删除此密钥？')) deleteMutation.mutate(key.id); }}
-                        className="text-red-500 hover:text-red-700 text-sm">删除</button>
+                      <button onClick={() => { if (confirm(t('table.deleteConfirm'))) deleteMutation.mutate(key.id); }}
+                        className="text-red-500 hover:text-red-700 text-sm">{t('table.deleteButton')}</button>
                     </td>
                   </tr>
                 ))}

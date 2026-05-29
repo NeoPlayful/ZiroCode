@@ -19,4 +19,21 @@ export async function healthRoutes(app: FastifyInstance) {
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取模型列表失败' } });
     }
   });
+
+  app.get('/api/models/:channel', async (req, reply) => {
+    try {
+      const { channel } = req.params as any;
+      const channelData = await prisma.modelChannel.findFirst({
+        where: { name: channel, isActive: true },
+        select: { id: true, name: true, displayName: true, models: true, priority: true, baseUrl: true },
+      });
+      if (!channelData) {
+        return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '渠道不存在' } });
+      }
+      return reply.send({ channel: channelData, tutorial: `使用 ${channelData.displayName || channelData.name} 渠道的模型` });
+    } catch (error) {
+      console.error('Get channel error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取渠道详情失败' } });
+    }
+  });
 }

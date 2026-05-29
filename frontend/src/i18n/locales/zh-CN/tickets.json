@@ -1,0 +1,46 @@
+{
+  "tickets": {
+    "title": "工单",
+    "subtitle": "提交问题或建议,我们将尽快回复",
+    "export": "导出",
+    "createNew": "新建工单",
+    "backToList": "返回工单列表",
+    "notFound": "工单不存在",
+    "status": {
+      "OPEN": "待处理",
+      "IN_PROGRESS": "处理中",
+      "RESOLVED": "已解决",
+      "CLOSED": "已关闭",
+      "all": "全部状态"
+    },
+    "priority": {
+      "LOW": "低",
+      "NORMAL": "普通",
+      "HIGH": "高",
+      "URGENT": "紧急"
+    },
+    "form": {
+      "selectTemplate": "选择模板",
+      "title": "标题",
+      "description": "详细描述您的问题...",
+      "category": "分类",
+      "priority": "优先级",
+      "cancel": "取消",
+      "submit": "提交"
+    },
+    "search": {
+      "placeholder": "搜索标题或内容..."
+    },
+    "emptyState": {
+      "message": "暂无工单",
+      "hint": "创建第一个工单"
+    },
+    "reply": {
+      "admin": "管理员",
+      "me": "我",
+      "official": "官方",
+      "placeholder": "输入回复...",
+      "submit": "回复"
+    }
+  }
+}
