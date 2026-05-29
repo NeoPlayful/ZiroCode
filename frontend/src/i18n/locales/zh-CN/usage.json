@@ -23,7 +23,7 @@
       "noData": "暂无每日数据"
     },
     "modelDistribution": {
-      "title": "模型使用分布",
+      "title": "模型使用分布（今日）",
       "times": "次"
     },
     "recentRecords": {

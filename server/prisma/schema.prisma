@@ -425,6 +425,7 @@ model ModelChannel {
   id               String       @id @default(cuid())
   name             String       @unique
   displayName      String
+  displayOrder     Int          @default(0)
   baseUrl          String
   apiKey           String
   models           String[]

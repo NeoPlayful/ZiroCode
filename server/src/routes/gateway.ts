@@ -150,6 +150,13 @@ export async function gatewayRoutes(app: FastifyInstance) {
         if (!hasError && totalTokens > 0) {
           await deductQuota(auth.userId, quotaUsed);
           triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
+          const newQuota = await getUserQuota(auth.userId);
+          const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
+          const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
+          if (total > BigInt(0) && remaining * BigInt(10) < total) {
+            createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', '剩余配额不足 10%，请及时充值', '/subscription').catch(() => {});
+            dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed: Number((total - remaining) * BigInt(100) / total) }).catch(() => {});
+          }
         }
         await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath);
         return;
@@ -169,6 +176,13 @@ export async function gatewayRoutes(app: FastifyInstance) {
       if (result.response.ok) {
         await deductQuota(auth.userId, quotaUsed);
         triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
+        const newQuota = await getUserQuota(auth.userId);
+        const total = newQuota.payAsYouGoTotal + (newQuota.monthlyTotal || BigInt(0));
+        const remaining = newQuota.payAsYouGoRemaining + (newQuota.monthlyRemaining || BigInt(0));
+        if (total > BigInt(0) && remaining * BigInt(10) < total) {
+          createNotification(auth.userId, 'QUOTA_LOW', '配额即将用完', '剩余配额不足 10%，请及时充值', '/subscription').catch(() => {});
+          dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed: Number((total - remaining) * BigInt(100) / total) }).catch(() => {});
+        }
       }
       await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath);
       return reply.status(result.response.status).send(responseData);

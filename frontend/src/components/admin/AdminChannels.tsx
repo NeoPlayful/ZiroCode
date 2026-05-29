@@ -251,6 +251,7 @@ export default function AdminChannels() {
                   {/* Row 1: Name + Status Badges + Actions */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#FFF4F0] text-[#F97346] text-sm font-bold flex-shrink-0">{channel.displayOrder ?? '-'}</span>
                       <span className="text-lg font-semibold text-[#111827] truncate">{channel.displayName || channel.name}</span>
                       <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${
                         channel.isActive ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#DC2626]'

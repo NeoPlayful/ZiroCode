@@ -208,10 +208,14 @@ export async function adminRoutes(app: FastifyInstance) {
       const existing = await prisma.modelChannel.findUnique({ where: { name: name.trim() } });
       if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `渠道名称 "${name}" 已被使用` } });
 
+      const maxOrder = await prisma.modelChannel.aggregate({ _max: { displayOrder: true } });
+      const nextOrder = (maxOrder._max.displayOrder ?? 0) + 1;
+
       const channel = await prisma.modelChannel.create({
         data: {
           name: name.trim(),
           displayName: displayName || name.trim(),
+          displayOrder: nextOrder,
           baseUrl: baseUrl.trim(),
           apiKey: apiKey.trim(),
           models: models || [],
@@ -689,23 +693,54 @@ export async function adminRoutes(app: FastifyInstance) {
       let points: { time: string; value: number }[];
 
       if (granularity === 'hour') {
-        const rows = await prisma.apiUsageHourly.findMany({
-          where: { timeBucket: { gte: from } },
-          orderBy: { timeBucket: 'asc' },
+        const rawLogs = await prisma.apiUsageLog.findMany({
+          where: { requestTime: { gte: from } },
+          select: { tokensUsed: true, requestTime: true },
+          orderBy: { requestTime: 'asc' },
         });
-        points = rows.map(r => ({
-          time: r.timeBucket.toISOString(),
-          value: metric === 'tokens' ? Number(r.totalTokens) : metric === 'latency' && r.requestCount > 0 ? Number(r.totalLatency) / r.requestCount : r.requestCount,
-        }));
+        // 生成24小时完整时段
+        const now = new Date();
+        const base = new Date(now);
+        base.setMinutes(0, 0, 0);
+        base.setHours(base.getHours() - 23);
+        points = [];
+        for (let i = 0; i < 24; i++) {
+          const h = new Date(base.getTime() + i * 3600000);
+          points.push({ time: h.toISOString(), value: 0 });
+        }
+        for (const log of rawLogs) {
+          const d = new Date(log.requestTime);
+          const idx = Math.floor((d.getTime() - base.getTime()) / 3600000);
+          if (idx >= 0 && idx < 24) {
+            if (metric === 'tokens') points[idx].value += log.tokensUsed;
+            else points[idx].value += 1;
+          }
+        }
       } else {
-        const rows = await prisma.apiUsageDaily.findMany({
-          where: { date: { gte: from } },
-          orderBy: { date: 'asc' },
+        // 生成完整时间段（7天或30天），按日填充
+        const numDays = period === '30d' ? 30 : 7;
+        const rawLogs = await prisma.apiUsageLog.findMany({
+          where: { requestTime: { gte: from } },
+          select: { tokensUsed: true, requestTime: true },
+          orderBy: { requestTime: 'asc' },
         });
-        points = rows.map(r => ({
-          time: r.date.toISOString(),
-          value: metric === 'tokens' ? Number(r.totalTokens) : metric === 'latency' && r.requestCount > 0 ? Number(r.totalLatency) / r.requestCount : r.requestCount,
-        }));
+        // 从当前日期往前倒推 N 天
+        points = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        for (let i = numDays - 1; i >= 0; i--) {
+          const d = new Date(today.getTime() - i * 86400000);
+          points.push({ time: d.toISOString(), value: 0 });
+        }
+        for (const log of rawLogs) {
+          const logDate = new Date(log.requestTime);
+          logDate.setHours(0, 0, 0, 0);
+          const idx = Math.floor((logDate.getTime() - points[0] ? new Date(points[0].time).getTime() : 0) / 86400000);
+          if (idx >= 0 && idx < numDays) {
+            if (metric === 'tokens') points[idx].value += log.tokensUsed;
+            else points[idx].value += 1;
+          }
+        }
       }
 
       return reply.send({ points });
@@ -904,28 +939,43 @@ export async function adminRoutes(app: FastifyInstance) {
         }),
       ]);
 
+      // Map channelIds to displayOrder/displayName
+      const channelIds = [...new Set(logs.map(l => l.channelId).filter(Boolean))] as string[];
+      const channels = channelIds.length > 0
+        ? await prisma.modelChannel.findMany({
+            where: { id: { in: channelIds } },
+            select: { id: true, displayOrder: true, displayName: true },
+          })
+        : [];
+      const channelMap = new Map(channels.map(c => [c.id, { displayOrder: c.displayOrder, displayName: c.displayName }]));
+
       const result = {
         total,
         page: p,
         pageSize: ps,
         totalPages: Math.ceil(total / ps),
-        logs: logs.map(l => ({
-          id: l.id,
-          userId: l.userId,
-          userName: (l as any).user?.name || null,
-          userEmail: (l as any).user?.email || null,
-          model: l.model,
-          channelId: l.channelId,
-          tokensUsed: l.tokensUsed,
-          quotaUsed: Number(l.quotaUsed),
-          latencyMs: l.latencyMs,
-          clientIp: l.clientIp,
-          routePath: l.routePath,
-          statusCode: l.statusCode,
-          error: l.error,
-          requestTime: l.requestTime,
-          responseTime: l.responseTime,
-        })),
+        logs: logs.map(l => {
+          const chInfo = l.channelId ? channelMap.get(l.channelId) : null;
+          return {
+            id: l.id,
+            userId: l.userId,
+            userName: (l as any).user?.name || null,
+            userEmail: (l as any).user?.email || null,
+            model: l.model,
+            channelId: l.channelId,
+            channelDisplayOrder: chInfo?.displayOrder ?? null,
+            channelDisplayName: chInfo?.displayName ?? null,
+            tokensUsed: l.tokensUsed,
+            quotaUsed: Number(l.quotaUsed),
+            latencyMs: l.latencyMs,
+            clientIp: l.clientIp,
+            routePath: l.routePath,
+            statusCode: l.statusCode,
+            error: l.error,
+            requestTime: l.requestTime,
+            responseTime: l.responseTime,
+          };
+        }),
       };
 
       return reply.send(result);
