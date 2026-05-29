@@ -122,11 +122,76 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const channels = await prisma.modelChannel.findMany({ orderBy: { priority: 'asc' } });
-      return reply.send({ channels });
+      const query = req.query as any;
+      const page = parseInt(query.page || '1');
+      const pageSize = parseInt(query.pageSize || '20');
+      const search = query.search || '';
+      const statusFilter = query.statusFilter || 'all';
+
+      const where: any = {};
+      if (statusFilter === 'active') where.isActive = true;
+      else if (statusFilter === 'inactive') where.isActive = false;
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { displayName: { contains: search, mode: 'insensitive' } },
+          { baseUrl: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      const [channels, total] = await Promise.all([
+        prisma.modelChannel.findMany({
+          where,
+          orderBy: { priority: 'asc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.modelChannel.count({ where }),
+      ]);
+
+      // Get route references for each channel
+      const allRoutes = await prisma.apiRoute.findMany({
+        select: { id: true, path: true, displayName: true, mode: true, primaryChannelId: true, backupChannelId: true, channelIds: true },
+      });
+      const channelsWithRefs = channels.map(ch => {
+        const refs = allRoutes.filter(r =>
+          r.primaryChannelId === ch.id ||
+          r.backupChannelId === ch.id ||
+          (r.channelIds || []).includes(ch.id)
+        ).map(r => ({ id: r.id, path: r.path, displayName: r.displayName, mode: r.mode }));
+        return { ...ch, routeRefs: refs };
+      });
+
+      return reply.send({ channels: channelsWithRefs, total, page, pageSize });
     } catch (error) {
       console.error('Admin channels error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取渠道列表失败' } });
+    }
+  });
+
+  app.get('/api/admin/channels/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const channel = await prisma.modelChannel.findUnique({ where: { id } });
+      if (!channel) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '渠道不存在' } });
+
+      const routeRefs = await prisma.apiRoute.findMany({
+        where: {
+          OR: [
+            { primaryChannelId: id },
+            { backupChannelId: id },
+            { channelIds: { has: id } },
+          ],
+        },
+        select: { id: true, path: true, displayName: true, mode: true },
+      });
+
+      return reply.send({ channel: { ...channel, routeRefs } });
+    } catch (error) {
+      console.error('Admin get channel error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取渠道详情失败' } });
     }
   });
 
@@ -134,10 +199,24 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const { name, displayName, baseUrl, apiKey, models, priority } = req.body as any;
-      if (!name || !baseUrl || !apiKey) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '名称、地址和API Key为必填项' } });
+      const { name, displayName, baseUrl, apiKey, models, priority, weight } = req.body as any;
+      if (!name || !name.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '渠道名称为必填项' } });
+      if (!baseUrl || !baseUrl.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'Base URL 为必填项' } });
+      if (!apiKey || !apiKey.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'API Key 为必填项' } });
+
+      const existing = await prisma.modelChannel.findUnique({ where: { name: name.trim() } });
+      if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `渠道名称 "${name}" 已被使用` } });
+
       const channel = await prisma.modelChannel.create({
-        data: { name, displayName, baseUrl, apiKey, models: models || [], priority: priority || 0 },
+        data: {
+          name: name.trim(),
+          displayName: displayName || name.trim(),
+          baseUrl: baseUrl.trim(),
+          apiKey: apiKey.trim(),
+          models: models || [],
+          priority: priority || 0,
+          weight: weight !== undefined ? weight : 1,
+        },
       });
       return reply.send({ channel });
     } catch (error) {
@@ -153,17 +232,60 @@ export async function adminRoutes(app: FastifyInstance) {
       const { id } = req.params as any;
       const data = req.body as any;
       const updateData: any = {};
-      if (data.displayName) updateData.displayName = data.displayName;
-      if (data.baseUrl) updateData.baseUrl = data.baseUrl;
-      if (data.apiKey) updateData.apiKey = data.apiKey;
-      if (data.models) updateData.models = data.models;
+
+      if (data.name !== undefined) {
+        if (!data.name.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '渠道名称不能为空' } });
+        const existing = await prisma.modelChannel.findUnique({ where: { name: data.name.trim() } });
+        if (existing && existing.id !== id) return reply.status(409).send({ error: { code: 'CONFLICT', message: `渠道名称 "${data.name}" 已被使用` } });
+        updateData.name = data.name.trim();
+      }
+      if (data.displayName !== undefined) updateData.displayName = data.displayName;
+      if (data.baseUrl !== undefined) updateData.baseUrl = data.baseUrl;
+      if (data.apiKey !== undefined && data.apiKey !== '') updateData.apiKey = data.apiKey;
+      if (data.models !== undefined) updateData.models = data.models;
       if (data.priority !== undefined) updateData.priority = data.priority;
+      if (data.weight !== undefined) updateData.weight = data.weight;
       if (data.isActive !== undefined) updateData.isActive = data.isActive;
+
       const channel = await prisma.modelChannel.update({ where: { id }, data: updateData });
       return reply.send({ channel });
     } catch (error) {
       console.error('Admin update channel error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新渠道失败' } });
+    }
+  });
+
+  app.delete('/api/admin/channels/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const channel = await prisma.modelChannel.findUnique({ where: { id } });
+      if (!channel) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '渠道不存在' } });
+
+      // Check route references
+      const routeRefs = await prisma.apiRoute.findMany({
+        where: {
+          OR: [
+            { primaryChannelId: id },
+            { backupChannelId: id },
+            { channelIds: { has: id } },
+          ],
+        },
+        select: { id: true, path: true, displayName: true },
+      });
+      if (routeRefs.length > 0) {
+        return reply.status(409).send({
+          error: { code: 'CONFLICT', message: `该渠道被 ${routeRefs.length} 个路由引用，删除后将影响这些路由` },
+          routeRefs: routeRefs.map(r => ({ id: r.id, path: r.path, displayName: r.displayName })),
+        });
+      }
+
+      await prisma.modelChannel.delete({ where: { id } });
+      return reply.send({ ok: true });
+    } catch (error) {
+      console.error('Admin delete channel error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '删除渠道失败' } });
     }
   });
 
@@ -273,11 +395,112 @@ export async function adminRoutes(app: FastifyInstance) {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
       const { id } = req.params as any;
-      const healthy = await checkChannelHealth(id);
-      return reply.send({ healthy });
+      const result = await checkChannelHealth(id);
+      return reply.send(result);
     } catch (error) {
       console.error('Test channel error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '测试失败' } });
+    }
+  });
+
+  // 路由管理
+  app.get('/api/admin/routes', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const routes = await prisma.apiRoute.findMany({ orderBy: { path: 'asc' } });
+      return reply.send({ routes });
+    } catch (error) {
+      console.error('Admin routes error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取路由列表失败' } });
+    }
+  });
+
+  app.get('/api/admin/routes/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const route = await prisma.apiRoute.findUnique({ where: { id } });
+      if (!route) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: '路由不存在' } });
+      return reply.send({ route });
+    } catch (error) {
+      console.error('Admin get route error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取路由详情失败' } });
+    }
+  });
+
+  app.post('/api/admin/routes', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { path, displayName, mode } = req.body as any;
+      if (!path || !path.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '路径为必填项' } });
+      if (!displayName || !displayName.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '名称为必填项' } });
+
+      const existing = await prisma.apiRoute.findUnique({ where: { path: path.trim() } });
+      if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `路径 "${path}" 已被使用` } });
+
+      const route = await prisma.apiRoute.create({
+        data: {
+          path: path.trim(),
+          displayName: displayName.trim(),
+          mode: mode || 'single',
+          primaryChannelId: null,
+          backupChannelId: null,
+          channelIds: [],
+          strategy: 'round_robin',
+        },
+      });
+      return reply.send({ route });
+    } catch (error) {
+      console.error('Admin create route error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '创建路由失败' } });
+    }
+  });
+
+  app.put('/api/admin/routes/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      const data = req.body as any;
+      const updateData: any = {};
+
+      if (data.path !== undefined) {
+        if (!data.path.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '路径不能为空' } });
+        const existing = await prisma.apiRoute.findUnique({ where: { path: data.path.trim() } });
+        if (existing && existing.id !== id) return reply.status(409).send({ error: { code: 'CONFLICT', message: `路径 "${data.path}" 已被使用` } });
+        updateData.path = data.path.trim();
+      }
+      if (data.displayName !== undefined) updateData.displayName = data.displayName;
+      if (data.mode !== undefined) updateData.mode = data.mode;
+      if (data.isActive !== undefined) updateData.isActive = data.isActive;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.primaryChannelId !== undefined) updateData.primaryChannelId = data.primaryChannelId || null;
+      if (data.backupChannelId !== undefined) updateData.backupChannelId = data.backupChannelId || null;
+      if (data.activeChannel !== undefined) updateData.activeChannel = data.activeChannel;
+      if (data.channelIds !== undefined) updateData.channelIds = data.channelIds;
+      if (data.strategy !== undefined) updateData.strategy = data.strategy;
+
+      const route = await prisma.apiRoute.update({ where: { id }, data: updateData });
+      return reply.send({ route });
+    } catch (error) {
+      console.error('Admin update route error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新路由失败' } });
+    }
+  });
+
+  app.delete('/api/admin/routes/:id', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+      const { id } = req.params as any;
+      await prisma.apiRoute.delete({ where: { id } });
+      return reply.send({ ok: true });
+    } catch (error) {
+      console.error('Admin delete route error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '删除路由失败' } });
     }
   });
 

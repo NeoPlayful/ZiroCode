@@ -23,6 +23,7 @@
     "message": "创建第一个密钥以开始调用模型",
     "button": "创建 API Key"
   },
+  "listTitle": "您的API密钥",
   "table": {
     "lastUsed": "最后使用",
     "createdAt": "创建于",

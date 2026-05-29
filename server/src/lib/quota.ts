@@ -120,7 +120,7 @@ export async function deductQuota(userId: string, amount: bigint): Promise<boole
 export function generateApiKey(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let result = 'sk-';
-  for (let i = 0; i < 32; i++) {
+  for (let i = 0; i < 95; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;

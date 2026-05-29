@@ -16,12 +16,12 @@ async function validateApiKey(authHeader: string | null): Promise<{ userId: stri
   return { userId: apiKey.userId, apiKeyId: apiKey.id };
 }
 
-async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, statusCode: number, error: string | null, requestTime: Date, responseTime: Date) {
+async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string) {
   await prisma.apiUsageLog.create({
     data: {
       userId: auth.userId, apiKeyId: auth.apiKeyId,
       model, tokensUsed, quotaUsed,
-      statusCode, error,
+      statusCode, error, channelId,
       requestTime, responseTime,
     },
   });
@@ -31,8 +31,16 @@ async function getCachedQuota(userId: string) {
   const cached = await cacheGet(`quota:${userId}`);
   if (cached) return JSON.parse(cached);
   const quota = await getUserQuota(userId);
-  await cacheSet(`quota:${userId}`, JSON.stringify(quota), 30);
-  return quota;
+  const serialized = {
+    payAsYouGoTotal: Number(quota.payAsYouGoTotal),
+    payAsYouGoUsed: Number(quota.payAsYouGoUsed),
+    payAsYouGoRemaining: Number(quota.payAsYouGoRemaining),
+    monthlyTotal: quota.monthlyTotal ? Number(quota.monthlyTotal) : null,
+    monthlyUsed: Number(quota.monthlyUsed),
+    monthlyRemaining: quota.monthlyRemaining ? Number(quota.monthlyRemaining) : null,
+  };
+  await cacheSet(`quota:${userId}`, JSON.stringify(serialized), 30);
+  return serialized;
 }
 
 export async function v1Routes(app: FastifyInstance) {
@@ -46,7 +54,7 @@ export async function v1Routes(app: FastifyInstance) {
       if (!allowed) return reply.status(429).send({ error: { code: 'RATE_LIMITED', message: '请求过于频繁' } });
 
       const quota = await getCachedQuota(auth.userId);
-      if (quota.payAsYouGoRemaining <= BigInt(0) && (quota.monthlyRemaining === null || quota.monthlyRemaining <= BigInt(0))) {
+      if (quota.payAsYouGoRemaining <= 0 && (quota.monthlyRemaining === null || quota.monthlyRemaining <= 0)) {
         createNotification(auth.userId, 'QUOTA_EXHAUSTED', '配额已用完', '请充值或兑换订阅以继续使用', '/subscription').catch(() => {});
         dispatchWebhook(auth.userId, 'QUOTA_EXHAUSTED', { quotaRemaining: 0 }).catch(() => {});
         return reply.status(403).send({ error: { code: 'INSUFFICIENT_QUOTA', message: '配额不足' } });
@@ -66,6 +74,7 @@ export async function v1Routes(app: FastifyInstance) {
 
         let totalTokens = 0;
         let hasError = false;
+        let streamChannelId: string | undefined;
 
         try {
           const result = await routeToUpstream('/chat/completions', {
@@ -73,6 +82,7 @@ export async function v1Routes(app: FastifyInstance) {
             headers: { Authorization: '' }, // router handles auth
             body: JSON.stringify(body),
           });
+          streamChannelId = result.channel.id;
 
           const reader = result.response.body?.getReader();
           if (!reader) throw new Error('No response body');
@@ -122,7 +132,7 @@ export async function v1Routes(app: FastifyInstance) {
             dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed }).catch(() => {});
           }
         }
-        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime);
+        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId);
         return;
       }
 
@@ -132,6 +142,7 @@ export async function v1Routes(app: FastifyInstance) {
         headers: { Authorization: '' },
         body: JSON.stringify(body),
       });
+      const usedChannelId = result.channel.id;
 
       const responseTime = new Date();
       const responseData = await result.response.json() as any;
@@ -151,7 +162,7 @@ export async function v1Routes(app: FastifyInstance) {
         }
       }
 
-      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime);
+      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId);
 
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
