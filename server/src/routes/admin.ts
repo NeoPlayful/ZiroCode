@@ -5,6 +5,7 @@ import { prisma } from '../lib/db.js';
 import { requireAdmin, AuthError } from '../lib/api-utils.js';
 import { checkChannelHealth } from '../lib/router.js';
 import { isSlaViolated } from '../lib/ticket-sla.js';
+import { cacheGet, cacheSet } from '../lib/cache.js';
 
 async function handleAuth(req: any, reply: any) {
   try { return await requireAdmin(req, reply); }
@@ -434,22 +435,24 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const { path, displayName, mode } = req.body as any;
-      if (!path || !path.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '路径为必填项' } });
-      if (!displayName || !displayName.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '名称为必填项' } });
+      const data = req.body as any;
+      if (!data.path || !data.path.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '路径为必填项' } });
+      if (!data.displayName || !data.displayName.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '名称为必填项' } });
 
-      const existing = await prisma.apiRoute.findUnique({ where: { path: path.trim() } });
-      if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `路径 "${path}" 已被使用` } });
+      const existing = await prisma.apiRoute.findUnique({ where: { path: data.path.trim() } });
+      if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `路径 "${data.path}" 已被使用` } });
 
       const route = await prisma.apiRoute.create({
         data: {
-          path: path.trim(),
-          displayName: displayName.trim(),
-          mode: mode || 'single',
-          primaryChannelId: null,
-          backupChannelId: null,
-          channelIds: [],
-          strategy: 'round_robin',
+          path: data.path.trim(),
+          displayName: data.displayName.trim(),
+          mode: data.mode || 'single',
+          primaryChannelId: data.primaryChannelId || null,
+          backupChannelId: data.backupChannelId || null,
+          channelIds: data.channelIds || [],
+          strategy: data.strategy || 'round_robin',
+          status: data.status || 'active',
+          activeChannel: data.activeChannel || 'primary',
         },
       });
       return reply.send({ route });
@@ -623,6 +626,312 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Review fraud log error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '审查失败' } });
+    }
+  });
+
+  // ==================== Analytics Endpoints ====================
+
+  // 今日概览
+  app.get('/api/admin/analytics/overview', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const yesterdayStart = new Date(todayStart);
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+      const cached = await cacheGet('admin:analytics:overview');
+      if (cached) return reply.send(JSON.parse(cached));
+
+      const [todayLogs, yesterdayLogs, activeUsers, totalTokensAgg, errorLogs] = await Promise.all([
+        prisma.apiUsageLog.findMany({ where: { requestTime: { gte: todayStart } }, select: { id: true, tokensUsed: true, quotaUsed: true, statusCode: true } }),
+        prisma.apiUsageLog.findMany({ where: { requestTime: { gte: yesterdayStart, lt: todayStart } }, select: { id: true } }),
+        prisma.apiUsageLog.groupBy({ by: ['userId'], where: { requestTime: { gte: todayStart } }, _count: { userId: true } }),
+        prisma.apiUsageLog.aggregate({ where: { requestTime: { gte: todayStart } }, _sum: { tokensUsed: true } }),
+        prisma.apiUsageLog.count({ where: { requestTime: { gte: todayStart }, statusCode: { gte: 500 } } }),
+      ]);
+
+      const result = {
+        todayRequests: todayLogs.length,
+        todayTokens: totalTokensAgg._sum.tokensUsed || 0,
+        todayActiveUsers: activeUsers.length,
+        todayErrorRate: todayLogs.length > 0 ? Math.round((errorLogs / todayLogs.length) * 10000) / 100 : 0,
+        yesterdayRequests: yesterdayLogs.length,
+        yesterdayTokens: 0,
+      };
+
+      await cacheSet('admin:analytics:overview', JSON.stringify(result), 30);
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics overview error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取概览失败' } });
+    }
+  });
+
+  // 趋势图数据
+  app.get('/api/admin/analytics/trends', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { period = '7d', granularity = 'day', metric = 'requests' } = req.query as any;
+      const now = new Date();
+      let from: Date;
+
+      switch (period) {
+        case '24h': from = new Date(now.getTime() - 24 * 60 * 60 * 1000); break;
+        case '30d': from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); break;
+        default: from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); break;
+      }
+
+      let points: { time: string; value: number }[];
+
+      if (granularity === 'hour') {
+        const rows = await prisma.apiUsageHourly.findMany({
+          where: { timeBucket: { gte: from } },
+          orderBy: { timeBucket: 'asc' },
+        });
+        points = rows.map(r => ({
+          time: r.timeBucket.toISOString(),
+          value: metric === 'tokens' ? Number(r.totalTokens) : metric === 'latency' && r.requestCount > 0 ? Number(r.totalLatency) / r.requestCount : r.requestCount,
+        }));
+      } else {
+        const rows = await prisma.apiUsageDaily.findMany({
+          where: { date: { gte: from } },
+          orderBy: { date: 'asc' },
+        });
+        points = rows.map(r => ({
+          time: r.date.toISOString(),
+          value: metric === 'tokens' ? Number(r.totalTokens) : metric === 'latency' && r.requestCount > 0 ? Number(r.totalLatency) / r.requestCount : r.requestCount,
+        }));
+      }
+
+      return reply.send({ points });
+    } catch (error) {
+      console.error('Admin analytics trends error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取趋势失败' } });
+    }
+  });
+
+  // 模型排名
+  app.get('/api/admin/analytics/models', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { from, to, orderBy = 'tokens', limit = 10 } = req.query as any;
+      const filter: any = {};
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+
+      const cached = await cacheGet(`admin:analytics:models:${from || ''}:${to || ''}`);
+      if (cached) return reply.send(JSON.parse(cached));
+
+      const groups = await prisma.apiUsageLog.groupBy({
+        by: ['model'],
+        where: filter,
+        _count: { id: true },
+        _sum: { tokensUsed: true, quotaUsed: true },
+        orderBy: orderBy === 'requests' ? { _count: { id: 'desc' } } : { _sum: { tokensUsed: 'desc' } },
+        take: parseInt(String(limit)) || 10,
+      });
+
+      const result = {
+        models: groups.map(g => ({
+          model: g.model,
+          requests: g._count.id,
+          tokens: g._sum.tokensUsed || 0,
+          quota: Number(g._sum.quotaUsed || BigInt(0)),
+        })),
+      };
+
+      await cacheSet(`admin:analytics:models:${from || ''}:${to || ''}`, JSON.stringify(result), 60);
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics models error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取模型排名失败' } });
+    }
+  });
+
+  // 渠道报表
+  app.get('/api/admin/analytics/channels', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { from, to } = req.query as any;
+      const filter: any = {};
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+
+      const channels = await prisma.modelChannel.findMany({ select: { id: true, name: true, displayName: true, healthStatus: true } });
+      const channelMap = new Map(channels.map(c => [c.id, c]));
+
+      const groups = await prisma.apiUsageLog.groupBy({
+        by: ['channelId'],
+        where: { ...filter, channelId: { not: null } },
+        _count: { channelId: true },
+        _sum: { tokensUsed: true },
+      });
+
+      const result = {
+        channels: groups.map(g => ({
+          channelId: g.channelId,
+          channelName: channelMap.get(g.channelId || '')?.displayName || channelMap.get(g.channelId || '')?.name || g.channelId,
+          healthStatus: channelMap.get(g.channelId || '')?.healthStatus || 'UNKNOWN',
+          requests: g._count.channelId,
+          tokens: g._sum.tokensUsed || 0,
+        })),
+      };
+
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics channels error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取渠道报表失败' } });
+    }
+  });
+
+  // Top 用户
+  app.get('/api/admin/analytics/top-users', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { from, to, limit = 10 } = req.query as any;
+      const filter: any = {};
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+
+      const groups = await prisma.apiUsageLog.groupBy({
+        by: ['userId'],
+        where: filter,
+        _count: { id: true },
+        _sum: { tokensUsed: true, quotaUsed: true },
+        orderBy: { _sum: { quotaUsed: 'desc' } },
+        take: parseInt(String(limit)) || 10,
+      });
+
+      const userIds = groups.map(g => g.userId);
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, name: true, email: true },
+      });
+      const userMap = new Map(users.map(u => [u.id, u]));
+
+      const result = {
+        users: groups.map(g => ({
+          userId: g.userId,
+          name: userMap.get(g.userId)?.name || 'Unknown',
+          email: userMap.get(g.userId)?.email || '',
+          requests: g._count.id,
+          tokens: g._sum.tokensUsed || 0,
+          quota: Number(g._sum.quotaUsed || BigInt(0)),
+        })),
+      };
+
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics top-users error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取用户排行失败' } });
+    }
+  });
+
+  // 错误分布
+  app.get('/api/admin/analytics/errors', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { from, to } = req.query as any;
+      const filter: any = { statusCode: { gte: 400 } };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+
+      const groups = await prisma.apiUsageLog.groupBy({
+        by: ['statusCode', 'error'],
+        where: filter,
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 20,
+      });
+
+      const result = {
+        errors: groups.map(g => ({
+          statusCode: g.statusCode,
+          error: g.error ? (g.error.length > 100 ? g.error.slice(0, 100) + '...' : g.error) : `HTTP ${g.statusCode}`,
+          count: g._count.id,
+        })),
+      };
+
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics errors error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取错误分布失败' } });
+    }
+  });
+
+  // 请求日志明细
+  app.get('/api/admin/analytics/requests', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { page = '1', pageSize = '20', userId, model, channelId, statusCode, from, to } = req.query as any;
+      const p = Math.max(1, parseInt(page) || 1);
+      const ps = Math.min(100, Math.max(1, parseInt(pageSize) || 20));
+
+      const where: any = {};
+      if (userId) where.userId = userId;
+      if (model) where.model = model;
+      if (channelId) where.channelId = channelId;
+      if (statusCode) where.statusCode = parseInt(statusCode);
+      if (from || to) {
+        where.requestTime = {};
+        if (from) where.requestTime.gte = new Date(from);
+        if (to) where.requestTime.lte = new Date(to);
+      }
+
+      const [total, logs] = await Promise.all([
+        prisma.apiUsageLog.count({ where }),
+        prisma.apiUsageLog.findMany({
+          where,
+          orderBy: { requestTime: 'desc' },
+          skip: (p - 1) * ps,
+          take: ps,
+          include: { user: { select: { name: true, email: true } } },
+        }),
+      ]);
+
+      const result = {
+        total,
+        page: p,
+        pageSize: ps,
+        totalPages: Math.ceil(total / ps),
+        logs: logs.map(l => ({
+          id: l.id,
+          userId: l.userId,
+          userName: (l as any).user?.name || null,
+          userEmail: (l as any).user?.email || null,
+          model: l.model,
+          channelId: l.channelId,
+          tokensUsed: l.tokensUsed,
+          quotaUsed: Number(l.quotaUsed),
+          latencyMs: l.latencyMs,
+          clientIp: l.clientIp,
+          routePath: l.routePath,
+          statusCode: l.statusCode,
+          error: l.error,
+          requestTime: l.requestTime,
+          responseTime: l.responseTime,
+        })),
+      };
+
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics requests error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取请求日志失败' } });
     }
   });
 }

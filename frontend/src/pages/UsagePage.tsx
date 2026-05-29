@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import * as echarts from 'echarts';
 
 export default function UsagePage() {
   const { t } = useTranslation('usage');
@@ -72,29 +73,8 @@ export default function UsagePage() {
           </div>
         ) : (
           <>
-            {/* 每日趋势 */}
-            <div className="bg-white rounded-xl p-5 border border-gray-200 mb-6">
-              <h3 className="font-semibold mb-4">{t('usage.dailyTrends.title')}</h3>
-              {daily.length > 0 ? (
-                <div className="flex items-end gap-2 h-40">
-                  {daily.map((d: any) => {
-                    const max = Math.max(...daily.map((x: any) => x.calls), 1);
-                    const h = (d.calls / max) * 100;
-                    return (
-                      <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
-                        <span className="text-xs text-gray-400">{d.calls}</span>
-                        <div className="w-full bg-[#fde8df] rounded-t relative" style={{ height: `${h}%` }}>
-                          <div className="absolute bottom-0 w-full bg-[#e8673a] rounded-t transition-all" style={{ height: `${h}%` }} />
-                        </div>
-                        <span className="text-xs text-gray-400">{d.date.slice(5)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400 text-center py-8">{t('usage.dailyTrends.noData')}</p>
-              )}
-            </div>
+            {/* 24小时各模型花费趋势 */}
+            <HourlyTrendChart data={data?.hourly} t={t} />
 
             {/* 模型分布 */}
             {byModel.length > 0 && (
@@ -153,5 +133,129 @@ export default function UsagePage() {
           </>
         )}
       </main>
+  );
+}
+
+const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+function HourlyTrendChart({ data, t }: { data: any; t: any }) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
+
+  useEffect(() => {
+    if (!chartRef.current || !data?.slots) return;
+    if (!chartInstance.current) {
+      chartInstance.current = echarts.init(chartRef.current);
+    }
+    const chart = chartInstance.current;
+
+    const slots = data.slots;
+    const labels = slots.map((s: any) => s.label);
+    const models = data.models || [];
+
+    const maxVal = Math.max(
+      ...slots.flatMap((s: any) => Object.values(s.models).map((m: any) => m.tokens)),
+      1
+    );
+
+    const option = {
+      grid: { left: 70, right: 30, top: 30, bottom: 100 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(34,34,34,0.9)',
+        borderColor: 'transparent',
+        textStyle: { color: '#fff', fontSize: 13, fontWeight: 600 },
+        padding: 10,
+        formatter(params: any) {
+          const time = params[0].axisValue;
+          return `
+            <div style="font-size:14px;font-weight:700;margin-bottom:6px;">⏰ ${time}</div>
+            ${params.map((item: any) => `
+              <div style="display:flex;align-items:center;gap:4px;line-height:22px;">
+                <span style="width:10px;height:10px;border:2px solid ${item.color};background:#fff;display:inline-block;flex-shrink:0;"></span>
+                <span style="font-size:12px;white-space:nowrap;">${item.seriesName}: 💰 ${Number(item.value).toLocaleString()} (📞 ${item.data?.calls || 0}次)</span>
+              </div>
+            `).join('')}
+          `;
+        },
+      },
+      legend: {
+        bottom: 10,
+        icon: 'circle',
+        itemWidth: 14,
+        itemHeight: 14,
+        textStyle: { color: '#6b7280', fontSize: 12 },
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        boundaryGap: false,
+        name: `⏰ ${t('usage.dailyTrends.timeLabel')}`,
+        nameLocation: 'middle',
+        nameGap: 35,
+        nameTextStyle: { fontWeight: 700, fontSize: 13, color: '#1f2937' },
+        axisLine: { lineStyle: { color: '#d1d5db' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#6b7280', fontSize: 11, interval: 0 },
+      },
+      yAxis: {
+        type: 'value',
+        name: `💰 ${t('usage.dailyTrends.costLabel')}`,
+        nameLocation: 'middle',
+        nameGap: 60,
+        max: Math.ceil(maxVal * 1.2),
+        nameTextStyle: { fontWeight: 700, fontSize: 13, color: '#1f2937' },
+        axisLabel: { color: '#6b7280', fontSize: 11, formatter: (v: number) => v.toLocaleString() },
+        splitLine: { lineStyle: { color: '#eef0f4' } },
+      },
+      series: models.map((model: string, i: number) => ({
+        name: model,
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        lineStyle: { width: 2 },
+        itemStyle: { color: colors[i % colors.length], borderWidth: 2, borderColor: colors[i % colors.length] },
+        data: slots.map((s: any) => {
+          const m = s.models[model];
+          return { value: m?.tokens || 0, calls: m?.calls || 0 };
+        }),
+      })),
+    };
+
+    chart.setOption(option, true);
+    const resize = () => chart.resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, [data]);
+
+  if (!data?.slots) return null;
+
+  const totalModels = data.models?.length || 0;
+  const totalCalls = data.slots.reduce((s: number, slot: any) =>
+    s + Object.values(slot.models).reduce((sum: number, m: any) => sum + m.calls, 0), 0);
+
+  return (
+    <div style={{
+      background: '#fff', marginBottom: 24, padding: '28px 36px 20px',
+      borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    }}>
+      <h2 style={{ margin: 0, fontSize: 24, color: '#111827', fontWeight: 700 }}>
+        {t('usage.dailyTrends.title')}
+      </h2>
+      <p style={{ margin: '12px 0 20px', fontSize: 16, color: '#6b7280' }}>
+        {t('usage.dailyTrends.subtitle')}
+      </p>
+
+      <div ref={chartRef} style={{ width: '100%', height: 430 }} />
+
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        color: '#64748b', fontSize: 15, padding: '8px 4px 0',
+      }}>
+        <span>📊 {t('usage.dailyTrends.footer')}</span>
+        <span>{t('usage.dailyTrends.modelCount', { n: totalModels })}，{t('usage.dailyTrends.callCount', { n: totalCalls.toLocaleString() })}</span>
+      </div>
+    </div>
   );
 }

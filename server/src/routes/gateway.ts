@@ -16,12 +16,14 @@ async function validateApiKey(authHeader: string | null): Promise<{ userId: stri
   return { userId: apiKey.userId, apiKeyId: apiKey.id };
 }
 
-async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string) {
+async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string) {
+  const latencyMs = responseTime.getTime() - requestTime.getTime();
   await prisma.apiUsageLog.create({
     data: {
       userId: auth.userId, apiKeyId: auth.apiKeyId,
       model, tokensUsed, quotaUsed,
       statusCode, error, channelId,
+      latencyMs, clientIp, routePath,
       requestTime, responseTime,
     },
   });
@@ -149,7 +151,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
           await deductQuota(auth.userId, quotaUsed);
           triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
         }
-        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId);
+        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath);
         return;
       }
 
@@ -168,7 +170,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
         await deductQuota(auth.userId, quotaUsed);
         triggerReferralReward(auth.userId, quotaUsed).catch(() => {});
       }
-      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId);
+      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath);
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
       console.error('Gateway error:', error);

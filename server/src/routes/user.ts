@@ -187,9 +187,46 @@ export async function userRoutes(app: FastifyInstance) {
       }
       const byModel = Array.from(modelMap.entries()).map(([model, data]) => ({ model, ...data }));
 
+      // 24小时各模型花费趋势
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentLogs = await prisma.apiUsageLog.findMany({
+        where: { userId: session.userId as string, requestTime: { gte: twentyFourHoursAgo } },
+        select: { model: true, tokensUsed: true, requestTime: true },
+        orderBy: { requestTime: 'asc' },
+      });
+
+      // 生成24个时间段 [0..23]
+      const slots: { hour: number; label: string; models: Record<string, { tokens: number; calls: number }> }[] = [];
+      const baseHour = new Date(twentyFourHoursAgo);
+      baseHour.setMinutes(0, 0, 0);
+      for (let i = 0; i < 24; i++) {
+        const h = new Date(baseHour.getTime() + i * 60 * 60 * 1000);
+        slots.push({
+          hour: h.getHours(),
+          label: `${h.getHours()}:00`,
+          models: {},
+        });
+      }
+
+      for (const log of recentLogs) {
+        const logHour = new Date(log.requestTime);
+        logHour.setMinutes(0, 0, 0);
+        const idx = Math.floor((logHour.getTime() - baseHour.getTime()) / (60 * 60 * 1000));
+        if (idx >= 0 && idx < 24) {
+          const slot = slots[idx];
+          if (!slot.models[log.model]) slot.models[log.model] = { tokens: 0, calls: 0 };
+          slot.models[log.model].tokens += log.tokensUsed;
+          slot.models[log.model].calls += 1;
+        }
+      }
+
+      // 收集出现的模型列表
+      const modelNames = [...new Set(recentLogs.map(l => l.model))];
+
       return reply.send({
         total: { calls: usageLogs.length, tokens: usageLogs.reduce((s, l) => s + l.tokensUsed, 0), quota: Number(usageLogs.reduce((s, l) => s + l.quotaUsed, BigInt(0))) },
         daily, byModel, recent: usageLogs.slice(0, 20),
+        hourly: { slots, models: modelNames },
       });
     } catch (error) {
       console.error('Usage error:', error);

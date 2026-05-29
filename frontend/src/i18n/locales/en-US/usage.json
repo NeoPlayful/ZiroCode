@@ -13,7 +13,13 @@
       "hint": "Statistics will be displayed here after calling API"
     },
     "dailyTrends": {
-      "title": "Daily Call Trends",
+      "title": "24-Hour Model Cost Trends",
+      "subtitle": "Cost trends by model, hover for details",
+      "footer": "Compare cost trends across models, hover for cost and call details",
+      "modelCount": "{{n}} models",
+      "callCount": "{{n}} calls",
+      "timeLabel": "Time",
+      "costLabel": "Cost",
       "noData": "No daily data"
     },
     "modelDistribution": {

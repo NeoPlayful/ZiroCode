@@ -11,6 +11,7 @@ import {
   CommandLineIcon,
   Cog6ToothIcon,
   ArrowRightEndOnRectangleIcon,
+  ChartBarSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import packageJson from '../../../package.json';
@@ -33,6 +34,7 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
     { key: 'withdrawals', label: t('sidebar.withdrawals'), icon: BanknotesIcon },
     { key: 'tickets', label: t('sidebar.tickets'), icon: ChatBubbleLeftRightIcon },
     { key: 'announcements', label: t('sidebar.announcements'), icon: MegaphoneIcon },
+    { key: 'analytics', label: t('sidebar.analytics') || '数据分析', icon: ChartBarSquareIcon },
     { key: 'audit-logs', label: t('sidebar.auditLogs'), icon: DocumentTextIcon },
     { key: 'batch', label: t('sidebar.batch'), icon: CommandLineIcon },
     { key: 'config', label: t('sidebar.config'), icon: Cog6ToothIcon },

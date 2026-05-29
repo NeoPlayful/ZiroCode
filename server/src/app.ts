@@ -20,8 +20,14 @@ import { analyticsRoutes } from './routes/analytics.js';
 import { systemRoutes } from './routes/system.js';
 import { gatewayRoutes } from './routes/gateway.js';
 import { i18nMiddleware } from './i18n/middleware.js';
+import { startScheduler } from './lib/scheduler.js';
 
 const app = Fastify({ logger: true });
+
+// BigInt JSON 序列化支持
+BigInt.prototype.toJSON = function () {
+  return Number(this);
+};
 
 async function start() {
   // Stripe Webhook 需要原始 body
@@ -78,6 +84,8 @@ async function start() {
   app.register(analyticsRoutes);
   app.register(systemRoutes);
   app.register(gatewayRoutes);
+
+  startScheduler();
 
   const port = parseInt(process.env.PORT || '4000');
   await app.listen({ port, host: '0.0.0.0' });

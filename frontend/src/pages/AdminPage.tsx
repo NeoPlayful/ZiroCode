@@ -13,6 +13,7 @@ import AdminRoutes from '../components/admin/AdminRoutes'
 import AdminWithdrawals from '../components/admin/AdminWithdrawals'
 import AdminAuditLogs from '../components/admin/AdminAuditLogs'
 import AdminBatch from '../components/admin/AdminBatch'
+import AdminAnalytics from '../components/admin/AdminAnalytics'
 
 export default function AdminPage() {
   const { t } = useTranslation('admin')
@@ -40,6 +41,7 @@ export default function AdminPage() {
           {tab === 'audit-logs' && <AdminAuditLogs />}
           {tab === 'batch' && <AdminBatch />}
           {tab === 'config' && <AdminConfig />}
+          {tab === 'analytics' && <AdminAnalytics />}
         </main>
       </div>
     )

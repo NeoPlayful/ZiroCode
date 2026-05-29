@@ -13,7 +13,13 @@
       "hint": "调用 API 后将在此显示统计数据"
     },
     "dailyTrends": {
-      "title": "每日调用趋势",
+      "title": "24小时各模型花费趋势",
+      "subtitle": "各模型花费变化趋势，悬停查看详细信息",
+      "footer": "各模型花费趋势对比，悬停查看花费和调用次数详情",
+      "modelCount": "共 {{n}} 个模型",
+      "callCount": "{{n}} 次调用",
+      "timeLabel": "时间",
+      "costLabel": "花费",
       "noData": "暂无每日数据"
     },
     "modelDistribution": {
