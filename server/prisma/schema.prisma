@@ -328,6 +328,7 @@ model ApiUsageLog {
   quotaUsed    BigInt
   statusCode   Int
   error        String?
+  channelId    String?
   requestTime  DateTime @default(now())
   responseTime DateTime
 
@@ -337,6 +338,7 @@ model ApiUsageLog {
   @@index([userId, requestTime])
   @@index([apiKeyId])
   @@index([model, requestTime])
+  @@index([channelId])
   @@index([requestTime])
 }
 
@@ -353,22 +355,56 @@ model SubscriptionPlan {
   createdAt    DateTime         @default(now())
 }
 
+// 健康状态枚举
+enum HealthStatus {
+  HEALTHY
+  UNHEALTHY
+  UNKNOWN
+}
+
 // 模型渠道表
 model ModelChannel {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  displayName String
-  baseUrl     String
-  apiKey      String
-  models      String[]
-  isActive    Boolean  @default(true)
-  priority    Int      @default(0)
-  createdAt   DateTime @default(now())
+  id               String       @id @default(cuid())
+  name             String       @unique
+  displayName      String
+  baseUrl          String
+  apiKey           String
+  models           String[]
+  isActive         Boolean      @default(true)
+  priority         Int          @default(0)
+  weight           Int          @default(1)
+  healthStatus     HealthStatus @default(UNKNOWN)
+  lastHealthCheckAt DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   @@index([isActive, priority])
 }
 
-// 通知表
+// API 路由表
+model ApiRoute {
+  id               String   @id @default(cuid())
+  path             String   @unique
+  displayName      String
+  mode             String   @default("single")
+  isActive         Boolean  @default(true)
+  status           String   @default("active")
+
+  // Single mode
+  primaryChannelId String?
+  backupChannelId  String?
+  activeChannel    String   @default("primary")
+
+  // Load balance mode
+  channelIds       String[] @default([])
+  strategy         String   @default("round_robin")
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([path])
+  @@index([isActive])
+}
 model Notification {
   id        String           @id @default(cuid())
   userId    String

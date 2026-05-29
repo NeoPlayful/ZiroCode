@@ -10,6 +10,7 @@ import {
   DocumentTextIcon,
   CommandLineIcon,
   Cog6ToothIcon,
+  ArrowRightEndOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import packageJson from '../../../package.json';
@@ -28,6 +29,7 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
     { key: 'subscriptions', label: t('sidebar.subscriptions'), icon: CreditCardIcon },
     { key: 'redeem-codes', label: t('sidebar.redeemCodes'), icon: TicketIcon },
     { key: 'channels', label: t('sidebar.channels'), icon: ServerIcon },
+    { key: 'routes', label: t('sidebar.routes') || '路由管理', icon: ArrowRightEndOnRectangleIcon },
     { key: 'withdrawals', label: t('sidebar.withdrawals'), icon: BanknotesIcon },
     { key: 'tickets', label: t('sidebar.tickets'), icon: ChatBubbleLeftRightIcon },
     { key: 'announcements', label: t('sidebar.announcements'), icon: MegaphoneIcon },

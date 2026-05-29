@@ -5,6 +5,7 @@
     "subscriptions": "Subscriptions",
     "redeemCodes": "Redeem Codes",
     "channels": "Channels",
+    "routes": "Routes",
     "withdrawals": "Withdrawals",
     "tickets": "Tickets",
     "announcements": "Announcements",
@@ -167,10 +168,12 @@
       "totalChannels": "Total Channels",
       "activeChannels": "Active Channels",
       "totalModels": "Total Models",
-      "avgPriority": "Avg Priority"
+      "avgPriority": "Avg Priority",
+      "healthRate": "Health Rate"
     },
     "form": {
       "title": "Add Channel",
+      "editTitle": "Edit Channel",
       "name": "Name",
       "namePlaceholder": "Channel name",
       "displayName": "Display Name",
@@ -179,11 +182,16 @@
       "baseUrlPlaceholder": "https://api.example.com",
       "apiKey": "API Key",
       "apiKeyPlaceholder": "sk-...",
+      "apiKeyHint": "Leave empty to keep current",
       "models": "Models",
       "modelsPlaceholder": "gpt-4,gpt-3.5-turbo",
       "priority": "Priority",
       "priorityPlaceholder": "0",
+      "weight": "Weight",
+      "weightPlaceholder": "Weight (default 1)",
       "create": "Create",
+      "save": "Save",
+      "saving": "Saving...",
       "cancel": "Cancel"
     },
     "search": "Search channels...",
@@ -202,16 +210,77 @@
       "actions": "Actions"
     },
     "test": "Test",
-    "testSuccess": "Test successful",
-    "testFailed": "Test failed",
+    "testing": "Testing...",
+    "testSuccess": "Connection OK",
+    "testFailed": "Connection failed",
+    "healthLabel": "Health",
+    "healthStatus": {
+      "healthy": "Healthy",
+      "unhealthy": "Unhealthy",
+      "unknown": "Unknown"
+    },
     "statusLabel": {
       "active": "Active",
       "inactive": "Inactive"
     },
+    "enableButton": "Enable",
+    "disableButton": "Disable",
+    "deleteButton": "Delete",
+    "deleteConfirm": "Delete this channel?",
+    "deleteConfirmWithRefs": "This channel is used by {{count}} routes",
+    "deleteConfirmMessage": "This will permanently delete the channel. This action cannot be undone.",
+    "lastCheckAt": "Last check",
+    "weight": "Weight",
+    "routeRefs": "Used by",
+    "routeRefsCount": "{{count}} routes",
+    "empty": "No channels",
     "pagination": "Showing {{from}} - {{to}} of {{total}}",
     "pageSize": "{{size}} / page",
     "prev": "Previous",
     "next": "Next"
+  },
+  "routes": {
+    "addBtn": "Add Route",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleteConfirm": "Delete this route?",
+    "deleteConfirmMessage": "This will permanently delete the route. This action cannot be undone.",
+    "empty": "No routes",
+    "listTitle": "Forwarding Rules",
+    "primaryChannel": "Primary",
+    "backupChannel": "Backup",
+    "activeChannel": "Active Channel",
+    "singleConfig": "Single Channel Config",
+    "lbConfig": "Load Balance Config",
+    "channels": "Channel Pool",
+    "addChannel": "Add Channel",
+    "noChannels": "Select channels",
+    "strategy": "Strategy",
+    "strategies": {
+      "roundRobin": "Round Robin",
+      "weighted": "Weighted Round Robin"
+    },
+    "mode": {
+      "single": "Single Channel",
+      "loadBalance": "Load Balance"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "paused": "Paused"
+    },
+    "form": {
+      "title": "Add Route",
+      "editTitle": "Edit Route",
+      "path": "Path",
+      "displayName": "Name",
+      "mode": "Mode",
+      "status": "Status",
+      "create": "Create",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel"
+    }
   },
   "withdrawals": {
     "title": "Withdrawal Management",

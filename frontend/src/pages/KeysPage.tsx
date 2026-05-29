@@ -173,62 +173,29 @@ export default function KeysPage() {
         </div>
       ) : (
         /* Key Cards */
-        <div className="space-y-6">
+        <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm divide-y divide-[#ECEFF3]">
+          <div className="px-6 py-4">
+            <h2 className="text-base font-semibold text-[#111827]">{t('listTitle')}</h2>
+          </div>
           {keys.map((key: any) => {
             const isRevealed = revealedIds.has(key.id);
             const displayKey = isRevealed ? key.key : maskKey(key.key);
 
             return (
-              <div key={key.id} className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-6">
-                <div className="flex items-start justify-between">
-                  {/* Left: Key Info */}
-                  <div className="flex-1 min-w-0">
-                    {/* Row 1: Name + Status */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl font-semibold text-[#111827]">{key.name}</span>
-                      <span className={`inline-flex items-center h-7 px-3 rounded-full text-xs font-medium ${
-                        key.isActive
-                          ? 'bg-[#DCFCE7] text-[#16A34A]'
-                          : 'bg-[#FEE2E2] text-[#DC2626]'
-                      }`}>
-                        {key.isActive ? t('table.statusActive') : t('table.statusDisabled')}
-                      </span>
-                    </div>
-
-                    {/* Row 2: Created + Last Used + Monthly Calls */}
-                    <div className="flex items-center gap-6 text-sm text-[#6B7280] mb-5">
-                      <span>{t('table.createdAt')} {formatDate(key.createdAt)}</span>
-                      <span>{t('table.lastUsed')} {key.lastUsedAt ? timeAgo(key.lastUsedAt) : t('table.neverUsed')}</span>
-                      {key.monthlyCalls > 0 && (
-                        <span className="flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#e8673a]" />
-                          {key.monthlyCalls.toLocaleString()} 次请求
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Row 3: API Key display */}
-                    <div className="flex items-center gap-2">
-                      <div className="h-12 bg-[#F8FAFC] rounded-xl px-4 flex items-center flex-1 min-w-0">
-                        <code className="font-mono text-sm text-[#6B7280] select-all truncate">{displayKey}</code>
-                      </div>
-                      <button
-                        onClick={() => toggleReveal(key.id)}
-                        className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-[#6B7280] transition-colors flex-shrink-0"
-                      >
-                        {isRevealed ? <EyeOffSvg /> : <EyeSvg />}
-                      </button>
-                      <button
-                        onClick={() => copyKey(key.id, key.key)}
-                        className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-[#6B7280] transition-colors flex-shrink-0"
-                      >
-                        {copiedId === key.id ? <CheckSvg /> : <CopySvg />}
-                      </button>
-                    </div>
+              <div key={key.id} className="px-6 py-5">
+                {/* Row 1: Name + Status */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-semibold text-[#111827]">{key.name}</span>
+                    <span className={`inline-flex items-center h-7 px-3 rounded-full text-xs font-medium ${
+                      key.isActive
+                        ? 'bg-[#DCFCE7] text-[#16A34A]'
+                        : 'bg-[#FEE2E2] text-[#DC2626]'
+                    }`}>
+                      {key.isActive ? t('table.statusActive') : t('table.statusDisabled')}
+                    </span>
                   </div>
-
-                  {/* Right: Actions */}
-                  <div className="flex items-center gap-2 ml-6 flex-shrink-0">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleMutation.mutate({ id: key.id, isActive: !key.isActive })}
                       className="h-9 px-3 rounded-lg text-xs font-medium bg-[#FEE2E2] hover:bg-[#fecaca] text-[#DC2626] transition-colors"
@@ -240,6 +207,39 @@ export default function KeysPage() {
                       className="h-9 px-3 rounded-lg text-xs font-medium bg-[#FEE2E2] hover:bg-[#fecaca] text-[#DC2626] transition-colors"
                     >
                       {t('table.deleteButton')}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 2: Created + Last Used + Monthly Calls */}
+                <div className="flex items-center gap-6 text-sm text-[#6B7280] mb-5">
+                  <span>{t('table.createdAt')} {formatDate(key.createdAt)}</span>
+                  <span>{t('table.lastUsed')} {key.lastUsedAt ? timeAgo(key.lastUsedAt) : t('table.neverUsed')}</span>
+                  {key.monthlyCalls > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#e8673a]" />
+                      {key.monthlyCalls.toLocaleString()} 次请求
+                    </span>
+                  )}
+                </div>
+
+                {/* Row 3: API Key display */}
+                <div className="flex items-center gap-1">
+                  <div className={`h-12 bg-[#F8FAFC] rounded-xl px-4 flex items-center ${isRevealed ? 'w-auto' : 'max-w-[260px]'} min-w-0`}>
+                    <code className="font-mono text-sm text-[#6B7280] select-all truncate">{displayKey}</code>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => toggleReveal(key.id)}
+                      className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-[#6B7280] transition-colors flex-shrink-0"
+                    >
+                      {isRevealed ? <EyeOffSvg /> : <EyeSvg />}
+                    </button>
+                    <button
+                      onClick={() => copyKey(key.id, key.key)}
+                      className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-[#6B7280] transition-colors flex-shrink-0"
+                    >
+                      {copiedId === key.id ? <CheckSvg /> : <CopySvg />}
                     </button>
                   </div>
                 </div>

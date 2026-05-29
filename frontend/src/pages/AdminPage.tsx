@@ -9,6 +9,7 @@ import AdminRedeemCodes from '../components/admin/AdminRedeemCodes'
 import AdminTickets from '../components/admin/AdminTickets'
 import AdminAnnouncements from '../components/admin/AdminAnnouncements'
 import AdminChannels from '../components/admin/AdminChannels'
+import AdminRoutes from '../components/admin/AdminRoutes'
 import AdminWithdrawals from '../components/admin/AdminWithdrawals'
 import AdminAuditLogs from '../components/admin/AdminAuditLogs'
 import AdminBatch from '../components/admin/AdminBatch'
@@ -32,6 +33,7 @@ export default function AdminPage() {
           {tab === 'subscriptions' && <AdminSubscriptions />}
           {tab === 'redeem-codes' && <AdminRedeemCodes />}
           {tab === 'channels' && <AdminChannels />}
+          {tab === 'routes' && <AdminRoutes />}
           {tab === 'withdrawals' && <AdminWithdrawals />}
           {tab === 'tickets' && <AdminTickets />}
           {tab === 'announcements' && <AdminAnnouncements />}

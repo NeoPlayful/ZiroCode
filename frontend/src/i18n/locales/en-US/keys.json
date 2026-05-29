@@ -23,6 +23,7 @@
     "message": "Create your first key to start calling models",
     "button": "Create API Key"
   },
+  "listTitle": "Your API Keys",
   "table": {
     "lastUsed": "Last used",
     "createdAt": "Created",

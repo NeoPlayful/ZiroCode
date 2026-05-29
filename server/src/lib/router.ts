@@ -5,12 +5,95 @@ interface RouteResult {
   response: Response;
 }
 
-// 按优先级获取可用渠道
+interface HealthCheckResult {
+  healthy: boolean;
+  statusCode?: number;
+  message: string;
+  error?: string;
+}
+
+// In-memory failure tracking for auto fault detection
+const failureCounts: Record<string, { count: number; coolingUntil: number | null }> = {};
+const CONSECUTIVE_FAILURE_THRESHOLD = 3;
+const COOLING_PERIOD_MS = 60000; // 60 seconds
+
+// Determine health check path based on baseUrl
+function getHealthCheckPath(baseUrl: string): string {
+  const url = baseUrl.toLowerCase();
+  if (url.includes('openai') || url.includes('api.openai')) return '/models';
+  if (url.includes('claude') || url.includes('anthropic')) return '/v1/models';
+  return '/v1/models'; // default for most providers
+}
+
+// Mark channel unhealthy in DB
+async function markChannelUnhealthy(channelId: string) {
+  await prisma.modelChannel.update({
+    where: { id: channelId },
+    data: { healthStatus: 'UNHEALTHY', lastHealthCheckAt: new Date() },
+  });
+}
+
+// Mark channel healthy in DB
+async function markChannelHealthy(channelId: string) {
+  await prisma.modelChannel.update({
+    where: { id: channelId },
+    data: { healthStatus: 'HEALTHY', lastHealthCheckAt: new Date() },
+  });
+}
+
+// Reset failure count for a channel
+function resetFailureCount(channelId: string) {
+  delete failureCounts[channelId];
+}
+
+// Record a failure and check if threshold reached
+async function recordFailure(channelId: string) {
+  if (!failureCounts[channelId]) {
+    failureCounts[channelId] = { count: 0, coolingUntil: null };
+  }
+  failureCounts[channelId].count++;
+
+  if (failureCounts[channelId].count >= CONSECUTIVE_FAILURE_THRESHOLD) {
+    failureCounts[channelId].coolingUntil = Date.now() + COOLING_PERIOD_MS;
+    await markChannelUnhealthy(channelId);
+  }
+}
+
+// Check if channel is in cooling period and should be re-checked
+function isInCooling(channelId: string): boolean {
+  const record = failureCounts[channelId];
+  if (!record || !record.coolingUntil) return false;
+  if (Date.now() >= record.coolingUntil) {
+    // Cooling period expired, reset and allow retry
+    delete failureCounts[channelId];
+    return false;
+  }
+  return true;
+}
+
+// 按优先级获取可用渠道（过滤 UNHEALTHY 和冷却中的渠道）
 export async function getAvailableChannels() {
-  return prisma.modelChannel.findMany({
+  const channels = await prisma.modelChannel.findMany({
     where: { isActive: true },
     orderBy: { priority: 'asc' },
   });
+
+  // Filter out channels in cooling period
+  const available = channels.filter(c => {
+    if (c.healthStatus === 'UNHEALTHY') {
+      // If cooling expired, auto-recover to UNKNOWN for re-check
+      if (isInCooling(c.id)) return false;
+      // Not in cooling anymore -> auto-recover
+      prisma.modelChannel.update({
+        where: { id: c.id },
+        data: { healthStatus: 'UNKNOWN' },
+      }).catch(() => {});
+      return true;
+    }
+    return true;
+  });
+
+  return available;
 }
 
 // 透明代理到上游，支持故障转移
@@ -24,8 +107,10 @@ export async function routeToUpstream(
   }
 
   let lastError: Error | null = null;
+  let lastChannelId: string | null = null;
 
   for (const channel of channels) {
+    lastChannelId = channel.id;
     try {
       const url = `${channel.baseUrl}${path}`;
       const response = await fetch(url, {
@@ -36,19 +121,23 @@ export async function routeToUpstream(
           ...options.headers,
         },
         body: options.body,
-        signal: AbortSignal.timeout(60000), // 60s timeout
+        signal: AbortSignal.timeout(60000),
       });
 
       // 5xx 错误尝试下一个渠道
       if (response.status >= 500 && channels.length > 1) {
         lastError = new Error(`Channel ${channel.name} returned ${response.status}`);
+        await recordFailure(channel.id);
         continue;
       }
 
+      // Success - reset failure count
+      resetFailureCount(channel.id);
       return { channel: { id: channel.id, name: channel.name, baseUrl: channel.baseUrl, apiKey: channel.apiKey }, response };
     } catch (err: any) {
       lastError = err;
       console.warn(`Channel ${channel.name} failed: ${err.message}`);
+      await recordFailure(channel.id);
       continue;
     }
   }
@@ -84,7 +173,10 @@ export async function routeToUpstreamStreaming(
       });
 
       if (!response.ok) {
-        if (response.status >= 500 && channels.length > 1) continue;
+        if (response.status >= 500 && channels.length > 1) {
+          await recordFailure(channel.id);
+          continue;
+        }
         onError(new Error(`Channel ${channel.name} returned ${response.status}`));
         return;
       }
@@ -108,10 +200,12 @@ export async function routeToUpstreamStreaming(
         }
       }
 
+      resetFailureCount(channel.id);
       onDone();
       return;
     } catch (err: any) {
       console.warn(`Channel ${channel.name} streaming failed: ${err.message}`);
+      await recordFailure(channel.id);
       continue;
     }
   }
@@ -119,16 +213,68 @@ export async function routeToUpstreamStreaming(
   onError(new Error('All channels failed for streaming'));
 }
 
-export async function checkChannelHealth(channelId: string): Promise<boolean> {
+// 健康检查 - 返回详细信息并更新数据库
+export async function checkChannelHealth(channelId: string): Promise<HealthCheckResult> {
   try {
     const channel = await prisma.modelChannel.findUnique({ where: { id: channelId } });
-    if (!channel) return false;
-    const response = await fetch(`${channel.baseUrl}/v1/models`, {
+    if (!channel) return { healthy: false, message: '渠道不存在' };
+
+    const healthPath = getHealthCheckPath(channel.baseUrl);
+    const url = `${channel.baseUrl}${healthPath}`;
+
+    const response = await fetch(url, {
       headers: { Authorization: `Bearer ${channel.apiKey}` },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000),
     });
-    return response.ok;
-  } catch {
-    return false;
+
+    if (response.ok) {
+      await markChannelHealthy(channelId);
+      resetFailureCount(channelId);
+      return {
+        healthy: true,
+        statusCode: response.status,
+        message: '连接正常',
+      };
+    } else {
+      await markChannelUnhealthy(channelId);
+      return {
+        healthy: false,
+        statusCode: response.status,
+        message: `HTTP ${response.status}: ${response.statusText}`,
+        error: `Health check to ${healthPath} returned ${response.status}`,
+      };
+    }
+  } catch (err: any) {
+    await markChannelUnhealthy(channelId);
+    if (err.name === 'TimeoutError' || err.code === 'UND_ERR_CONNECT_TIMEOUT') {
+      return { healthy: false, message: '连接超时', error: 'Request timed out after 10s' };
+    }
+    return { healthy: false, message: `连接失败: ${err.message}`, error: err.message };
+  }
+}
+
+// 定时健康巡检
+let healthCheckInterval: ReturnType<typeof setInterval> | null = null;
+
+export function startScheduledHealthChecks(intervalMs = 300000) {
+  if (healthCheckInterval) clearInterval(healthCheckInterval);
+  healthCheckInterval = setInterval(async () => {
+    try {
+      const channels = await prisma.modelChannel.findMany({ where: { isActive: true } });
+      for (const channel of channels) {
+        checkChannelHealth(channel.id).catch(err =>
+          console.warn(`Scheduled health check failed for ${channel.name}:`, err.message)
+        );
+      }
+    } catch (err) {
+      console.error('Scheduled health check error:', err);
+    }
+  }, intervalMs);
+}
+
+export function stopScheduledHealthChecks() {
+  if (healthCheckInterval) {
+    clearInterval(healthCheckInterval);
+    healthCheckInterval = null;
   }
 }
