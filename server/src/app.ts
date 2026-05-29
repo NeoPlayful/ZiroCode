@@ -16,6 +16,7 @@ import { adminRoutes } from './routes/admin.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { analyticsRoutes } from './routes/analytics.js';
+import { billingRoutes } from './routes/billing.js';
 import { systemRoutes } from './routes/system.js';
 import { gatewayRoutes } from './routes/gateway.js';
 import { i18nMiddleware } from './i18n/middleware.js';
@@ -24,7 +25,7 @@ import { startScheduler } from './lib/scheduler.js';
 const app = Fastify({ logger: true });
 
 // BigInt JSON 序列化支持
-BigInt.prototype.toJSON = function () {
+(BigInt.prototype as any).toJSON = function () {
   return Number(this);
 };
 
@@ -80,6 +81,7 @@ async function start() {
   app.register(notificationRoutes);
   app.register(webhookRoutes);
   app.register(analyticsRoutes);
+  app.register(billingRoutes);
   app.register(systemRoutes);
   app.register(gatewayRoutes);
 

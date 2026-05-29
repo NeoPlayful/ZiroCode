@@ -35,6 +35,7 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
     { key: 'tickets', label: t('sidebar.tickets'), icon: ChatBubbleLeftRightIcon },
     { key: 'announcements', label: t('sidebar.announcements'), icon: MegaphoneIcon },
     { key: 'analytics', label: t('sidebar.analytics') || '数据分析', icon: ChartBarSquareIcon },
+    { key: 'billing', label: '计费报表', icon: BanknotesIcon },
     { key: 'audit-logs', label: t('sidebar.auditLogs'), icon: DocumentTextIcon },
     { key: 'batch', label: t('sidebar.batch'), icon: CommandLineIcon },
     { key: 'config', label: t('sidebar.config'), icon: Cog6ToothIcon },

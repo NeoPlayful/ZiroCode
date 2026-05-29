@@ -7,6 +7,56 @@ import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
 import { triggerReferralReward } from '../lib/referral.js';
 
+let defaultPricingCache: { inputPrice: number; outputPrice: number; cacheWritePrice: number; cacheReadPrice: number } | null = null;
+let modelPricingCache: Record<string, { input: number; output: number; cacheWrite: number; cacheRead: number }> | null = null;
+let pricingCacheTime = 0;
+
+async function getDefaultPricing() {
+  if (defaultPricingCache && Date.now() - pricingCacheTime < 60000) return defaultPricingCache;
+  try {
+    const config = await prisma.systemConfig.findUnique({ where: { key: 'default_pricing' } });
+    defaultPricingCache = config?.value ? {
+      inputPrice: Number((config.value as any).inputPrice) || 1,
+      outputPrice: Number((config.value as any).outputPrice) || 1,
+      cacheWritePrice: Number((config.value as any).cacheWritePrice) || 1,
+      cacheReadPrice: Number((config.value as any).cacheReadPrice) || 1,
+    } : { inputPrice: 1, outputPrice: 1, cacheWritePrice: 1, cacheReadPrice: 1 };
+    pricingCacheTime = Date.now();
+  } catch {
+    defaultPricingCache = { inputPrice: 1, outputPrice: 1, cacheWritePrice: 1, cacheReadPrice: 1 };
+  }
+  return defaultPricingCache;
+}
+
+async function getModelPricing(model: string) {
+  if (!modelPricingCache || Date.now() - pricingCacheTime >= 60000) {
+    try {
+      const config = await prisma.systemConfig.findUnique({ where: { key: 'model_pricing' } });
+      modelPricingCache = (config?.value as any) || {};
+    } catch {
+      modelPricingCache = {};
+    }
+    pricingCacheTime = Date.now();
+  }
+  if (modelPricingCache![model]) return modelPricingCache![model];
+  for (const [key, price] of Object.entries(modelPricingCache!)) {
+    if (model.startsWith(key)) return price;
+  }
+  return null;
+}
+
+async function calculateCost(model: string, inputTokens: number, outputTokens: number, cacheCreationTokens: number, cacheReadTokens: number, channelPricing: { inputPrice: number; outputPrice: number; cacheWritePrice: number; cacheReadPrice: number }) {
+  const mp = await getModelPricing(model);
+  if (mp) {
+    return (inputTokens / 1_000_000 * mp.input) + (outputTokens / 1_000_000 * mp.output) + (cacheCreationTokens / 1_000_000 * mp.cacheWrite) + (cacheReadTokens / 1_000_000 * mp.cacheRead);
+  }
+  const ip = channelPricing.inputPrice > 0 ? channelPricing.inputPrice : (await getDefaultPricing()).inputPrice;
+  const op = channelPricing.outputPrice > 0 ? channelPricing.outputPrice : (await getDefaultPricing()).outputPrice;
+  const cwp = channelPricing.cacheWritePrice > 0 ? channelPricing.cacheWritePrice : (await getDefaultPricing()).cacheWritePrice;
+  const crp = channelPricing.cacheReadPrice > 0 ? channelPricing.cacheReadPrice : (await getDefaultPricing()).cacheReadPrice;
+  return (inputTokens / 1_000_000 * ip) + (outputTokens / 1_000_000 * op) + (cacheCreationTokens / 1_000_000 * cwp) + (cacheReadTokens / 1_000_000 * crp);
+}
+
 async function validateApiKey(authHeader: string | null): Promise<{ userId: string; apiKeyId: string } | null> {
   if (!authHeader || !authHeader.startsWith('Bearer sk-')) return null;
   const key = authHeader.replace('Bearer ', '');
@@ -16,15 +66,15 @@ async function validateApiKey(authHeader: string | null): Promise<{ userId: stri
   return { userId: apiKey.userId, apiKeyId: apiKey.id };
 }
 
-async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string) {
+async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, inputTokens: number, outputTokens: number, cacheCreationTokens: number, cacheReadTokens: number, cost: number | null, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string) {
   const latencyMs = responseTime.getTime() - requestTime.getTime();
   await prisma.apiUsageLog.create({
     data: {
       userId: auth.userId, apiKeyId: auth.apiKeyId,
-      model, tokensUsed, quotaUsed,
+      model, tokensUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, quotaUsed,
       statusCode, error, channelId,
       latencyMs, clientIp, routePath,
-      requestTime, responseTime,
+      requestTime, responseTime, cost,
     },
   });
 }
@@ -114,8 +164,10 @@ export async function gatewayRoutes(app: FastifyInstance) {
           Connection: 'keep-alive',
         });
         let totalTokens = 0;
+        let inputTokens = 0, outputTokens = 0, cacheCreationTokens = 0, cacheReadTokens = 0;
         let hasError = false;
         let streamChannelId: string | undefined;
+        let streamPricing = { inputPrice: 0, outputPrice: 0, cacheWritePrice: 0, cacheReadPrice: 0 };
         try {
           const result = await routeToUpstream(upstreamPath, {
             method: (req as any).method,
@@ -123,6 +175,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
             body: JSON.stringify(body),
           });
           streamChannelId = result.channel.id;
+          streamPricing = result.channel;
           const reader = result.response.body?.getReader();
           if (!reader) throw new Error('No response body');
           const decoder = new TextDecoder();
@@ -137,7 +190,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 if (data === '[DONE]') { reply.raw.write('data: [DONE]\n\n'); continue; }
-                try { const parsed = JSON.parse(data); totalTokens = parsed.usage?.total_tokens || totalTokens; } catch {}
+                try { const parsed = JSON.parse(data); const u = parsed.usage; if (u) { totalTokens = u.total_tokens || totalTokens; inputTokens = u.prompt_tokens || inputTokens; outputTokens = u.completion_tokens || outputTokens; cacheReadTokens = u.prompt_tokens_details?.cached_tokens || cacheReadTokens; cacheCreationTokens = u.cache_creation_input_tokens || cacheCreationTokens; } } catch {}
                 reply.raw.write(`data: ${data}\n\n`);
               }
             }
@@ -161,7 +214,8 @@ export async function gatewayRoutes(app: FastifyInstance) {
             dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed: Number((total - remaining) * BigInt(100) / total) }).catch(() => {});
           }
         }
-        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath);
+        const cost = await calculateCost(body?.model || 'unknown', inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, streamPricing);
+        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath);
         return;
       }
 
@@ -174,7 +228,13 @@ export async function gatewayRoutes(app: FastifyInstance) {
       const usedChannelId = result.channel.id;
       const responseTime = new Date();
       const responseData = await result.response.json() as any;
-      const tokensUsed = responseData.usage?.total_tokens || 0;
+      const usage = responseData.usage || {};
+      const tokensUsed = usage.total_tokens || 0;
+      const inputTokens = usage.prompt_tokens || 0;
+      const outputTokens = usage.completion_tokens || 0;
+      const cacheReadTokens = usage.prompt_tokens_details?.cached_tokens || 0;
+      const cacheCreationTokens = usage.cache_creation_input_tokens || 0;
+      const cost = await calculateCost(body?.model || 'unknown', inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, result.channel);
       const quotaUsed = BigInt(Math.ceil(tokensUsed * billingMultiplier));
       if (result.response.ok) {
         await deductQuota(auth.userId, quotaUsed);
@@ -187,7 +247,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
           dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed: Number((total - remaining) * BigInt(100) / total) }).catch(() => {});
         }
       }
-      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath);
+      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath);
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
       console.error('Gateway error:', error);

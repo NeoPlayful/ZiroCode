@@ -73,11 +73,30 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const subs = await prisma.subscription.findMany({
-        orderBy: { createdAt: 'desc' }, take: 50,
-        include: { user: { select: { name: true, email: true } } },
-      });
-      return reply.send({ subscriptions: subs.map(s => ({ ...s, quotaTotal: Number(s.quotaTotal), quotaUsed: Number(s.quotaUsed), quotaMonthly: s.quotaMonthly ? Number(s.quotaMonthly) : null, quotaMonthlyUsed: Number(s.quotaMonthlyUsed) })) });
+      const query = req.query as any;
+      const page = parseInt(query.page || '1');
+      const pageSize = parseInt(query.pageSize || '20');
+      const search = query.search || '';
+      const typeFilter = query.typeFilter || 'all';
+      const statusFilter = query.statusFilter || 'all';
+
+      const where: any = {};
+      if (typeFilter !== 'all') where.type = typeFilter;
+      if (statusFilter === 'active') where.isActive = true;
+      else if (statusFilter === 'expired') where.isActive = false;
+      if (search) where.user = { OR: [{ name: { contains: search, mode: 'insensitive' } }, { email: { contains: search, mode: 'insensitive' } }] };
+
+      const [subs, total] = await Promise.all([
+        prisma.subscription.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: { user: { select: { name: true, email: true } } },
+        }),
+        prisma.subscription.count({ where }),
+      ]);
+      return reply.send({ subscriptions: subs.map(s => ({ ...s, quotaTotal: Number(s.quotaTotal), quotaUsed: Number(s.quotaUsed), quotaMonthly: s.quotaMonthly ? Number(s.quotaMonthly) : null, quotaMonthlyUsed: Number(s.quotaMonthlyUsed) })), total, page, pageSize });
     } catch (error) {
       console.error('Admin subscriptions error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取订阅列表失败' } });
@@ -725,7 +744,7 @@ export async function adminRoutes(app: FastifyInstance) {
       if (granularity === 'hour') {
         const rawLogs = await prisma.apiUsageLog.findMany({
           where: { requestTime: { gte: from } },
-          select: { tokensUsed: true, requestTime: true },
+          select: { tokensUsed: true, requestTime: true, inputTokens: true, outputTokens: true, cacheReadTokens: true, cacheCreationTokens: true, cost: true },
           orderBy: { requestTime: 'asc' },
         });
         // 生成24小时完整时段
@@ -743,6 +762,10 @@ export async function adminRoutes(app: FastifyInstance) {
           const idx = Math.floor((d.getTime() - base.getTime()) / 3600000);
           if (idx >= 0 && idx < 24) {
             if (metric === 'tokens') points[idx].value += log.tokensUsed;
+            else if (metric === 'input_tokens') points[idx].value += log.inputTokens;
+            else if (metric === 'output_tokens') points[idx].value += log.outputTokens;
+            else if (metric === 'cache_read_tokens') points[idx].value += log.cacheReadTokens;
+            else if (metric === 'cost') points[idx].value += Number(log.cost || 0);
             else points[idx].value += 1;
           }
         }
@@ -751,7 +774,7 @@ export async function adminRoutes(app: FastifyInstance) {
         const numDays = period === '30d' ? 30 : 7;
         const rawLogs = await prisma.apiUsageLog.findMany({
           where: { requestTime: { gte: from } },
-          select: { tokensUsed: true, requestTime: true },
+          select: { tokensUsed: true, requestTime: true, inputTokens: true, outputTokens: true, cacheReadTokens: true, cacheCreationTokens: true, cost: true },
           orderBy: { requestTime: 'asc' },
         });
         // 从当前日期往前倒推 N 天
@@ -765,9 +788,13 @@ export async function adminRoutes(app: FastifyInstance) {
         for (const log of rawLogs) {
           const logDate = new Date(log.requestTime);
           logDate.setHours(0, 0, 0, 0);
-          const idx = Math.floor((logDate.getTime() - points[0] ? new Date(points[0].time).getTime() : 0) / 86400000);
+          const idx = Math.floor((logDate.getTime() - new Date(points[0].time).getTime()) / 86400000);
           if (idx >= 0 && idx < numDays) {
             if (metric === 'tokens') points[idx].value += log.tokensUsed;
+            else if (metric === 'input_tokens') points[idx].value += log.inputTokens;
+            else if (metric === 'output_tokens') points[idx].value += log.outputTokens;
+            else if (metric === 'cache_read_tokens') points[idx].value += log.cacheReadTokens;
+            else if (metric === 'cost') points[idx].value += Number(log.cost || 0);
             else points[idx].value += 1;
           }
         }
@@ -798,7 +825,7 @@ export async function adminRoutes(app: FastifyInstance) {
         by: ['model'],
         where: filter,
         _count: { id: true },
-        _sum: { tokensUsed: true, quotaUsed: true },
+        _sum: { tokensUsed: true, quotaUsed: true, inputTokens: true, outputTokens: true, cacheReadTokens: true, cacheCreationTokens: true, cost: true },
         orderBy: orderBy === 'requests' ? { _count: { id: 'desc' } } : { _sum: { tokensUsed: 'desc' } },
         take: parseInt(String(limit)) || 10,
       });
@@ -808,6 +835,11 @@ export async function adminRoutes(app: FastifyInstance) {
           model: g.model,
           requests: g._count.id,
           tokens: g._sum.tokensUsed || 0,
+          inputTokens: g._sum.inputTokens || 0,
+          outputTokens: g._sum.outputTokens || 0,
+          cacheReadTokens: g._sum.cacheReadTokens || 0,
+          cacheWriteTokens: g._sum.cacheCreationTokens || 0,
+          cost: Number(g._sum.cost || 0),
           quota: Number(g._sum.quotaUsed || BigInt(0)),
         })),
       };
@@ -873,7 +905,7 @@ export async function adminRoutes(app: FastifyInstance) {
         by: ['userId'],
         where: filter,
         _count: { id: true },
-        _sum: { tokensUsed: true, quotaUsed: true },
+        _sum: { tokensUsed: true, quotaUsed: true, inputTokens: true, outputTokens: true, cacheReadTokens: true, cacheCreationTokens: true, cost: true },
         orderBy: { _sum: { quotaUsed: 'desc' } },
         take: parseInt(String(limit)) || 10,
       });
@@ -892,6 +924,11 @@ export async function adminRoutes(app: FastifyInstance) {
           email: userMap.get(g.userId)?.email || '',
           requests: g._count.id,
           tokens: g._sum.tokensUsed || 0,
+          inputTokens: g._sum.inputTokens || 0,
+          outputTokens: g._sum.outputTokens || 0,
+          cacheReadTokens: g._sum.cacheReadTokens || 0,
+          cacheWriteTokens: g._sum.cacheCreationTokens || 0,
+          cost: Number(g._sum.cost || 0),
           quota: Number(g._sum.quotaUsed || BigInt(0)),
         })),
       };
@@ -1012,6 +1049,44 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Admin analytics requests error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取请求日志失败' } });
+    }
+  });
+
+  // 系统配置读写
+  app.get('/api/admin/config', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const configs = await prisma.systemConfig.findMany();
+      const configMap: Record<string, any> = {};
+      for (const config of configs) {
+        configMap[config.key] = config.value;
+      }
+      return reply.send(configMap);
+    } catch (error) {
+      console.error('Admin get config error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取系统配置失败' } });
+    }
+  });
+
+  app.put('/api/admin/config', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const body = req.body as Record<string, any>;
+      for (const [key, value] of Object.entries(body)) {
+        await prisma.systemConfig.upsert({
+          where: { key },
+          create: { key, value },
+          update: { value },
+        });
+      }
+      return reply.send({ ok: true });
+    } catch (error) {
+      console.error('Admin update config error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '更新系统配置失败' } });
     }
   });
 }

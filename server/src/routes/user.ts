@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { verifySession, COOKIE_NAME } from '../lib/auth.js';
 import { prisma } from '../lib/db.js';
+import { getModelPrice, QUOTA_PER_DOLLAR } from '../lib/pricing.js';
 import { getUserQuota } from '../lib/quota.js';
 import bcrypt from 'bcryptjs';
 
@@ -167,7 +168,7 @@ export async function userRoutes(app: FastifyInstance) {
       const usageLogs = await prisma.apiUsageLog.findMany({
         where: { userId: session.userId as string },
         orderBy: { requestTime: 'desc' }, take: 100,
-        select: { id: true, model: true, tokensUsed: true, quotaUsed: true, statusCode: true, requestTime: true },
+        select: { id: true, model: true, tokensUsed: true, inputTokens: true, outputTokens: true, cacheCreationTokens: true, cacheReadTokens: true, quotaUsed: true, statusCode: true, requestTime: true, responseTime: true, error: true, latencyMs: true, clientIp: true, routePath: true },
       });
 
       const dailyMap = new Map<string, { tokens: number; quota: number; calls: number }>();
@@ -227,12 +228,79 @@ export async function userRoutes(app: FastifyInstance) {
 
       return reply.send({
         total: { calls: usageLogs.length, tokens: usageLogs.reduce((s, l) => s + l.tokensUsed, 0), quota: Number(usageLogs.reduce((s, l) => s + l.quotaUsed, BigInt(0))) },
-        daily, byModel, recent: usageLogs.slice(0, 20),
+        daily, byModel, recent: usageLogs.slice(0, 20).map(l => ({
+          ...l,
+          pricing: getModelPrice(l.model),
+          quotaPerDollar: QUOTA_PER_DOLLAR,
+        })),
         hourly: { slots, models: modelNames },
       });
     } catch (error) {
       console.error('Usage error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取使用统计失败' } });
+    }
+  });
+
+  app.get('/api/user/billing', async (req, reply) => {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      const session = await verifySession(token);
+      if (!session) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '未登录' } });
+
+      const { from, to, model, page: pageStr = '1', pageSize: pageSizeStr = '20' } = req.query as any;
+      const userId = session.userId as string;
+      const page = parseInt(pageStr) || 1;
+      const pageSize = parseInt(pageSizeStr) || 20;
+
+      const filter: any = { userId };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (model) filter.model = model;
+
+      const [logs, total] = await Promise.all([
+        prisma.apiUsageLog.findMany({
+          where: filter,
+          select: {
+            requestTime: true, model: true, statusCode: true,
+            inputTokens: true, outputTokens: true,
+            cacheReadTokens: true, cacheCreationTokens: true,
+            quotaUsed: true, cost: true,
+          },
+          orderBy: { requestTime: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.apiUsageLog.count({ where: filter }),
+      ]);
+
+      const summary = logs.reduce((acc, log) => ({
+        totalCost: acc.totalCost + Number(log.cost || 0),
+        totalQuota: acc.totalQuota + Number(log.quotaUsed),
+        totalTokens: acc.totalTokens + log.inputTokens + log.outputTokens + log.cacheReadTokens + log.cacheCreationTokens,
+        totalRequests: acc.totalRequests + 1,
+      }), { totalCost: 0, totalQuota: 0, totalTokens: 0, totalRequests: 0 });
+
+      return reply.send({
+        summary: {
+          ...summary,
+          totalCost: Math.round(summary.totalCost * 1_000_000) / 1_000_000,
+        },
+        logs: logs.map(l => ({
+          time: l.requestTime,
+          model: l.model,
+          statusCode: l.statusCode,
+          inputTokens: l.inputTokens,
+          outputTokens: l.outputTokens,
+          cacheReadTokens: l.cacheReadTokens,
+          cacheWriteTokens: l.cacheCreationTokens,
+          cost: Number(l.cost || 0),
+          quotaUsed: Number(l.quotaUsed),
+        })),
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      });
+    } catch (error) {
+      console.error('User billing error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取消费记录失败' } });
     }
   });
 }

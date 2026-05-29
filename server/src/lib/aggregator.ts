@@ -26,7 +26,8 @@ export async function aggregateHourly(): Promise<void> {
   // Group by timeBucket + model + channelId + routePath
   const groups = new Map<string, {
     requestCount: number; successCount: number; errorCount: number;
-    totalTokens: bigint; totalLatency: bigint; totalQuota: bigint;
+    totalTokens: bigint; totalInputTokens: bigint; totalOutputTokens: bigint; totalCacheReadTokens: bigint; totalCacheWriteTokens: bigint;
+    totalLatency: bigint; totalQuota: bigint;
   }>();
 
   for (const log of logs) {
@@ -36,7 +37,8 @@ export async function aggregateHourly(): Promise<void> {
 
     const existing = groups.get(key) || {
       requestCount: 0, successCount: 0, errorCount: 0,
-      totalTokens: BigInt(0), totalLatency: BigInt(0), totalQuota: BigInt(0),
+      totalTokens: BigInt(0), totalInputTokens: BigInt(0), totalOutputTokens: BigInt(0), totalCacheReadTokens: BigInt(0), totalCacheWriteTokens: BigInt(0),
+      totalLatency: BigInt(0), totalQuota: BigInt(0),
     };
 
     existing.requestCount++;
@@ -46,6 +48,10 @@ export async function aggregateHourly(): Promise<void> {
       existing.errorCount++;
     }
     existing.totalTokens += BigInt(log.tokensUsed || 0);
+    existing.totalInputTokens += BigInt(log.inputTokens || 0);
+    existing.totalOutputTokens += BigInt(log.outputTokens || 0);
+    existing.totalCacheReadTokens += BigInt(log.cacheReadTokens || 0);
+    existing.totalCacheWriteTokens += BigInt(log.cacheCreationTokens || 0);
     existing.totalLatency += BigInt(log.latencyMs || 0);
     existing.totalQuota += log.quotaUsed;
 
@@ -78,6 +84,10 @@ export async function aggregateHourly(): Promise<void> {
         successCount: { increment: agg.successCount },
         errorCount: { increment: agg.errorCount },
         totalTokens: { increment: agg.totalTokens },
+        totalInputTokens: { increment: agg.totalInputTokens },
+        totalOutputTokens: { increment: agg.totalOutputTokens },
+        totalCacheReadTokens: { increment: agg.totalCacheReadTokens },
+        totalCacheWriteTokens: { increment: agg.totalCacheWriteTokens },
         totalLatency: { increment: agg.totalLatency },
         totalQuota: { increment: agg.totalQuota },
       },
@@ -108,7 +118,8 @@ export async function aggregateDaily(): Promise<void> {
   // Group by date + model + channelId + routePath
   const groups = new Map<string, {
     requestCount: number; successCount: number; errorCount: number;
-    totalTokens: bigint; totalLatency: bigint; totalQuota: bigint;
+    totalTokens: bigint; totalInputTokens: bigint; totalOutputTokens: bigint; totalCacheReadTokens: bigint; totalCacheWriteTokens: bigint;
+    totalLatency: bigint; totalQuota: bigint;
   }>();
 
   for (const row of hourlyRows) {
@@ -118,13 +129,18 @@ export async function aggregateDaily(): Promise<void> {
 
     const existing = groups.get(key) || {
       requestCount: 0, successCount: 0, errorCount: 0,
-      totalTokens: BigInt(0), totalLatency: BigInt(0), totalQuota: BigInt(0),
+      totalTokens: BigInt(0), totalInputTokens: BigInt(0), totalOutputTokens: BigInt(0), totalCacheReadTokens: BigInt(0), totalCacheWriteTokens: BigInt(0),
+      totalLatency: BigInt(0), totalQuota: BigInt(0),
     };
 
     existing.requestCount += row.requestCount;
     existing.successCount += row.successCount;
     existing.errorCount += row.errorCount;
     existing.totalTokens += row.totalTokens;
+    existing.totalInputTokens += row.totalInputTokens;
+    existing.totalOutputTokens += row.totalOutputTokens;
+    existing.totalCacheReadTokens += row.totalCacheReadTokens;
+    existing.totalCacheWriteTokens += row.totalCacheWriteTokens;
     existing.totalLatency += row.totalLatency;
     existing.totalQuota += row.totalQuota;
 
@@ -156,6 +172,10 @@ export async function aggregateDaily(): Promise<void> {
         successCount: { increment: agg.successCount },
         errorCount: { increment: agg.errorCount },
         totalTokens: { increment: agg.totalTokens },
+        totalInputTokens: { increment: agg.totalInputTokens },
+        totalOutputTokens: { increment: agg.totalOutputTokens },
+        totalCacheReadTokens: { increment: agg.totalCacheReadTokens },
+        totalCacheWriteTokens: { increment: agg.totalCacheWriteTokens },
         totalLatency: { increment: agg.totalLatency },
         totalQuota: { increment: agg.totalQuota },
       },
