@@ -1049,6 +1049,7 @@ export async function adminRoutes(app: FastifyInstance) {
             latencyMs: l.latencyMs,
             clientIp: l.clientIp,
             routePath: l.routePath,
+            requestPath: (l as any).requestPath || null,
             statusCode: l.statusCode,
             error: l.error,
             requestTime: l.requestTime,
