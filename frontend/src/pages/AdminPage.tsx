@@ -63,6 +63,9 @@ function AdminConfig() {
   const [saved, setSaved] = useState(false)
   const [modelPrices, setModelPrices] = useState<Record<string, { input: string; output: string; cacheWrite: string; cacheRead: string }>>({})
   const [redeemCodePrefix, setRedeemCodePrefix] = useState('')
+  const [upstreamTimeout, setUpstreamTimeout] = useState('')
+  const [rateLimitMax, setRateLimitMax] = useState('')
+  const [rateLimitWindow, setRateLimitWindow] = useState('')
 
   const BUILTIN_MODEL_PRICES: Record<string, { input: string; output: string; cacheWrite: string; cacheRead: string }> = {
     'gpt-4o': { input: '1', output: '1', cacheWrite: '1', cacheRead: '1' },
@@ -99,6 +102,15 @@ function AdminConfig() {
       if (configData.redeem_code_prefix !== undefined) {
         setRedeemCodePrefix(String(configData.redeem_code_prefix))
       }
+      if (configData.upstream_timeout !== undefined) {
+        setUpstreamTimeout(String(configData.upstream_timeout))
+      }
+      if (configData.rate_limit_max !== undefined) {
+        setRateLimitMax(String(configData.rate_limit_max))
+      }
+      if (configData.rate_limit_window !== undefined) {
+        setRateLimitWindow(String(configData.rate_limit_window))
+      }
     }
   }, [configData])
 
@@ -134,7 +146,7 @@ function AdminConfig() {
       await fetch('/api/admin/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model_pricing: modelPricingPayload, redeem_code_prefix: redeemCodePrefix }),
+        body: JSON.stringify({ model_pricing: modelPricingPayload, redeem_code_prefix: redeemCodePrefix, upstream_timeout: upstreamTimeout ? parseInt(upstreamTimeout) : 0, rate_limit_max: rateLimitMax ? parseInt(rateLimitMax) : 30, rate_limit_window: rateLimitWindow ? parseInt(rateLimitWindow) : 60 }),
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -168,6 +180,18 @@ function AdminConfig() {
             <input value={redeemCodePrefix} onChange={e => setRedeemCodePrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
               className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7] font-mono uppercase" placeholder="例如：SUMMER" />
             <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">生成兑换码时自动添加此前缀，仅允许大写字母和数字</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">上游超时时间（秒）</label>
+            <input value={upstreamTimeout} onChange={e => setUpstreamTimeout(e.target.value)} type="number" min="0"
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="0 = 不限制" />
+            <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">渠道请求的等待超时时间，0 表示不限制。默认为 60 秒。</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">速率限制（每分钟最大请求数）</label>
+            <input value={rateLimitMax} onChange={e => setRateLimitMax(e.target.value)} type="number" min="1"
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="30" />
+            <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">每个用户每分钟最多允许的请求次数，默认 30 次。</p>
           </div>
         </div>
       </div>
