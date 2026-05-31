@@ -56,13 +56,19 @@ export default function AdminChannels() {
   const [newForm, setNewForm] = useState({
     name: '', displayName: '', baseUrl: '', apiKey: '',
     models: [] as string[], priority: '0', weight: '1', timeout: '',
+    modelRedirect: {} as Record<string, string>, proxyUrl: '',
   })
 
   // Edit form state
   const [editForm, setEditForm] = useState({
     name: '', displayName: '', baseUrl: '', apiKey: '',
     models: [] as string[], priority: '0', weight: '1', timeout: '',
+    modelRedirect: {} as Record<string, string>, proxyUrl: '',
   })
+
+  // Redirect rules as array for UI editing
+  const [newRedirectRules, setNewRedirectRules] = useState<Array<{ source: string; target: string }>>([])
+  const [editRedirectRules, setEditRedirectRules] = useState<Array<{ source: string; target: string }>>([])
 
   const queryParams = new URLSearchParams({
     page: String(page),
@@ -100,7 +106,8 @@ export default function AdminChannels() {
       }),
     onSuccess: () => {
       setShowCreate(false)
-      setNewForm({ name: '', displayName: '', baseUrl: '', apiKey: '', models: [], priority: '0', weight: '1', timeout: '' })
+      setNewForm({ name: '', displayName: '', baseUrl: '', apiKey: '', models: [], priority: '0', weight: '1', timeout: '', modelRedirect: {}, proxyUrl: '' })
+      setNewRedirectRules([])
       queryClient.invalidateQueries({ queryKey: ['admin-channels'] })
     },
   })
@@ -159,6 +166,9 @@ export default function AdminChannels() {
   }
 
   function openEdit(channel: any) {
+    const redirectObj = channel.modelRedirect || {}
+    const rules = Object.entries(redirectObj).map(([source, target]) => ({ source, target: target as string }))
+    setEditRedirectRules(rules)
     setEditForm({
       name: channel.name,
       displayName: channel.displayName || '',
@@ -168,6 +178,8 @@ export default function AdminChannels() {
       priority: String(channel.priority ?? 0),
       weight: String(channel.weight ?? 1),
       timeout: channel.timeout ? String(channel.timeout) : '',
+      modelRedirect: redirectObj,
+      proxyUrl: channel.proxyUrl || '',
     })
     setEditChannel(channel)
   }
@@ -314,6 +326,16 @@ export default function AdminChannels() {
                       <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                       超时: {channel.timeout ? `${channel.timeout}s` : '默认'}
                     </span>
+                    {channel.modelRedirect && Object.keys(channel.modelRedirect).length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        {t('channels.redirectCount', { count: Object.keys(channel.modelRedirect).length })}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${channel.proxyUrl ? 'bg-purple-400' : 'bg-gray-300'}`} />
+                      {channel.proxyUrl ? `${t('channels.proxyStatus')}: ${channel.proxyUrl.replace(/socks5:\/\/[^:]+:[^@]+@/, 'socks5://***@')}` : t('channels.directConnect')}
+                    </span>
                     {channel.routeRefs && channel.routeRefs.length > 0 && (
                       <span className="flex items-center gap-1 group relative cursor-help">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
@@ -389,6 +411,29 @@ export default function AdminChannels() {
                 <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.models') || '模型列表'}</label>
                 <ModelMultiSelect value={newForm.models} onChange={models => setNewForm({ ...newForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
               </div>
+              {/* 模型重定向 */}
+              <div className="pt-2 border-t border-[#ECEFF3] dark:border-[#303033]">
+                <label className="block text-sm font-semibold text-[#111827] dark:text-[#E5E5E7] mb-1">{t('channels.modelRedirect')}</label>
+                <p className="text-xs text-[#6B7280] dark:text-[#98989D] mb-3">{t('channels.modelRedirectDesc')}</p>
+                {newRedirectRules.map((rule, idx) => (
+                  <div key={idx} className="flex items-center gap-2 mb-2">
+                    <input value={rule.source} onChange={e => { const r = [...newRedirectRules]; r[idx] = { ...r[idx], source: e.target.value }; setNewRedirectRules(r) }}
+                      className="flex-1 h-9 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.sourceModel')} />
+                    <span className="text-[#6B7280] dark:text-[#98989D]">→</span>
+                    <input value={rule.target} onChange={e => { const r = [...newRedirectRules]; r[idx] = { ...r[idx], target: e.target.value }; setNewRedirectRules(r) }}
+                      className="flex-1 h-9 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.targetModel')} />
+                    <button onClick={() => setNewRedirectRules(newRedirectRules.filter((_, i) => i !== idx))}
+                      className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => setNewRedirectRules([...newRedirectRules, { source: '', target: '' }])}
+                  className="text-xs text-[#e8673a] hover:text-[#d4562a] font-medium flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  {t('channels.addRule')}
+                </button>
+              </div>
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.priority') || '优先级'}</label>
@@ -406,9 +451,19 @@ export default function AdminChannels() {
                 <input value={newForm.timeout} onChange={e => setNewForm({ ...newForm, timeout: e.target.value })} type="number" min="0"
                   className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="留空=使用全局设置" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.proxyUrl')}</label>
+                <input value={newForm.proxyUrl} onChange={e => setNewForm({ ...newForm, proxyUrl: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.proxyUrlPlaceholder')} />
+                <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">{t('channels.proxyHint')}</p>
+              </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button onClick={() => createMutation.mutate({ name: newForm.name, displayName: newForm.displayName, baseUrl: newForm.baseUrl, apiKey: newForm.apiKey, models: newForm.models, priority: parseInt(newForm.priority) || 0, weight: parseInt(newForm.weight) || 1, timeout: newForm.timeout || 0 })}
+              <button onClick={() => {
+                const redirectObj: Record<string, string> = {}
+                newRedirectRules.forEach(r => { if (r.source && r.target) redirectObj[r.source] = r.target })
+                createMutation.mutate({ name: newForm.name, displayName: newForm.displayName, baseUrl: newForm.baseUrl, apiKey: newForm.apiKey, models: newForm.models, priority: parseInt(newForm.priority) || 0, weight: parseInt(newForm.weight) || 1, timeout: newForm.timeout || 0, modelRedirect: Object.keys(redirectObj).length > 0 ? redirectObj : undefined, proxyUrl: newForm.proxyUrl || '' })
+              }}
                 disabled={createMutation.isPending}
                 className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
                 {createMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.create') || '创建')}
@@ -453,6 +508,29 @@ export default function AdminChannels() {
                 <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.models') || '模型列表'}</label>
                 <ModelMultiSelect value={editForm.models} onChange={models => setEditForm({ ...editForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
               </div>
+              {/* 模型重定向 - 编辑 */}
+              <div className="pt-2 border-t border-[#ECEFF3] dark:border-[#303033]">
+                <label className="block text-sm font-semibold text-[#111827] dark:text-[#E5E5E7] mb-1">{t('channels.modelRedirect')}</label>
+                <p className="text-xs text-[#6B7280] dark:text-[#98989D] mb-3">{t('channels.modelRedirectDesc')}</p>
+                {editRedirectRules.map((rule, idx) => (
+                  <div key={idx} className="flex items-center gap-2 mb-2">
+                    <input value={rule.source} onChange={e => { const r = [...editRedirectRules]; r[idx] = { ...r[idx], source: e.target.value }; setEditRedirectRules(r) }}
+                      className="flex-1 h-9 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.sourceModel')} />
+                    <span className="text-[#6B7280] dark:text-[#98989D]">→</span>
+                    <input value={rule.target} onChange={e => { const r = [...editRedirectRules]; r[idx] = { ...r[idx], target: e.target.value }; setEditRedirectRules(r) }}
+                      className="flex-1 h-9 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.targetModel')} />
+                    <button onClick={() => setEditRedirectRules(editRedirectRules.filter((_, i) => i !== idx))}
+                      className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => setEditRedirectRules([...editRedirectRules, { source: '', target: '' }])}
+                  className="text-xs text-[#e8673a] hover:text-[#d4562a] font-medium flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  {t('channels.addRule')}
+                </button>
+              </div>
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.priority') || '优先级'}</label>
@@ -470,9 +548,19 @@ export default function AdminChannels() {
                 <input value={editForm.timeout} onChange={e => setEditForm({ ...editForm, timeout: e.target.value })} type="number" min="0"
                   className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="留空=使用全局设置" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.proxyUrl')}</label>
+                <input value={editForm.proxyUrl} onChange={e => setEditForm({ ...editForm, proxyUrl: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.proxyUrlPlaceholder')} />
+                <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">{t('channels.proxyHint')}</p>
+              </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button onClick={() => editMutation.mutate({ id: editChannel.id, data: { name: editForm.name, displayName: editForm.displayName, baseUrl: editForm.baseUrl, apiKey: editForm.apiKey || undefined, models: editForm.models, priority: parseInt(editForm.priority) || 0, weight: parseInt(editForm.weight) || 1, timeout: editForm.timeout || 0 } })}
+              <button onClick={() => {
+                const redirectObj: Record<string, string> = {}
+                editRedirectRules.forEach(r => { if (r.source && r.target) redirectObj[r.source] = r.target })
+                editMutation.mutate({ id: editChannel.id, data: { name: editForm.name, displayName: editForm.displayName, baseUrl: editForm.baseUrl, apiKey: editForm.apiKey || undefined, models: editForm.models, priority: parseInt(editForm.priority) || 0, weight: parseInt(editForm.weight) || 1, timeout: editForm.timeout || 0, modelRedirect: Object.keys(redirectObj).length > 0 ? redirectObj : undefined, proxyUrl: editForm.proxyUrl || '' } })
+              }}
                 disabled={editMutation.isPending}
                 className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
                 {editMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.save') || '保存')}

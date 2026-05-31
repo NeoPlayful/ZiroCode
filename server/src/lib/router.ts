@@ -1,4 +1,56 @@
 import { prisma } from './db.js';
+import { SocksProxyAgent } from 'socks-proxy-agent';
+import http from 'http';
+import https from 'https';
+
+// SOCKS5 代理 Agent 缓存
+const proxyAgentCache = new Map<string, SocksProxyAgent>();
+
+function getProxyAgent(proxyUrl: string): SocksProxyAgent | undefined {
+  if (!proxyUrl) return undefined;
+  if (!proxyAgentCache.has(proxyUrl)) {
+    proxyAgentCache.set(proxyUrl, new SocksProxyAgent(proxyUrl));
+  }
+  return proxyAgentCache.get(proxyUrl);
+}
+
+// 通过代理发起 HTTP 请求（兼容 SOCKS5）
+function proxyFetch(url: string, options: { method: string; headers: Record<string, string>; body?: string; signal?: AbortSignal }, proxyUrl: string): Promise<http.IncomingMessage> {
+  return new Promise((resolve, reject) => {
+    const agent = getProxyAgent(proxyUrl);
+    const urlObj = new URL(url);
+    const mod = urlObj.protocol === 'https:' ? https : http;
+    const req = mod.request(url, { method: options.method, headers: options.headers, agent, signal: options.signal }, (res) => resolve(res));
+    req.on('error', reject);
+    if (options.signal) {
+      options.signal.addEventListener('abort', () => { req.destroy(); reject(Object.assign(new Error('Request timed out'), { name: 'TimeoutError' })); }, { once: true });
+    }
+    if (options.body) req.write(options.body);
+    req.end();
+  });
+}
+
+// 将 IncomingMessage 包装为 Response 对象
+function incomingMessageToResponse(incoming: http.IncomingMessage): Response {
+  const headers: Record<string, string> = {};
+  if (incoming.rawHeaders) {
+    for (let i = 0; i < incoming.rawHeaders.length; i += 2) {
+      headers[incoming.rawHeaders[i].toLowerCase()] = incoming.rawHeaders[i + 1];
+    }
+  }
+  const body = new ReadableStream({
+    start(controller) {
+      incoming.on('data', (chunk: Buffer) => controller.enqueue(chunk));
+      incoming.on('end', () => controller.close());
+      incoming.on('error', (err) => controller.error(err));
+    },
+  });
+  return new Response(body, {
+    status: incoming.statusCode || 500,
+    statusText: incoming.statusMessage || 'Error',
+    headers,
+  });
+}
 
 let cachedTimeout: number | null = null;
 let timeoutCacheTime = 0;
@@ -114,6 +166,21 @@ export async function getAvailableChannels() {
   }));
 }
 
+// 应用模型重定向
+function applyModelRedirect(body: string | undefined, modelRedirect: unknown): string | undefined {
+  if (!body || !modelRedirect) return body;
+  try {
+    const redirectMap = modelRedirect as Record<string, string>;
+    if (Object.keys(redirectMap).length === 0) return body;
+    const parsed = JSON.parse(body);
+    if (parsed.model && redirectMap[parsed.model]) {
+      parsed.model = redirectMap[parsed.model];
+      return JSON.stringify(parsed);
+    }
+  } catch {}
+  return body;
+}
+
 // 透明代理到上游，支持故障转移
 export async function routeToUpstream(
   path: string,
@@ -133,17 +200,28 @@ export async function routeToUpstream(
     try {
       const url = `${channel.baseUrl}${path}`;
       const timeout = (channel as any).timeout > 0 ? (channel as any).timeout * 1000 : await getUpstreamTimeout();
-      const fetchOptions: RequestInit & { signal?: AbortSignal } = {
-        method: options.method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-          Authorization: `Bearer ${channel.apiKey}`,
-        },
-        body: options.body,
+      const proxyUrl = (channel as any).proxyUrl || '';
+      const channelHeaders = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+        Authorization: `Bearer ${channel.apiKey}`,
       };
-      if (timeout > 0) fetchOptions.signal = AbortSignal.timeout(timeout);
-      const response = await fetch(url, fetchOptions);
+      const requestBody = applyModelRedirect(options.body, (channel as any).modelRedirect);
+      const signal = timeout > 0 ? AbortSignal.timeout(timeout) : undefined;
+
+      let response: Response;
+      if (proxyUrl) {
+        const proxyRes = await proxyFetch(url, { method: options.method, headers: channelHeaders, body: requestBody, signal }, proxyUrl);
+        response = incomingMessageToResponse(proxyRes);
+      } else {
+        const fetchOptions: RequestInit & { signal?: AbortSignal } = {
+          method: options.method,
+          headers: channelHeaders,
+          body: requestBody,
+        };
+        if (signal) fetchOptions.signal = signal;
+        response = await fetch(url, fetchOptions);
+      }
 
       // 5xx 错误尝试下一个渠道
       if (response.status >= 500 && channels.length > 1) {
@@ -187,15 +265,25 @@ export async function routeToUpstreamStreaming(
   for (const channel of channels) {
     try {
       const url = `${channel.baseUrl}${path}`;
-      const response = await fetch(url, {
-        method: options.method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-          Authorization: `Bearer ${channel.apiKey}`,
-        },
-        body: options.body,
-      });
+      const proxyUrl = (channel as any).proxyUrl || '';
+      const channelHeaders = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+        Authorization: `Bearer ${channel.apiKey}`,
+      };
+      const requestBody = applyModelRedirect(options.body, (channel as any).modelRedirect);
+
+      let response: Response;
+      if (proxyUrl) {
+        const proxyRes = await proxyFetch(url, { method: options.method, headers: channelHeaders, body: requestBody }, proxyUrl);
+        response = incomingMessageToResponse(proxyRes);
+      } else {
+        response = await fetch(url, {
+          method: options.method,
+          headers: channelHeaders,
+          body: requestBody,
+        });
+      }
 
       if (!response.ok) {
         if (response.status >= 500 && channels.length > 1) {
@@ -246,11 +334,24 @@ export async function checkChannelHealth(channelId: string): Promise<HealthCheck
 
     const healthPath = getHealthCheckPath(channel.baseUrl);
     const url = `${channel.baseUrl}${healthPath}`;
+    const proxyUrl = (channel as any).proxyUrl || '';
 
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${channel.apiKey}` },
-      signal: AbortSignal.timeout(10000),
-    });
+    let response: Response;
+    if (proxyUrl) {
+      const proxyRes = await proxyFetch(url, { method: 'GET', headers: { Authorization: `Bearer ${channel.apiKey}` }, signal: AbortSignal.timeout(10000) }, proxyUrl);
+      // Await full body so proxyRes is fully consumed before returning
+      const bodyChunks: Buffer[] = [];
+      for await (const chunk of proxyRes) bodyChunks.push(chunk);
+      response = new Response(Buffer.concat(bodyChunks), {
+        status: proxyRes.statusCode || 500,
+        statusText: proxyRes.statusMessage || 'Error',
+      });
+    } else {
+      response = await fetch(url, {
+        headers: { Authorization: `Bearer ${channel.apiKey}` },
+        signal: AbortSignal.timeout(10000),
+      });
+    }
 
     if (response.ok) {
       await markChannelHealthy(channelId);
