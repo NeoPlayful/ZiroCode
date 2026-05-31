@@ -6,6 +6,9 @@ import { requireAdmin, AuthError } from '../lib/api-utils.js';
 import { checkChannelHealth } from '../lib/router.js';
 import { isSlaViolated } from '../lib/ticket-sla.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
+import { initGeoIP } from '../lib/geoip.js';
+import fs from 'fs';
+import path from 'path';
 
 async function handleAuth(req: any, reply: any) {
   try { return await requireAdmin(req, reply); }
@@ -1048,6 +1051,7 @@ export async function adminRoutes(app: FastifyInstance) {
             quotaUsed: Number(l.quotaUsed),
             latencyMs: l.latencyMs,
             clientIp: l.clientIp,
+            country: l.country,
             routePath: l.routePath,
             requestPath: (l as any).requestPath || null,
             statusCode: l.statusCode,
@@ -1062,6 +1066,102 @@ export async function adminRoutes(app: FastifyInstance) {
     } catch (error) {
       console.error('Admin analytics requests error:', error);
       return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取请求日志失败' } });
+    }
+  });
+
+  // 请求来源地域分布
+  app.get('/api/admin/analytics/geo', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const { from, to } = req.query as any;
+      const filter: any = {};
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
+      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+
+      const cached = await cacheGet(`admin:analytics:geo:${from || ''}:${to || ''}`);
+      if (cached) return reply.send(JSON.parse(cached));
+
+      const groups = await prisma.apiUsageLog.groupBy({
+        by: ['country'],
+        where: filter,
+        _count: { id: true },
+        _sum: { tokensUsed: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 20,
+      });
+
+      const result = {
+        distribution: groups.map(g => ({
+          country: g.country,
+          requests: g._count.id,
+          tokens: g._sum.tokensUsed || 0,
+        })),
+      };
+
+      await cacheSet(`admin:analytics:geo:${from || ''}:${to || ''}`, JSON.stringify(result), 60);
+      return reply.send(result);
+    } catch (error) {
+      console.error('Admin analytics geo error:', error);
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取地域分布失败' } });
+    }
+  });
+
+  // GEOIP 数据库更新
+  app.post('/api/admin/geoip/update', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const config = await prisma.systemConfig.findUnique({ where: { key: 'geoip_download_url' } });
+      const downloadUrl = config?.value ? String(config.value) : '';
+      if (!downloadUrl) {
+        return reply.status(400).send({ error: { code: 'NO_DOWNLOAD_URL', message: '请先配置 GEOIP 下载地址' } });
+      }
+
+      console.log('[GEOIP] Downloading database from:', downloadUrl);
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        return reply.status(502).send({ error: { code: 'DOWNLOAD_FAILED', message: `下载失败: HTTP ${response.status}` } });
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const dbPath = path.join(process.cwd(), 'data', 'GeoLite2-City.mmdb');
+      fs.writeFileSync(dbPath, buffer);
+
+      await initGeoIP(dbPath);
+      console.log('[GEOIP] Database updated successfully');
+
+      return reply.send({ ok: true, size: buffer.length, updatedAt: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('[GEOIP] Update error:', error);
+      return reply.status(500).send({ error: { code: 'UPDATE_FAILED', message: error.message || 'GEOIP 数据库更新失败' } });
+    }
+  });
+
+  // GEOIP 状态查询
+  app.get('/api/admin/geoip/status', async (req, reply) => {
+    try {
+      const admin = await handleAuth(req, reply);
+      if (!admin) return;
+
+      const dbPath = path.join(process.cwd(), 'data', 'GeoLite2-City.mmdb');
+      let fileInfo = { exists: false, size: 0, updatedAt: null as string | null };
+      if (fs.existsSync(dbPath)) {
+        const stat = fs.statSync(dbPath);
+        fileInfo = { exists: true, size: stat.size, updatedAt: stat.mtime.toISOString() };
+      }
+
+      const config = await prisma.systemConfig.findUnique({ where: { key: 'geoip_download_url' } });
+
+      return reply.send({
+        loaded: true,
+        downloadUrl: config?.value ? String(config.value) : '',
+        file: fileInfo,
+      });
+    } catch (error) {
+      return reply.status(500).send({ error: { code: 'INTERNAL', message: '获取 GEOIP 状态失败' } });
     }
   });
 

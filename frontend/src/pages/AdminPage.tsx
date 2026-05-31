@@ -66,6 +66,15 @@ function AdminConfig() {
   const [upstreamTimeout, setUpstreamTimeout] = useState('')
   const [rateLimitMax, setRateLimitMax] = useState('')
   const [rateLimitWindow, setRateLimitWindow] = useState('')
+  const [geoipDownloadUrl, setGeoipDownloadUrl] = useState('https://git.io/GeoLite2-City.mmdb')
+  const [geoipUpdating, setGeoipUpdating] = useState(false)
+  const [geoipUpdateResult, setGeoipUpdateResult] = useState<{ ok: boolean; message: string } | null>(null)
+
+  const { data: geoipStatus } = useQuery({
+    queryKey: ['admin-geoip-status'],
+    queryFn: () => fetch('/api/admin/geoip/status').then(r => r.json()),
+    refetchInterval: 30000,
+  })
 
   const BUILTIN_MODEL_PRICES: Record<string, { input: string; output: string; cacheWrite: string; cacheRead: string }> = {
     'gpt-4o': { input: '1', output: '1', cacheWrite: '1', cacheRead: '1' },
@@ -111,6 +120,9 @@ function AdminConfig() {
       if (configData.rate_limit_window !== undefined) {
         setRateLimitWindow(String(configData.rate_limit_window))
       }
+      if (configData.geoip_download_url !== undefined) {
+        setGeoipDownloadUrl(String(configData.geoip_download_url))
+      }
     }
   }, [configData])
 
@@ -146,7 +158,7 @@ function AdminConfig() {
       await fetch('/api/admin/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model_pricing: modelPricingPayload, redeem_code_prefix: redeemCodePrefix, upstream_timeout: upstreamTimeout ? parseInt(upstreamTimeout) : 0, rate_limit_max: rateLimitMax ? parseInt(rateLimitMax) : 30, rate_limit_window: rateLimitWindow ? parseInt(rateLimitWindow) : 60 }),
+        body: JSON.stringify({ model_pricing: modelPricingPayload, redeem_code_prefix: redeemCodePrefix, upstream_timeout: upstreamTimeout ? parseInt(upstreamTimeout) : 0, rate_limit_max: rateLimitMax ? parseInt(rateLimitMax) : 30, rate_limit_window: rateLimitWindow ? parseInt(rateLimitWindow) : 60, geoip_download_url: geoipDownloadUrl }),
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -154,6 +166,24 @@ function AdminConfig() {
       alert('保存失败')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleGeoipUpdate() {
+    setGeoipUpdating(true)
+    setGeoipUpdateResult(null)
+    try {
+      const res = await fetch('/api/admin/geoip/update', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        setGeoipUpdateResult({ ok: true, message: `更新成功 (${(data.size / 1024 / 1024).toFixed(1)}MB)` })
+      } else {
+        setGeoipUpdateResult({ ok: false, message: data.error?.message || '更新失败' })
+      }
+    } catch {
+      setGeoipUpdateResult({ ok: false, message: '网络错误' })
+    } finally {
+      setGeoipUpdating(false)
     }
   }
 
@@ -276,6 +306,36 @@ function AdminConfig() {
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* GEOIP 设置 */}
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-6">
+        <h3 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">GEOIP 数据库</h3>
+        <div className="space-y-4 max-w-md">
+          <div>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">下载地址</label>
+            <input value={geoipDownloadUrl} onChange={e => setGeoipDownloadUrl(e.target.value)}
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="https://raw.githubusercontent.com/.../GeoLite2-City.mmdb" />
+            <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">设置后保存，再点击下方按钮下载更新。建议每季度更新一次。</p>
+          </div>
+          {geoipStatus?.file?.exists && (
+            <div className="flex gap-4 text-xs text-gray-500 dark:text-[#98989D]">
+              <span>文件大小: {(geoipStatus.file.size / 1024 / 1024).toFixed(1)}MB</span>
+              <span>更新日期: {new Date(geoipStatus.file.updatedAt).toLocaleDateString()}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <button onClick={handleGeoipUpdate} disabled={geoipUpdating || !geoipDownloadUrl}
+              className="h-9 px-4 text-xs font-medium border border-[#ECEFF3] dark:border-[#303033] rounded-xl hover:bg-gray-50 dark:hover:bg-[#242426] text-gray-600 dark:text-[#E5E5E7] disabled:opacity-50 transition-colors">
+              {geoipUpdating ? '更新中...' : '立即更新'}
+            </button>
+            {geoipUpdateResult && (
+              <span className={`text-xs ${geoipUpdateResult.ok ? 'text-green-600 dark:text-[#30D158]' : 'text-red-600 dark:text-[#FF453A]'}`}>
+                {geoipUpdateResult.message}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

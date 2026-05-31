@@ -534,6 +534,17 @@
       "input_tokens": "Input Tokens",
       "output_tokens": "Output Tokens",
       "cost": "Cost (USD)"
+    },
+    "geo": {
+      "title": "Request Origin",
+      "country": "Country",
+      "countryRanking": "Country Ranking",
+      "requests": "Requests",
+      "tokens": "Tokens",
+      "unknown": "Unknown",
+      "other": "Other",
+      "local": "Local",
+      "noData": "No Geo Data"
     }
   },
   "billing": {

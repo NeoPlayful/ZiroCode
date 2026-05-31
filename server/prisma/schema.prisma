@@ -335,6 +335,7 @@ model ApiUsageLog {
   channelId    String?
   latencyMs    Int?
   clientIp     String?
+  country      String?
   cost         Decimal? @db.Decimal(12, 6)
   routePath    String?
   requestPath  String?
