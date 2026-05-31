@@ -7,6 +7,7 @@ import NotificationBell from './NotificationBell'
 import AnnouncementBanner from './AnnouncementBanner'
 import Footer from './Footer'
 import LanguageSwitcher from './LanguageSwitcher'
+import ThemeToggle from './ThemeToggle'
 
 const navItems = [
   { labelKey: 'nav.dashboard', href: '/dashboard' },
@@ -52,10 +53,10 @@ export default function AppLayout() {
   // 加载中显示加载动画
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex items-center justify-center">
         <div className="text-center">
           <SparklesIcon className="w-12 h-12 text-[#e8673a] mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">{t('message.loading')}</p>
+          <p className="text-gray-600 dark:text-[#98989D]">{t('message.loading')}</p>
         </div>
       </div>
     )
@@ -74,8 +75,8 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3] flex flex-col">
-      <nav className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex flex-col">
+      <nav className="bg-white dark:bg-[#1F1F21] border-b border-gray-200 dark:border-[#303033]">
         <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
             <SparklesIcon className="w-7 h-7 text-[#e8673a]" />ZiroCode
@@ -88,7 +89,7 @@ export default function AppLayout() {
                   key={item.href}
                   to={item.href}
                   className={`px-4 py-1.5 rounded-md text-base font-medium ${
-                    isActive ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'
+                    isActive ? 'bg-[#e8673a] text-white' : 'text-gray-600 dark:text-[#E5E5E7] hover:bg-gray-100 dark:hover:bg-[#242426]'
                   }`}
                 >
                   {t(item.labelKey)}
@@ -98,7 +99,7 @@ export default function AppLayout() {
             {user?.role === 'ADMIN' && (
               <Link to="/admin"
                 className={`px-4 py-1.5 rounded-md text-base font-medium ${
-                  location.pathname.startsWith('/admin') ? 'bg-[#e8673a] text-white' : 'text-gray-600 hover:bg-gray-100'
+                  location.pathname.startsWith('/admin') ? 'bg-[#e8673a] text-white' : 'text-gray-600 dark:text-[#E5E5E7] hover:bg-gray-100 dark:hover:bg-[#242426]'
                 }`}
               >
                 {t('nav.admin')}
@@ -106,7 +107,8 @@ export default function AppLayout() {
             )}
           </div>
           {user && <NotificationBell />}
-          {user && <div className="ml-2"><LanguageSwitcher /></div>}
+          {user && <div className="ml-2"><ThemeToggle /></div>}
+          {user && <div className="ml-1"><LanguageSwitcher /></div>}
           {user && (
             <div className="relative flex-shrink-0 ml-2" ref={menuRef}>
               <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center gap-2 cursor-pointer">
@@ -121,20 +123,20 @@ export default function AppLayout() {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
-                  <div className="px-4 py-2 text-sm text-gray-400 border-b border-gray-100">
+                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-[#1F1F21] border border-gray-200 dark:border-[#303033] rounded-lg shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 text-sm text-gray-400 dark:text-[#6E6E73] border-b border-gray-100 dark:border-[#303033]">
                     {user.email}
                   </div>
                   <Link to="/dashboard" onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-[#E5E5E7] hover:bg-gray-50 dark:hover:bg-[#242426]">
                     {t('user.menu.profile')}
                   </Link>
                   <Link to="/tickets" onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-[#E5E5E7] hover:bg-gray-50 dark:hover:bg-[#242426]">
                     {t('user.menu.tickets')}
                   </Link>
                   <button onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">
+                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-[#242426]">
                     {t('user.menu.logout')}
                   </button>
                 </div>
