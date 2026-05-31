@@ -30,11 +30,11 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       const { t } = this.props;
       return (
-        <div className="min-h-screen bg-[#f0ebe3] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-sm p-8 max-w-md text-center">
+        <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1F1F21] rounded-xl shadow-sm p-8 max-w-md text-center">
             <ExclamationTriangleIcon className="w-16 h-16 text-red-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('error.title')}</h1>
-            <p className="text-gray-600 mb-4">{t('error.message')}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-[#E5E5E7] mb-2">{t('error.title')}</h1>
+            <p className="text-gray-600 dark:text-[#98989D] mb-4">{t('error.message')}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 bg-[#e8673a] text-white rounded-lg hover:bg-[#d15a2f]"

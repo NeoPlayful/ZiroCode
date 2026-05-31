@@ -185,19 +185,19 @@ export default function AdminChannels() {
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-6 animate-pulse">
-              <div className="h-5 bg-gray-100 rounded w-48 mb-3" />
-              <div className="h-4 bg-gray-100 rounded w-64 mb-2" />
-              <div className="h-4 bg-gray-100 rounded w-32" />
+            <div key={i} className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-6 animate-pulse">
+              <div className="h-5 bg-gray-100 dark:bg-[#242426] rounded w-48 mb-3" />
+              <div className="h-4 bg-gray-100 dark:bg-[#242426] rounded w-64 mb-2" />
+              <div className="h-4 bg-gray-100 dark:bg-[#242426] rounded w-32" />
             </div>
           ))}
         </div>
       ) : filteredChannels.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm py-20 px-6 text-center">
-          <ServerSvg className="w-16 h-16 mx-auto mb-5 text-gray-200" />
-          <h3 className="text-lg font-semibold text-[#111827] mb-1">{t('channels.empty') || '暂无渠道'}</h3>
-          <p className="text-sm text-[#6B7280] mb-6">创建第一个渠道开始转发模型请求</p>
+        <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm py-20 px-6 text-center">
+          <ServerSvg className="w-16 h-16 mx-auto mb-5 text-gray-200 dark:text-gray-600" />
+          <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-1">{t('channels.empty') || '暂无渠道'}</h3>
+          <p className="text-sm text-[#6B7280] dark:text-[#98989D] mb-6">创建第一个渠道开始转发模型请求</p>
           <button onClick={() => setShowCreate(true)}
             className="h-11 px-5 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 shadow-sm">
             {t('channels.addBtn')}
@@ -207,21 +207,21 @@ export default function AdminChannels() {
         /* Filter Bar + Channel Cards */
         <>
           {/* Filter Bar */}
-          <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-4 mb-4 flex items-center gap-4">
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-4 mb-4 flex items-center gap-4">
             <div className="relative flex-1 max-w-xs">
               <MagnifyingGlassSvg />
               <input type="text" placeholder={t('channels.search')}
                 value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
-                className="w-full pl-9 pr-3 h-10 text-sm border border-[#ECEFF3] rounded-xl focus:outline-none focus:border-[#111827]" />
+                className="w-full pl-9 pr-3 h-10 text-sm border border-[#ECEFF3] dark:border-[#303033] rounded-xl focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
             </div>
             <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
-              className="h-10 px-3 text-sm border border-[#ECEFF3] rounded-xl focus:outline-none focus:border-[#111827] bg-white">
+              className="h-10 px-3 text-sm border border-[#ECEFF3] dark:border-[#303033] rounded-xl focus:outline-none focus:border-[#111827] bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
               <option value="all">{t('channels.filter.allStatus')}</option>
               <option value="active">{t('channels.filter.active')}</option>
               <option value="inactive">{t('channels.filter.inactive')}</option>
             </select>
             <select value={healthFilter} onChange={e => { setHealthFilter(e.target.value); setPage(1) }}
-              className="h-10 px-3 text-sm border border-[#ECEFF3] rounded-xl focus:outline-none focus:border-[#111827] bg-white">
+              className="h-10 px-3 text-sm border border-[#ECEFF3] dark:border-[#303033] rounded-xl focus:outline-none focus:border-[#111827] bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
               <option value="all">{t('channels.healthLabel') || '健康状态'} - {t('channels.filter.allStatus')}</option>
               <option value="HEALTHY">{t('channels.healthStatus.healthy') || '健康'}</option>
               <option value="UNHEALTHY">{t('channels.healthStatus.unhealthy') || '异常'}</option>
@@ -238,9 +238,9 @@ export default function AdminChannels() {
           </div>
 
           {/* Channel Cards */}
-          <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm divide-y divide-[#ECEFF3]">
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm divide-y divide-[#ECEFF3] dark:divide-[#303033]">
             <div className="px-6 py-4">
-              <h2 className="text-base font-semibold text-[#111827]">渠道列表</h2>
+              <h2 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7]">渠道列表</h2>
             </div>
             {filteredChannels.map((channel: any) => {
               const testRes = testResult[channel.id]
@@ -252,7 +252,7 @@ export default function AdminChannels() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#FFF4F0] text-[#F97346] text-sm font-bold flex-shrink-0">{channel.displayOrder ?? '-'}</span>
-                      <span className="text-lg font-semibold text-[#111827] truncate">{channel.displayName || channel.name}</span>
+                      <span className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] truncate">{channel.displayName || channel.name}</span>
                       <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${
                         channel.isActive ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#DC2626]'
                       }`}>
@@ -261,7 +261,7 @@ export default function AdminChannels() {
                       <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${
                         channel.healthStatus === 'HEALTHY' ? 'bg-[#DCFCE7] text-[#16A34A]' :
                         channel.healthStatus === 'UNHEALTHY' ? 'bg-[#FEE2E2] text-[#DC2626]' :
-                        'bg-gray-100 text-gray-500'
+                        'bg-gray-100 dark:bg-[#242426] text-gray-500 dark:text-[#98989D]'
                       }`}>
                         <HealthDot status={channel.healthStatus} />
                         {channel.healthStatus === 'HEALTHY' ? (t('channels.healthStatus.healthy') || '健康') :
@@ -273,7 +273,7 @@ export default function AdminChannels() {
                       {/* Test Button */}
                       <button onClick={() => testChannel(channel.id)} disabled={isTesting}
                         className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                          testRes ? (testRes.healthy ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#DC2626]') : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          testRes ? (testRes.healthy ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#FEE2E2] text-[#DC2626]') : 'bg-gray-100 dark:bg-[#242426] hover:bg-gray-200 dark:hover:bg-[#2C2C2E] text-gray-700 dark:text-[#E5E5E7]'
                         }`}>
                         {isTesting ? (
                           <><SpinnerSvg />{t('channels.testing') || '测试中...'}</>
@@ -283,17 +283,17 @@ export default function AdminChannels() {
                       </button>
                       {/* Toggle Active */}
                       <button onClick={() => toggleMutation.mutate({ id: channel.id, isActive: !channel.isActive })}
-                        className="h-8 px-3 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
+                        className="h-8 px-3 rounded-lg text-xs font-medium bg-gray-100 dark:bg-[#242426] hover:bg-gray-200 dark:hover:bg-[#2C2C2E] text-gray-700 dark:text-[#E5E5E7] transition-colors">
                         {channel.isActive ? (t('channels.disableButton') || '禁用') : (t('channels.enableButton') || '启用')}
                       </button>
                       {/* Edit */}
                       <button onClick={() => openEdit(channel)}
-                        className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
+                        className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-[#242426] flex items-center justify-center text-gray-500 dark:text-[#98989D] transition-colors">
                         <PencilSvg />
                       </button>
                       {/* Delete */}
                       <button onClick={() => setDeleteChannel(channel)}
-                        className="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                        className="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center text-gray-400 dark:text-[#6E6E73] hover:text-red-500 transition-colors">
                         <TrashSvg />
                       </button>
                     </div>
@@ -301,11 +301,11 @@ export default function AdminChannels() {
 
                   {/* Row 2: Base URL */}
                   <div className="mb-3">
-                    <code className="text-xs text-gray-500 bg-[#F8FAFC] px-2 py-1 rounded">{channel.baseUrl}</code>
+                    <code className="text-xs text-gray-500 dark:text-[#98989D] bg-[#F8FAFC] dark:bg-[#242426] px-2 py-1 rounded">{channel.baseUrl}</code>
                   </div>
 
                   {/* Row 3: Meta info */}
-                  <div className="flex items-center gap-6 text-sm text-[#6B7280]">
+                  <div className="flex items-center gap-6 text-sm text-[#6B7280] dark:text-[#98989D]">
                     <span>优先级 {channel.priority ?? 0}</span>
                     <span>{t('channels.weight') || '权重'}: {channel.weight ?? 1}</span>
                     <span>模型: {channel.models?.length || 0}</span>
@@ -315,9 +315,9 @@ export default function AdminChannels() {
                         <span className="text-blue-600">被 {channel.routeRefs.length} 个路由引用</span>
                         {/* Hover tooltip showing route paths */}
                         <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-10">
-                          <div className="bg-[#111827] text-white text-xs rounded-xl px-3 py-2 shadow-lg whitespace-nowrap">
+                          <div className="bg-[#111827] dark:bg-[#0F0F10] text-white dark:text-[#E5E5E7] text-xs rounded-xl px-3 py-2 shadow-lg whitespace-nowrap">
                             {channel.routeRefs.map((r: any) => (
-                              <div key={r.id} className="py-0.5">{r.displayName} <span className="text-gray-400">({r.path})</span></div>
+                              <div key={r.id} className="py-0.5">{r.displayName} <span className="text-gray-400 dark:text-[#6E6E73]">({r.path})</span></div>
                             ))}
                           </div>
                         </div>
@@ -336,19 +336,19 @@ export default function AdminChannels() {
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between mt-4 text-sm text-[#6B7280]">
+          <div className="flex items-center justify-between mt-4 text-sm text-[#6B7280] dark:text-[#98989D]">
             <span>显示 {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)}，共 {total} 条</span>
             <div className="flex items-center gap-2">
               <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1) }}
-                className="h-8 px-2 text-sm border border-[#ECEFF3] rounded-lg focus:outline-none bg-white">
+                className="h-8 px-2 text-sm border border-[#ECEFF3] dark:border-[#303033] rounded-lg focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                 <option value={10}>10 / 页</option>
                 <option value={20}>20 / 页</option>
                 <option value={50}>50 / 页</option>
               </select>
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-                className="h-8 px-3 border border-[#ECEFF3] rounded-lg hover:bg-gray-50 disabled:opacity-50">上一页</button>
+                className="h-8 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-lg hover:bg-gray-50 dark:hover:bg-[#242426] disabled:opacity-50">上一页</button>
               <button onClick={() => setPage(p => p + 1)} disabled={page * pageSize >= total}
-                className="h-8 px-3 border border-[#ECEFF3] rounded-lg hover:bg-gray-50 disabled:opacity-50">下一页</button>
+                className="h-8 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-lg hover:bg-gray-50 dark:hover:bg-[#242426] disabled:opacity-50">下一页</button>
             </div>
           </div>
         </>
@@ -357,43 +357,43 @@ export default function AdminChannels() {
       {/* Create Dialog */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('channels.form.title') || '新增渠道'}</h3>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">{t('channels.form.title') || '新增渠道'}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.name') || '名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.name') || '名称'}</label>
                 <input value={newForm.name} onChange={e => setNewForm({ ...newForm, name: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.namePlaceholder')} />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.namePlaceholder')} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
                 <input value={newForm.displayName} onChange={e => setNewForm({ ...newForm, displayName: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.displayNamePlaceholder')} />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.displayNamePlaceholder')} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
                 <input value={newForm.baseUrl} onChange={e => setNewForm({ ...newForm, baseUrl: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.baseUrlPlaceholder')} />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.baseUrlPlaceholder')} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
                 <input value={newForm.apiKey} onChange={e => setNewForm({ ...newForm, apiKey: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.apiKeyPlaceholder')} />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.apiKeyPlaceholder')} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.models') || '模型列表'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.models') || '模型列表'}</label>
                 <ModelMultiSelect value={newForm.models} onChange={models => setNewForm({ ...newForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.priority') || '优先级'}</label>
+                  <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.priority') || '优先级'}</label>
                   <input value={newForm.priority} onChange={e => setNewForm({ ...newForm, priority: e.target.value })} type="number"
-                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.priorityPlaceholder')} />
+                    className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.priorityPlaceholder')} />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.weight') || '权重'}</label>
+                  <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.weight') || '权重'}</label>
                   <input value={newForm.weight} onChange={e => setNewForm({ ...newForm, weight: e.target.value })} type="number"
-                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.weightPlaceholder')} />
+                    className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.weightPlaceholder')} />
                 </div>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function AdminChannels() {
                 {createMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.create') || '创建')}
               </button>
               <button onClick={() => setShowCreate(false)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('channels.form.cancel') || '取消'}
               </button>
             </div>
@@ -415,44 +415,44 @@ export default function AdminChannels() {
       {/* Edit Dialog */}
       {editChannel && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditChannel(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('channels.form.editTitle') || '编辑渠道'}</h3>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">{t('channels.form.editTitle') || '编辑渠道'}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.name') || '名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.name') || '名称'}</label>
                 <input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.displayName') || '显示名称'}</label>
                 <input value={editForm.displayName} onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.baseUrl') || 'Base URL'}</label>
                 <input value={editForm.baseUrl} onChange={e => setEditForm({ ...editForm, baseUrl: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.apiKey') || 'API Key'}</label>
                 <input value={editForm.apiKey} onChange={e => setEditForm({ ...editForm, apiKey: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder={t('channels.form.apiKeyHint')} />
-                <p className="text-xs text-gray-400 mt-1">{t('channels.form.apiKeyHint') || '留空则不修改'}</p>
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.apiKeyHint')} />
+                <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">{t('channels.form.apiKeyHint') || '留空则不修改'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.models') || '模型列表'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.models') || '模型列表'}</label>
                 <ModelMultiSelect value={editForm.models} onChange={models => setEditForm({ ...editForm, models })} placeholder={t('channels.form.modelsPlaceholder') || 'gpt-4,gpt-3.5-turbo'} />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.form.priority') || '优先级'}</label>
+                  <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.form.priority') || '优先级'}</label>
                   <input value={editForm.priority} onChange={e => setEditForm({ ...editForm, priority: e.target.value })} type="number"
-                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none" />
+                    className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('channels.weight') || '权重'}</label>
+                  <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('channels.weight') || '权重'}</label>
                   <input value={editForm.weight} onChange={e => setEditForm({ ...editForm, weight: e.target.value })} type="number"
-                    className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none" />
+                    className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" />
                 </div>
               </div>
             </div>
@@ -463,7 +463,7 @@ export default function AdminChannels() {
                 {editMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.save') || '保存')}
               </button>
               <button onClick={() => setEditChannel(null)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('channels.form.cancel') || '取消'}
               </button>
             </div>
@@ -474,12 +474,12 @@ export default function AdminChannels() {
       {/* Delete Dialog */}
       {deleteChannel && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setDeleteChannel(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-2">{t('channels.deleteConfirm') || '确定删除此渠道？'}</h3>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-2">{t('channels.deleteConfirm') || '确定删除此渠道？'}</h3>
             {deleteChannel.routeRefs?.length > 0 && (
               <p className="text-sm text-amber-600 mb-2">{t('channels.deleteConfirmWithRefs', { count: deleteChannel.routeRefs.length }) || `该渠道被 ${deleteChannel.routeRefs.length} 个路由引用`}</p>
             )}
-            <p className="text-sm text-[#6B7280] mb-4">{t('channels.deleteConfirmMessage') || '将永久删除该渠道，此操作不可撤销。'}</p>
+            <p className="text-sm text-[#6B7280] dark:text-[#98989D] mb-4">{t('channels.deleteConfirmMessage') || '将永久删除该渠道，此操作不可撤销。'}</p>
             <div className="flex gap-2">
               <button onClick={() => deleteMutation.mutate(deleteChannel.id)}
                 disabled={deleteMutation.isPending}
@@ -487,7 +487,7 @@ export default function AdminChannels() {
                 {deleteMutation.isPending ? '删除中...' : (t('channels.deleteButton') || '删除')}
               </button>
               <button onClick={() => setDeleteChannel(null)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('channels.form.cancel') || '取消'}
               </button>
             </div>
@@ -501,13 +501,13 @@ export default function AdminChannels() {
 /* Sub-components */
 function KPICard({ icon, label, value, trend }: any) {
   return (
-    <div className="bg-white rounded-2xl border border-[#ECEFF3] p-5 hover:shadow-sm transition-shadow">
+    <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] p-5 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">{icon}</div>
-        <span className="text-xs font-medium text-gray-400">{trend}</span>
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7]">{icon}</div>
+        <span className="text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{trend}</span>
       </div>
-      <div className="text-2xl font-bold text-[#111827] mb-1">{value}</div>
-      <div className="text-sm text-[#6B7280]">{label}</div>
+      <div className="text-2xl font-bold text-[#111827] dark:text-[#E5E5E7] mb-1">{value}</div>
+      <div className="text-sm text-[#6B7280] dark:text-[#98989D]">{label}</div>
     </div>
   )
 }
@@ -554,5 +554,5 @@ function CubeSvg() {
 }
 
 function MagnifyingGlassSvg() {
-  return (<svg width="16" height="16" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>)
+  return (<svg width="16" height="16" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#6E6E73]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>)
 }

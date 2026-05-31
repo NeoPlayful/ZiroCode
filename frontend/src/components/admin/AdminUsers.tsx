@@ -60,17 +60,17 @@ export default function AdminUsers() {
       </div>
 
       {/* 筛选工具栏 */}
-      <div className="bg-gray-50/50 rounded-xl p-4 flex items-center justify-between gap-4">
+      <div className="bg-gray-50/50 dark:bg-[#242426]/50 rounded-xl p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           {/* 搜索框 */}
           <div className="relative flex-1 max-w-xs">
-            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#6E6E73]" />
             <input
               type="text"
               placeholder={t('users.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border-0 bg-white dark:bg-[#242426] dark:text-[#E5E5E7] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
             />
           </div>
 
@@ -78,7 +78,7 @@ export default function AdminUsers() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
+            className="px-3 py-2 text-sm border-0 bg-white dark:bg-[#242426] dark:text-[#E5E5E7] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('users.filter.allRoles')}</option>
             <option value="ADMIN">{t('users.filter.admin')}</option>
@@ -89,7 +89,7 @@ export default function AdminUsers() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border-0 bg-white rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
+            className="px-3 py-2 text-sm border-0 bg-white dark:bg-[#242426] dark:text-[#E5E5E7] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
           >
             <option value="all">{t('users.filter.allStatus')}</option>
             <option value="active">{t('users.filter.active')}</option>
@@ -106,21 +106,21 @@ export default function AdminUsers() {
       </div>
 
       {/* 表格容器 */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.user')}</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.role')}</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.status')}</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.apiKey')}</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.subscription')}</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.registeredAt')}</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('users.table.actions')}</th>
+              <tr className="border-b border-gray-100 dark:border-[#303033]">
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.user')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.role')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.status')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.apiKey')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.subscription')}</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.registeredAt')}</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('users.table.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-[#303033]/50">
               {users.map((user: any) => (
                 <UserRow key={user.id} user={user} />
               ))}
@@ -129,15 +129,15 @@ export default function AdminUsers() {
         </div>
 
         {/* 表格底部 - 分页 */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#303033] flex items-center justify-between">
+          <div className="text-sm text-gray-500 dark:text-[#98989D]">
             {t('users.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>
           <div className="flex items-center gap-2">
             <select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none"
+              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none dark:bg-[#242426] dark:text-[#E5E5E7]"
             >
               <option value={10}>{t('users.pageSize', { size: 10 })}</option>
               <option value={20}>{t('users.pageSize', { size: 20 })}</option>
@@ -148,14 +148,14 @@ export default function AdminUsers() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-[#303033] rounded-lg hover:bg-gray-50 dark:hover:bg-[#242426] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('users.prev')}
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * pageSize >= total}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-[#303033] rounded-lg hover:bg-gray-50 dark:hover:bg-[#242426] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('users.next')}
               </button>
@@ -170,17 +170,17 @@ export default function AdminUsers() {
 // KPI 卡片组件
 function KPICard({ icon, label, value, trend, trendUp }: any) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-sm transition-shadow">
+    <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] p-5 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7]">
           {icon}
         </div>
-        <span className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-gray-400'}`}>
+        <span className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-gray-400 dark:text-[#6E6E73]'}`}>
           {trend}
         </span>
       </div>
-      <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-500">{label}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-[#E5E5E7] mb-1">{value}</div>
+      <div className="text-sm text-gray-500 dark:text-[#98989D]">{label}</div>
     </div>
   )
 }
@@ -189,27 +189,27 @@ function KPICard({ icon, label, value, trend, trendUp }: any) {
 function UserRow({ user }: any) {
   const { t } = useTranslation('admin')
   const getStatusColor = (status: string) => {
-    if (status === 'active' || user.isActive !== false) return 'bg-green-50 text-green-700'
-    if (status === 'disabled') return 'bg-gray-50 text-gray-600'
-    if (status === 'banned') return 'bg-red-50 text-red-700'
-    return 'bg-gray-50 text-gray-600'
+    if (status === 'active' || user.isActive !== false) return 'bg-green-50 dark:bg-[#30D158]/10 text-green-700 dark:text-[#30D158]'
+    if (status === 'disabled') return 'bg-gray-50 dark:bg-[#242426] text-gray-600 dark:text-[#98989D]'
+    if (status === 'banned') return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-[#FF453A]'
+    return 'bg-gray-50 dark:bg-[#242426] text-gray-600 dark:text-[#98989D]'
   }
 
   const getRoleColor = (role: string) => {
-    if (role === 'ADMIN') return 'bg-orange-50 text-orange-700'
-    return 'bg-blue-50 text-blue-700'
+    if (role === 'ADMIN') return 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+    return 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
   }
 
   return (
-    <tr className="hover:bg-gray-50/50 transition-colors">
+    <tr className="hover:bg-gray-50/50 dark:hover:bg-[#242426]/50 transition-colors">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
             {user.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div>
-            <div className="font-medium text-gray-900">{user.name || t('users.table.unnamed')}</div>
-            <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="font-medium text-gray-900 dark:text-[#E5E5E7]">{user.name || t('users.table.unnamed')}</div>
+            <div className="text-sm text-gray-500 dark:text-[#98989D]">{user.email}</div>
           </div>
         </div>
       </td>
@@ -223,15 +223,15 @@ function UserRow({ user }: any) {
           {user.isActive !== false ? t('users.filter.active') : t('users.filter.disabled')}
         </span>
       </td>
-      <td className="px-6 py-4 text-sm text-gray-600">{user._count?.apiKeys || 0}</td>
-      <td className="px-6 py-4 text-sm text-gray-600">{user._count?.subscriptions || 0}</td>
-      <td className="px-6 py-4 text-sm text-gray-500">{new Date(user.createdAt).toLocaleDateString()}</td>
+      <td className="px-6 py-4 text-sm text-gray-600 dark:text-[#E5E5E7]">{user._count?.apiKeys || 0}</td>
+      <td className="px-6 py-4 text-sm text-gray-600 dark:text-[#E5E5E7]">{user._count?.subscriptions || 0}</td>
+      <td className="px-6 py-4 text-sm text-gray-500 dark:text-[#98989D]">{new Date(user.createdAt).toLocaleDateString()}</td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">
-          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7] transition-colors">
             <PencilIcon className="w-4 h-4" />
           </button>
-          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+          <button className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7] transition-colors">
             <EllipsisHorizontalIcon className="w-4 h-4" />
           </button>
         </div>

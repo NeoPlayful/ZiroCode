@@ -46,7 +46,7 @@ export default function WebhooksPage() {
     return (
       <div className="max-w-6xl mx-auto px-8 py-6">
         <div className="animate-pulse space-y-4">
-          {[1, 2].map(i => <div key={i} className="h-24 bg-gray-200 rounded-lg" />)}
+          {[1, 2].map(i => <div key={i} className="h-24 bg-gray-200 dark:bg-[#242426] rounded-lg" />)}
         </div>
       </div>
     )
@@ -62,16 +62,16 @@ export default function WebhooksPage() {
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+        <div className="bg-white dark:bg-[#1F1F21] p-6 rounded-lg border border-gray-200 dark:border-[#303033] mb-6">
           <h2 className="font-semibold mb-4">{t('form.title')}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">{t('form.name')}</label>
-              <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-[#303033] rounded-lg dark:bg-[#242426] dark:text-[#E5E5E7]" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">{t('form.url')}</label>
-              <input type="url" value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder={t('form.urlPlaceholder')} />
+              <input type="url" value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-[#303033] rounded-lg dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('form.urlPlaceholder')} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">{t('form.events')}</label>
@@ -95,30 +95,30 @@ export default function WebhooksPage() {
       )}
 
       {webhooks.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-[#6E6E73]">
           <div className="text-4xl mb-4">🔗</div>
           <div>{t('empty')}</div>
         </div>
       ) : (
         <div className="space-y-4">
           {webhooks.map((wh: any) => (
-            <div key={wh.id} className="bg-white p-4 rounded-lg border border-gray-200">
+            <div key={wh.id} className="bg-white dark:bg-[#1F1F21] p-4 rounded-lg border border-gray-200 dark:border-[#303033]">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="font-semibold">{wh.name}</div>
-                  <div className="text-sm text-gray-600 mt-1">{wh.url}</div>
+                  <div className="text-sm text-gray-600 dark:text-[#E5E5E7] mt-1">{wh.url}</div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {wh.events.map((ev: string) => (
-                      <span key={ev} className="px-2 py-1 bg-gray-100 text-xs rounded">{eventKeys.find(o => o.value === ev)?.key ? t(eventKeys.find(o => o.value === ev)!.key) : ev}</span>
+                      <span key={ev} className="px-2 py-1 bg-gray-100 dark:bg-[#242426] text-xs rounded">{eventKeys.find(o => o.value === ev)?.key ? t(eventKeys.find(o => o.value === ev)!.key) : ev}</span>
                     ))}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">
+                  <div className="text-xs text-gray-400 dark:text-[#6E6E73] mt-2">
                     {wh.lastSuccessAt && t('lastSuccess', { date: new Date(wh.lastSuccessAt).toLocaleString() })}
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <button onClick={() => testMutation.mutate(wh.id)} className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">{t('test')}</button>
-                  <button onClick={() => deleteMutation.mutate(wh.id)} className="px-3 py-1 text-sm text-red-500 border border-red-300 rounded hover:bg-red-50">{t('delete')}</button>
+                  <button onClick={() => testMutation.mutate(wh.id)} className="px-3 py-1 text-sm border border-gray-300 dark:border-[#303033] rounded hover:bg-gray-50 dark:hover:bg-[#242426]">{t('test')}</button>
+                  <button onClick={() => deleteMutation.mutate(wh.id)} className="px-3 py-1 text-sm text-red-500 border border-red-300 dark:border-[#FF453A]/30 rounded hover:bg-red-50 dark:hover:bg-red-900/20">{t('delete')}</button>
                 </div>
               </div>
             </div>

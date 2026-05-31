@@ -63,63 +63,63 @@ export default function AdminBatch() {
       </div>
 
       {/* 批量生成表单 */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-8">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
             <SparklesIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">{t('batch.generateForm.title')}</h3>
-            <p className="text-sm text-gray-500">{t('batch.generateForm.subtitle')}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-[#E5E5E7]">{t('batch.generateForm.title')}</h3>
+            <p className="text-sm text-gray-500 dark:text-[#98989D]">{t('batch.generateForm.subtitle')}</p>
           </div>
         </div>
 
         {/* 消息提示 */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          <div className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-50 dark:bg-[#30D158]/10 text-green-700 dark:text-[#30D158]' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-[#FF453A]'}`}>
             {message.text}
           </div>
         )}
 
         <div className="grid grid-cols-4 gap-6 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.count')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-2">{t('batch.generateForm.count')}</label>
             <input
               value={count}
               onChange={e => setCount(e.target.value)}
               type="number"
               min="1"
               max="1000"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg dark:bg-[#242426] dark:text-[#E5E5E7]"
               placeholder="10"
             />
-            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.countHint')}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-[#98989D]">{t('batch.generateForm.countHint')}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.quotaAmount')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-2">{t('batch.generateForm.quotaAmount')}</label>
             <input
               value={quotaAmount}
               onChange={e => setQuotaAmount(e.target.value)}
               type="number"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg dark:bg-[#242426] dark:text-[#E5E5E7]"
               placeholder="100000000"
             />
-            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.quotaHint', { amount: (Number(quotaAmount) / 100000000).toFixed(1) })}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-[#98989D]">{t('batch.generateForm.quotaHint', { amount: (Number(quotaAmount) / 100000000).toFixed(1) })}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('batch.generateForm.type')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-2">{t('batch.generateForm.type')}</label>
             <select
               value={type}
               onChange={e => setType(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-gray-200 outline-none text-lg dark:bg-[#242426] dark:text-[#E5E5E7]"
             >
               <option value="PAY_AS_YOU_GO">{t('batch.generateForm.types.payAsYouGo')}</option>
               <option value="MONTHLY">{t('batch.generateForm.types.monthly')}</option>
               <option value="PERMANENT">{t('batch.generateForm.types.permanent')}</option>
             </select>
-            <p className="mt-1 text-xs text-gray-500">{t('batch.generateForm.typeHint')}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-[#98989D]">{t('batch.generateForm.typeHint')}</p>
           </div>
 
           <div>
@@ -140,17 +140,17 @@ export default function AdminBatch() {
 // KPI 卡片组件
 function KPICard({ icon, label, value, trend, trendUp }: any) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-sm transition-shadow">
+    <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] p-5 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7]">
           {icon}
         </div>
-        <span className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-gray-400'}`}>
+        <span className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-gray-400 dark:text-[#6E6E73]'}`}>
           {trend}
         </span>
       </div>
-      <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-500">{label}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-[#E5E5E7] mb-1">{value}</div>
+      <div className="text-sm text-gray-500 dark:text-[#98989D]">{label}</div>
     </div>
   )
 }

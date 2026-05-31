@@ -42,7 +42,7 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
+    <aside className="w-64 bg-white dark:bg-[#161618] border-r border-gray-200 dark:border-[#303033] h-full flex flex-col">
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -52,10 +52,10 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
             <button
               key={item.key}
               onClick={() => onTabChange(item.key)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative ${
                 isActive
-                  ? 'bg-[#FFF4F0] text-[#F97346]'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-[#FFF4F0] dark:bg-[#F97346]/12 text-[#F97346]'
+                  : 'text-gray-600 dark:text-[#E5E5E7] hover:bg-gray-50 dark:hover:bg-[#242426] hover:text-gray-900 dark:hover:text-[#F5F5F7]'
               }`}
             >
               {isActive && (
@@ -69,12 +69,12 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
       </nav>
 
       {/* Bottom Status */}
-      <div className="m-3 p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
+      <div className="m-3 p-3 bg-gray-50/50 dark:bg-[#242426]/50 border border-gray-100 dark:border-[#303033] rounded-xl">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          <span className="text-xs text-gray-600">{t('sidebar.statusNormal')}</span>
+          <span className="text-xs text-gray-600 dark:text-[#E5E5E7]">{t('sidebar.statusNormal')}</span>
         </div>
-        <div className="text-[10px] text-gray-400">
+        <div className="text-[10px] text-gray-400 dark:text-[#6E6E73]">
           {t('sidebar.version', { version: packageJson.version })}
         </div>
       </div>

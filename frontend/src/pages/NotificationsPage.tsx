@@ -36,7 +36,7 @@ export default function NotificationsPage() {
       <div className="max-w-4xl mx-auto px-8 py-6">
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-gray-200 rounded-lg" />
+            <div key={i} className="h-20 bg-gray-200 dark:bg-[#242426] rounded-lg" />
           ))}
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-[#6E6E73]">
           <div className="text-4xl mb-4">🔔</div>
           <div>{t('notifications.emptyState')}</div>
         </div>
@@ -67,13 +67,13 @@ export default function NotificationsPage() {
           {notifications.map((n: any) => (
             <div
               key={n.id}
-              className={`p-4 rounded-lg border ${n.isRead ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200'}`}
+              className={`p-4 rounded-lg border ${n.isRead ? 'bg-white dark:bg-[#1F1F21] border-gray-200 dark:border-[#303033]' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-[#BF5AF2]/30'}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="font-medium">{n.title}</div>
-                  {n.content && <div className="text-sm text-gray-600 mt-1">{n.content}</div>}
-                  <div className="text-xs text-gray-400 mt-2">
+                  {n.content && <div className="text-sm text-gray-600 dark:text-[#E5E5E7] mt-1">{n.content}</div>}
+                  <div className="text-xs text-gray-400 dark:text-[#6E6E73] mt-2">
                     {new Date(n.createdAt).toLocaleString('zh-CN')}
                   </div>
                 </div>
@@ -96,17 +96,17 @@ export default function NotificationsPage() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+            className="px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg disabled:opacity-50"
           >
             {t('notifications.pagination.previous')}
           </button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-[#E5E5E7]">
             {t('notifications.pagination.pageInfo', { page, total: Math.ceil(total / 20) })}
           </span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={page >= Math.ceil(total / 20)}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+            className="px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg disabled:opacity-50"
           >
             {t('notifications.pagination.next')}
           </button>

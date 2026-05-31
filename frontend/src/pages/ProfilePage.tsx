@@ -4,7 +4,7 @@ import { UserCircleIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-gray-200 rounded ${className || ''}`} />;
+  return <div className={`animate-pulse bg-gray-200 dark:bg-[#242426] rounded ${className || ''}`} />;
 }
 
 export default function ProfilePage() {
@@ -70,7 +70,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f0ebe3]">
+      <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10]">
         <main className="max-w-4xl mx-auto px-8 py-8">
           <Skeleton className="h-9 w-48 mb-6" />
           <Skeleton className="h-64 rounded-xl mb-4" />
@@ -81,60 +81,60 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3]">
+    <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10]">
       <main className="max-w-4xl mx-auto px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('developer.profile.title')}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E5E5E7] mb-6">{t('developer.profile.title')}</h1>
 
         {message && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+          <div className="mb-4 p-4 bg-green-50 dark:bg-[#30D158]/10 border border-green-200 dark:border-[#30D158]/30 rounded-lg text-green-800 dark:text-green-200">
             {message}
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <div className="bg-white dark:bg-[#1F1F21] rounded-xl shadow-sm p-6 mb-4">
           <div className="flex items-center gap-3 mb-6">
-            <UserCircleIcon className="w-6 h-6 text-gray-600" />
+            <UserCircleIcon className="w-6 h-6 text-gray-600 dark:text-[#98989D]" />
             <h2 className="text-xl font-semibold">{t('developer.profile.basicInfo')}</h2>
           </div>
 
           <div className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.email')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.email')}</label>
               <input
                 type="text"
                 value={data?.email || ''}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg bg-gray-50 dark:bg-[#242426] text-gray-500 dark:text-[#98989D]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.role')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.role')}</label>
               <input
                 type="text"
                 value={data?.role || ''}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg bg-gray-50 dark:bg-[#242426] text-gray-500 dark:text-[#98989D]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.referralCode')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.referralCode')}</label>
               <input
                 type="text"
                 value={data?.referralCode || ''}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg bg-gray-50 dark:bg-[#242426] text-gray-500 dark:text-[#98989D]"
               />
             </div>
           </div>
 
           <div className="border-t pt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.nickname')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.nickname')}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
               />
               <button
                 onClick={() => updateProfile.mutate(name)}
@@ -145,34 +145,34 @@ export default function ProfilePage() {
               </button>
             </div>
             {updateProfile.isError && (
-              <p className="mt-2 text-sm text-red-600">{updateProfile.error?.message}</p>
+              <p className="mt-2 text-sm text-red-600 dark:text-[#FF453A]">{updateProfile.error?.message}</p>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-[#1F1F21] rounded-xl shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
-            <KeyIcon className="w-6 h-6 text-gray-600" />
+            <KeyIcon className="w-6 h-6 text-gray-600 dark:text-[#98989D]" />
             <h2 className="text-xl font-semibold">{t('developer.profile.changePassword')}</h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.oldPassword')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.oldPassword')}</label>
               <input
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('developer.profile.newPassword')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-[#E5E5E7] mb-1">{t('developer.profile.newPassword')}</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg focus:ring-2 focus:ring-[#e8673a] focus:border-transparent"
               />
             </div>
             <button
@@ -183,7 +183,7 @@ export default function ProfilePage() {
               {changePassword.isPending ? t('developer.profile.changing') : t('developer.profile.changePasswordBtn')}
             </button>
             {changePassword.isError && (
-              <p className="text-sm text-red-600">{changePassword.error?.message}</p>
+              <p className="text-sm text-red-600 dark:text-[#FF453A]">{changePassword.error?.message}</p>
             )}
           </div>
         </div>
