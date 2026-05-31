@@ -35,6 +35,9 @@ export function useTheme() {
   }, [theme]);
 
   const setAndSaveTheme = (newTheme: Theme) => {
+    // 同步应用 dark class，确保 setTheme 触发 re-render 时 CSS 上下文已就位
+    const isNowDark = newTheme === 'dark' || (newTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', isNowDark);
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   };

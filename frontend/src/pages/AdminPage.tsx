@@ -27,7 +27,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex overflow-hidden bg-[#f9f9f9] dark:bg-[#0F0F10]" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex overflow-hidden bg-[#f9f9f9] dark:bg-[#0F0F10] flex-1 min-h-0">
       <AdminSidebar activeTab={tab} onTabChange={setTab} />
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-8">
           {tab === 'dashboard' && <AdminDashboard />}

@@ -42,8 +42,8 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-[#161618] border-r border-gray-200 dark:border-[#303033] h-full flex flex-col">
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+    <aside className="w-64 bg-white dark:bg-[#161618] border-r border-gray-200 dark:border-[#303033] h-full flex flex-col overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.key;
