@@ -53,7 +53,7 @@ export default function AppLayout() {
   // 加载中显示加载动画
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex items-center justify-center">
+      <div className="h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex items-center justify-center">
         <div className="text-center">
           <SparklesIcon className="w-12 h-12 text-[#e8673a] mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600 dark:text-[#98989D]">{t('message.loading')}</p>
@@ -75,7 +75,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex flex-col">
+    <div className="h-screen overflow-hidden bg-[#f0ebe3] dark:bg-[#0F0F10] flex flex-col">
       <nav className="sticky top-0 z-50 bg-white dark:bg-[#1F1F21] border-b border-gray-200 dark:border-[#303033]">
         <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
@@ -146,7 +146,7 @@ export default function AppLayout() {
         </div>
       </nav>
       <AnnouncementBanner />
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col min-h-0">
         <Outlet />
       </div>
       {!location.pathname.startsWith('/admin') && <Footer />}

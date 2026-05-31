@@ -42,8 +42,8 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-[#161618] border-r border-gray-200 dark:border-[#303033] h-full flex flex-col overflow-y-auto">
-      <nav className="flex-1 p-4 space-y-1">
+    <aside className="w-64 bg-white dark:bg-[#161618] border-r border-gray-200 dark:border-[#303033] flex flex-col">
+      <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.key;
@@ -69,12 +69,12 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
       </nav>
 
       {/* Bottom Status */}
-      <div className="m-3 p-3 bg-gray-50/50 dark:bg-[#242426]/50 border border-gray-100 dark:border-[#303033] rounded-xl">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+      <div className="flex-shrink-0 mx-2 mb-2 p-3 bg-white dark:bg-[#1F1F21] border border-[#ECEFF3] dark:border-[#303033] rounded-xl">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
           <span className="text-xs text-gray-600 dark:text-[#E5E5E7]">{t('sidebar.statusNormal')}</span>
         </div>
-        <div className="text-[10px] text-gray-400 dark:text-[#6E6E73]">
+        <div className="text-[11px] text-[#9CA3AF] dark:text-[#6E6E73]">
           {t('sidebar.version', { version: packageJson.version })}
         </div>
       </div>
