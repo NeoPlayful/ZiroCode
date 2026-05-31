@@ -13,7 +13,10 @@
       "Bash(npx shadcn@latest add button card badge tabs --overwrite)",
       "Bash(npm run *)",
       "Bash(git *)",
-      "Bash(npm create *)"
+      "Bash(npm create *)",
+      "Bash(npx vite *)",
+      "Bash(npx prisma *)",
+      "Bash(taskkill *)"
     ]
   }
 }

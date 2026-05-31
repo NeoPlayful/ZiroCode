@@ -67,14 +67,14 @@ async function validateApiKey(authHeader: string | null): Promise<{ userId: stri
   return { userId: apiKey.userId, apiKeyId: apiKey.id, rateLimit: apiKey.rateLimit ?? null };
 }
 
-async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, inputTokens: number, outputTokens: number, cacheCreationTokens: number, cacheReadTokens: number, cost: number | null, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string) {
+async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, inputTokens: number, outputTokens: number, cacheCreationTokens: number, cacheReadTokens: number, cost: number | null, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string, requestPath?: string) {
   const latencyMs = responseTime.getTime() - requestTime.getTime();
   await prisma.apiUsageLog.create({
     data: {
       userId: auth.userId, apiKeyId: auth.apiKeyId,
       model, tokensUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, quotaUsed,
       statusCode, error, channelId,
-      latencyMs, clientIp, routePath,
+      latencyMs, clientIp, routePath, requestPath,
       requestTime, responseTime, cost,
     },
   });
@@ -222,7 +222,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
           }
         }
         const cost = await calculateCost(body?.model || 'unknown', inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, streamPricing);
-        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath);
+        await logUsage(auth, body?.model || 'unknown', totalTokens, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, hasError ? 500 : 200, hasError ? 'Streaming failed' : null, requestTime, responseTime, streamChannelId, (req as any).ip, matchedPath, urlPath);
         return;
       }
 
@@ -254,7 +254,7 @@ export async function gatewayRoutes(app: FastifyInstance) {
           dispatchWebhook(auth.userId, 'QUOTA_LOW', { quotaRemaining: Number(remaining), quotaTotal: Number(total), percentageUsed: Number((total - remaining) * BigInt(100) / total) }).catch(() => {});
         }
       }
-      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath);
+      await logUsage(auth, body?.model || 'unknown', tokensUsed, quotaUsed, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, cost > 0 ? cost : null, result.response.status, result.response.ok ? null : JSON.stringify(responseData), requestTime, responseTime, usedChannelId, (req as any).ip, matchedPath, urlPath);
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
       console.error('Gateway error:', error);

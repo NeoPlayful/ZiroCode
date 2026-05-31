@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactEChartsCore from 'echarts-for-react'
 import { useTheme } from '../../hooks/useTheme'
@@ -12,6 +12,7 @@ export default function AdminAnalytics() {
   const [logExpanded, setLogExpanded] = useState(false)
   const [logPage, setLogPage] = useState(1)
   const [logFilter, setLogFilter] = useState('')
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
 
   // Today overview
   const { data: overview } = useQuery({
@@ -219,7 +220,8 @@ export default function AdminAnalytics() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#ECEFF3] dark:border-[#303033]">
-                    <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">时间</th>
+                    <th className="w-8 py-2.5 px-1"></th>
+                    <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase w-[155px]">时间</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">用户</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">模型</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">入口</th>
@@ -231,36 +233,99 @@ export default function AdminAnalytics() {
                   </tr>
                 </thead>
                 <tbody>
-                  {logData?.logs?.map((log: any) => (
-                    <tr key={log.id} className="border-b border-gray-50 dark:border-[#303033]/50 hover:bg-gray-50 dark:hover:bg-[#242426]/30">
-                      <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D] whitespace-nowrap">
-                        {new Date(log.requestTime).toLocaleTimeString()}
-                      </td>
-                      <td className="py-2.5 px-3 text-xs text-gray-700 dark:text-[#E5E5E7] max-w-[100px] truncate" title={log.userEmail || log.userId}>
-                        {log.userName || log.userId.slice(0, 8)}
-                      </td>
-                      <td className="py-2.5 px-3 text-xs text-gray-700 dark:text-[#E5E5E7] max-w-[120px] truncate" title={log.model}>{log.model}</td>
-                      <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D] max-w-[100px] truncate" title={log.routePath || ''}>{log.routePath || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs">
-                        {log.channelDisplayOrder ? (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#FFF4F0] dark:bg-[#F97346]/15 text-[#F97346] dark:text-[#F97346] text-[10px] font-bold">{log.channelDisplayOrder}</span>
-                            <span className="text-gray-500 dark:text-[#98989D]">{log.channelDisplayName || ''}</span>
+                  {logData?.logs?.map((log: any) => {
+                    const isOpen = expandedLogId === log.id
+                    return (
+                      <React.Fragment key={log.id}>
+                      <tr onClick={() => setExpandedLogId(isOpen ? null : log.id)}
+                        className={`border-b border-gray-50 dark:border-[#303033]/50 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-[#242426]/30 ${isOpen ? 'bg-gray-50/50 dark:bg-[#242426]/30' : ''}`}>
+                        <td className="py-2.5 px-1 text-center">
+                          <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-150 ${isOpen ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                          </svg>
+                        </td>
+                        <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D] whitespace-nowrap">
+                          {new Date(log.requestTime).toLocaleString()}
+                        </td>
+                        <td className="py-2.5 px-3 text-xs text-gray-700 dark:text-[#E5E5E7] max-w-[100px] truncate" title={log.userEmail || log.userId}>
+                          {log.userName || log.userId.slice(0, 8)}
+                        </td>
+                        <td className="py-2.5 px-3 text-xs text-gray-700 dark:text-[#E5E5E7] max-w-[120px] truncate" title={log.model}>{log.model}</td>
+                        <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D] max-w-[100px] truncate" title={log.routePath || ''}>{log.routePath || '-'}</td>
+                        <td className="py-2.5 px-3 text-xs">
+                          {log.channelDisplayOrder ? (
+                            <span className="inline-flex items-center gap-1">
+                              <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#FFF4F0] dark:bg-[#F97346]/15 text-[#F97346] dark:text-[#F97346] text-[10px] font-bold">{log.channelDisplayOrder}</span>
+                              <span className="text-gray-500 dark:text-[#98989D]">{log.channelDisplayName || ''}</span>
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D]">{log.clientIp || '-'}</td>
+                        <td className="py-2.5 px-3 text-xs text-right text-gray-700 dark:text-[#E5E5E7]">{log.tokensUsed}</td>
+                        <td className="py-2.5 px-3 text-xs text-right text-gray-500 dark:text-[#98989D]">{log.latencyMs ? `${log.latencyMs}ms` : '-'}</td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            log.statusCode < 400 ? 'bg-green-50 dark:bg-[#30D158]/15 text-green-700 dark:text-[#30D158]' : 'bg-red-50 dark:bg-[#FF453A]/15 text-red-700 dark:text-[#FF453A]'
+                          }`}>
+                            {log.statusCode}
                           </span>
-                        ) : '-'}
-                      </td>
-                      <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D]">{log.clientIp || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs text-right text-gray-700 dark:text-[#E5E5E7]">{log.tokensUsed}</td>
-                      <td className="py-2.5 px-3 text-xs text-right text-gray-500 dark:text-[#98989D]">{log.latencyMs ? `${log.latencyMs}ms` : '-'}</td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          log.statusCode < 400 ? 'bg-green-50 dark:bg-[#30D158]/15 text-green-700 dark:text-[#30D158]' : 'bg-red-50 dark:bg-[#FF453A]/15 text-red-700 dark:text-[#FF453A]'
-                        }`}>
-                          {log.statusCode}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr key={`${log.id}-detail`}>
+                          <td colSpan={10} className="px-6 py-0">
+                            <div className="border-t border-gray-100 dark:border-[#303033] mb-3" />
+                            {/* 请求详情 */}
+                            <div className="space-y-3 pb-4">
+                              {log.requestPath && (
+                                <div>
+                                  <span className="text-xs font-medium text-gray-400 dark:text-[#6E6E73]">完整请求地址</span>
+                                  <div className="mt-1 text-xs font-mono text-[#e8673a] break-all bg-gray-50 dark:bg-[#242426] rounded-lg px-3 py-2">
+                                    {window.location.origin}{log.requestPath}
+                                  </div>
+                                </div>
+                              )}
+                              <div className="grid grid-cols-3 gap-4 text-xs">
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">用户</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7]">{log.userName || log.userEmail || log.userId}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">用户 ID</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7] font-mono">{log.userId}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">请求时间</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7]">{new Date(log.requestTime).toLocaleString()}</p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-3 gap-4 text-xs">
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">模型</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7]">{log.model}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">Token 消耗</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7]">{log.tokensUsed?.toLocaleString() || '-'}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400 dark:text-[#6E6E73]">渠道</span>
+                                  <p className="mt-0.5 text-gray-700 dark:text-[#E5E5E7]">{log.channelDisplayName || '-'}</p>
+                                </div>
+                              </div>
+                              {log.error && (
+                                <div>
+                                  <span className="text-xs font-medium text-red-500">错误信息</span>
+                                  <p className="mt-1 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{log.error}</p>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
