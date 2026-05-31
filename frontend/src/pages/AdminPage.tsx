@@ -62,6 +62,7 @@ function AdminConfig() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [modelPrices, setModelPrices] = useState<Record<string, { input: string; output: string; cacheWrite: string; cacheRead: string }>>({})
+  const [redeemCodePrefix, setRedeemCodePrefix] = useState('')
 
   const BUILTIN_MODEL_PRICES: Record<string, { input: string; output: string; cacheWrite: string; cacheRead: string }> = {
     'gpt-4o': { input: '1', output: '1', cacheWrite: '1', cacheRead: '1' },
@@ -94,6 +95,9 @@ function AdminConfig() {
           }
         }
         setModelPrices(mp)
+      }
+      if (configData.redeem_code_prefix !== undefined) {
+        setRedeemCodePrefix(String(configData.redeem_code_prefix))
       }
     }
   }, [configData])
@@ -130,7 +134,7 @@ function AdminConfig() {
       await fetch('/api/admin/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model_pricing: modelPricingPayload }),
+        body: JSON.stringify({ model_pricing: modelPricingPayload, redeem_code_prefix: redeemCodePrefix }),
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -158,6 +162,12 @@ function AdminConfig() {
             <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('admin.config.defaultQuota')}</label>
             <input value={defaultQuota} onChange={e => setDefaultQuota(e.target.value)} type="number"
               className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">兑换码前缀（可选）</label>
+            <input value={redeemCodePrefix} onChange={e => setRedeemCodePrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7] font-mono uppercase" placeholder="例如：SUMMER" />
+            <p className="text-xs text-gray-400 dark:text-[#6E6E73] mt-1">生成兑换码时自动添加此前缀，仅允许大写字母和数字</p>
           </div>
         </div>
       </div>

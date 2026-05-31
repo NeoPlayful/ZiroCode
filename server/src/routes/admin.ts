@@ -12,6 +12,11 @@ async function handleAuth(req: any, reply: any) {
   catch (e) { if (e instanceof AuthError) return null; throw e; }
 }
 
+async function getRedeemCodePrefix(): Promise<string> {
+  const config = await prisma.systemConfig.findUnique({ where: { key: 'redeem_code_prefix' } });
+  return config?.value ? String(config.value) : '';
+}
+
 export async function adminRoutes(app: FastifyInstance) {
   // 平台统计
   app.get('/api/admin/stats', async (req, reply) => {
@@ -153,7 +158,8 @@ export async function adminRoutes(app: FastifyInstance) {
 
       const codes = [];
       for (let i = 0; i < count; i++) {
-        const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+        const prefix = await getRedeemCodePrefix();
+        const code = prefix + crypto.randomBytes(4).toString('hex').toUpperCase();
         codes.push(await prisma.redeemCode.create({
           data: { code, quotaAmount: BigInt(quotaAmount), type, maxUses: maxUses || 1 },
         }));
@@ -413,7 +419,8 @@ export async function adminRoutes(app: FastifyInstance) {
       const { count, quotaAmount, type } = req.body as any;
       const codes = [];
       for (let i = 0; i < count; i++) {
-        const code = crypto.randomBytes(8).toString('hex').toUpperCase();
+        const prefix = await getRedeemCodePrefix();
+        const code = prefix + crypto.randomBytes(8).toString('hex').toUpperCase();
         codes.push({ code, quotaAmount: BigInt(quotaAmount), type });
       }
       await prisma.redeemCode.createMany({ data: codes });
@@ -815,8 +822,8 @@ export async function adminRoutes(app: FastifyInstance) {
 
       const { from, to, orderBy = 'tokens', limit = 10 } = req.query as any;
       const filter: any = {};
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
 
       const cached = await cacheGet(`admin:analytics:models:${from || ''}:${to || ''}`);
       if (cached) return reply.send(JSON.parse(cached));
@@ -860,8 +867,8 @@ export async function adminRoutes(app: FastifyInstance) {
 
       const { from, to } = req.query as any;
       const filter: any = {};
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
 
       const channels = await prisma.modelChannel.findMany({ select: { id: true, name: true, displayName: true, healthStatus: true } });
       const channelMap = new Map(channels.map(c => [c.id, c]));
@@ -898,8 +905,8 @@ export async function adminRoutes(app: FastifyInstance) {
 
       const { from, to, limit = 10 } = req.query as any;
       const filter: any = {};
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
 
       const groups = await prisma.apiUsageLog.groupBy({
         by: ['userId'],
@@ -948,8 +955,8 @@ export async function adminRoutes(app: FastifyInstance) {
 
       const { from, to } = req.query as any;
       const filter: any = { statusCode: { gte: 400 } };
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
 
       const groups = await prisma.apiUsageLog.groupBy({
         by: ['statusCode', 'error'],

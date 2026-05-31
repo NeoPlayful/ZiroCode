@@ -168,7 +168,7 @@ export async function userRoutes(app: FastifyInstance) {
       const usageLogs = await prisma.apiUsageLog.findMany({
         where: { userId: session.userId as string },
         orderBy: { requestTime: 'desc' }, take: 100,
-        select: { id: true, model: true, tokensUsed: true, inputTokens: true, outputTokens: true, cacheCreationTokens: true, cacheReadTokens: true, quotaUsed: true, statusCode: true, requestTime: true, responseTime: true, error: true, latencyMs: true, clientIp: true, routePath: true },
+        select: { id: true, model: true, tokensUsed: true, inputTokens: true, outputTokens: true, cacheCreationTokens: true, cacheReadTokens: true, quotaUsed: true, statusCode: true, requestTime: true, responseTime: true, error: true, latencyMs: true, clientIp: true, routePath: true, apiKey: { select: { name: true } } },
       });
 
       const dailyMap = new Map<string, { tokens: number; quota: number; calls: number }>();
@@ -253,8 +253,8 @@ export async function userRoutes(app: FastifyInstance) {
       const pageSize = parseInt(pageSizeStr) || 20;
 
       const filter: any = { userId };
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
       if (model) filter.model = model;
 
       const [logs, total] = await Promise.all([

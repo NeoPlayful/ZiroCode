@@ -75,6 +75,57 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
+        {/* 使用说明 */}
+        <div className="bg-white dark:bg-[#1F1F21] rounded-xl p-6 border border-gray-200 dark:border-[#303033] mb-6">
+          <h2 className="font-semibold mb-4">使用说明</h2>
+          <div className="space-y-3 mb-5">
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#e8673a] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">1</span>
+              <p className="text-sm text-gray-500 dark:text-[#98989D]">在上方输入框中输入您获得的兑换码</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#e8673a] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">2</span>
+              <p className="text-sm text-gray-500 dark:text-[#98989D]">点击"立即兑换"按钮进行验证</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#e8673a] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">3</span>
+              <p className="text-sm text-gray-500 dark:text-[#98989D]">兑换成功后，订阅将立即生效</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#e8673a] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-medium">4</span>
+              <p className="text-sm text-gray-500 dark:text-[#98989D]">前往控制台查看您的订阅详情和使用情况</p>
+            </div>
+          </div>
+
+          <div className="border border-amber-200 dark:border-amber-400/30 bg-amber-50/50 dark:bg-amber-400/5 rounded-xl p-4">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-[#E5E5E7] mb-3 flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              温馨提示</h3>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-[#98989D]">
+                <span className="text-[#e8673a] mt-0.5">•</span>
+                <span>每个兑换码只能使用一次</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-[#98989D]">
+                <span className="text-[#e8673a] mt-0.5">•</span>
+                <span>兑换码可能有有效期限制，请及时使用</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-[#98989D]">
+                <span className="text-[#e8673a] mt-0.5">•</span>
+                <span>兑换后的订阅将从当前时间开始计算</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-[#98989D]">
+                <span className="text-[#e8673a] mt-0.5">•</span>
+                <span>如有问题请联系客服支持</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 订阅列表 */}
         {isLoading ? (
           <div className="animate-pulse space-y-3">
