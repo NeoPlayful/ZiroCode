@@ -1,5 +1,21 @@
 import { prisma } from './db.js';
 
+let cachedTimeout: number | null = null;
+let timeoutCacheTime = 0;
+
+async function getUpstreamTimeout(): Promise<number> {
+  if (cachedTimeout !== null && Date.now() - timeoutCacheTime < 60000) return cachedTimeout;
+  try {
+    const config = await prisma.systemConfig.findUnique({ where: { key: 'upstream_timeout' } });
+    const val = config?.value !== null && config?.value !== undefined ? Number(config.value) : 0;
+    cachedTimeout = val > 0 ? val * 1000 : 0;
+    timeoutCacheTime = Date.now();
+  } catch {
+    cachedTimeout = 0;
+  }
+  return cachedTimeout;
+}
+
 interface RouteResult {
   channel: { id: string; name: string; baseUrl: string; apiKey: string; inputPrice: number; outputPrice: number; cacheWritePrice: number; cacheReadPrice: number };
   response: Response;
@@ -110,12 +126,14 @@ export async function routeToUpstream(
 
   let lastError: Error | null = null;
   let lastChannelId: string | null = null;
+  let hasTimeout = false;
 
   for (const channel of channels) {
     lastChannelId = channel.id;
     try {
       const url = `${channel.baseUrl}${path}`;
-      const response = await fetch(url, {
+      const timeout = (channel as any).timeout > 0 ? (channel as any).timeout * 1000 : await getUpstreamTimeout();
+      const fetchOptions: RequestInit & { signal?: AbortSignal } = {
         method: options.method,
         headers: {
           'Content-Type': 'application/json',
@@ -123,8 +141,9 @@ export async function routeToUpstream(
           Authorization: `Bearer ${channel.apiKey}`,
         },
         body: options.body,
-        signal: AbortSignal.timeout(60000),
-      });
+      };
+      if (timeout > 0) fetchOptions.signal = AbortSignal.timeout(timeout);
+      const response = await fetch(url, fetchOptions);
 
       // 5xx 错误尝试下一个渠道
       if (response.status >= 500 && channels.length > 1) {
@@ -138,12 +157,16 @@ export async function routeToUpstream(
       return { channel: { id: channel.id, name: channel.name, baseUrl: channel.baseUrl, apiKey: channel.apiKey, inputPrice: Number(channel.inputPrice), outputPrice: Number(channel.outputPrice), cacheWritePrice: Number(channel.cacheWritePrice), cacheReadPrice: Number(channel.cacheReadPrice) }, response };
     } catch (err: any) {
       lastError = err;
+      if (err.name === 'TimeoutError' || err.code === 'UND_ERR_CONNECT_TIMEOUT') hasTimeout = true;
       console.warn(`Channel ${channel.name} failed: ${err.message}`);
       await recordFailure(channel.id);
       continue;
     }
   }
 
+  if (hasTimeout) {
+    throw Object.assign(new Error('All channels timed out'), { isTimeout: true, statusCode: 504 });
+  }
   throw lastError || new Error('All channels failed');
 }
 

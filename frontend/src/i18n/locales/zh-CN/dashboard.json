@@ -21,11 +21,20 @@
     "activeTitle": "活跃订阅",
     "plansUnit": "个套餐",
     "viewDetails": "查看详情",
+    "hideDetails": "隐藏详情",
     "statusTitle": "订阅状态",
     "statusPermanent": "永久有效",
-    "statusValid": "有效",
+    "statusValid": "活跃",
     "statusNone": "无订阅",
-    "purchaseCode": "购买兑换码"
+    "purchaseCode": "购买兑换码",
+    "quotaLimit": "额度限制",
+    "remainingQuota": "剩余额度",
+    "resetCycle": "重置周期",
+    "startDate": "开始时间",
+    "expireDate": "到期时间",
+    "monthlyQuota": "月度配额",
+    "monthly": "每月",
+    "noReset": "不重置"
   },
   "tutorial": {
     "title": "官方教程",

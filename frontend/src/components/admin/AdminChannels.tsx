@@ -55,13 +55,13 @@ export default function AdminChannels() {
   // Create form state
   const [newForm, setNewForm] = useState({
     name: '', displayName: '', baseUrl: '', apiKey: '',
-    models: [] as string[], priority: '0', weight: '1',
+    models: [] as string[], priority: '0', weight: '1', timeout: '',
   })
 
   // Edit form state
   const [editForm, setEditForm] = useState({
     name: '', displayName: '', baseUrl: '', apiKey: '',
-    models: [] as string[], priority: '0', weight: '1',
+    models: [] as string[], priority: '0', weight: '1', timeout: '',
   })
 
   const queryParams = new URLSearchParams({
@@ -100,7 +100,7 @@ export default function AdminChannels() {
       }),
     onSuccess: () => {
       setShowCreate(false)
-      setNewForm({ name: '', displayName: '', baseUrl: '', apiKey: '', models: [], priority: '0', weight: '1' })
+      setNewForm({ name: '', displayName: '', baseUrl: '', apiKey: '', models: [], priority: '0', weight: '1', timeout: '' })
       queryClient.invalidateQueries({ queryKey: ['admin-channels'] })
     },
   })
@@ -167,6 +167,7 @@ export default function AdminChannels() {
       models: channel.models || [],
       priority: String(channel.priority ?? 0),
       weight: String(channel.weight ?? 1),
+      timeout: channel.timeout ? String(channel.timeout) : '',
     })
     setEditChannel(channel)
   }
@@ -309,6 +310,10 @@ export default function AdminChannels() {
                     <span>优先级 {channel.priority ?? 0}</span>
                     <span>{t('channels.weight') || '权重'}: {channel.weight ?? 1}</span>
                     <span>模型: {channel.models?.length || 0}</span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                      超时: {channel.timeout ? `${channel.timeout}s` : '默认'}
+                    </span>
                     {channel.routeRefs && channel.routeRefs.length > 0 && (
                       <span className="flex items-center gap-1 group relative cursor-help">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
@@ -396,9 +401,14 @@ export default function AdminChannels() {
                     className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder={t('channels.form.weightPlaceholder')} />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">超时时间（秒）</label>
+                <input value={newForm.timeout} onChange={e => setNewForm({ ...newForm, timeout: e.target.value })} type="number" min="0"
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="留空=使用全局设置" />
+              </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button onClick={() => createMutation.mutate({ name: newForm.name, displayName: newForm.displayName, baseUrl: newForm.baseUrl, apiKey: newForm.apiKey, models: newForm.models, priority: parseInt(newForm.priority) || 0, weight: parseInt(newForm.weight) || 1 })}
+              <button onClick={() => createMutation.mutate({ name: newForm.name, displayName: newForm.displayName, baseUrl: newForm.baseUrl, apiKey: newForm.apiKey, models: newForm.models, priority: parseInt(newForm.priority) || 0, weight: parseInt(newForm.weight) || 1, timeout: newForm.timeout || 0 })}
                 disabled={createMutation.isPending}
                 className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
                 {createMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.create') || '创建')}
@@ -455,9 +465,14 @@ export default function AdminChannels() {
                     className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">超时时间（秒）</label>
+                <input value={editForm.timeout} onChange={e => setEditForm({ ...editForm, timeout: e.target.value })} type="number" min="0"
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="留空=使用全局设置" />
+              </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button onClick={() => editMutation.mutate({ id: editChannel.id, data: { name: editForm.name, displayName: editForm.displayName, baseUrl: editForm.baseUrl, apiKey: editForm.apiKey || undefined, models: editForm.models, priority: parseInt(editForm.priority) || 0, weight: parseInt(editForm.weight) || 1 } })}
+              <button onClick={() => editMutation.mutate({ id: editChannel.id, data: { name: editForm.name, displayName: editForm.displayName, baseUrl: editForm.baseUrl, apiKey: editForm.apiKey || undefined, models: editForm.models, priority: parseInt(editForm.priority) || 0, weight: parseInt(editForm.weight) || 1, timeout: editForm.timeout || 0 } })}
                 disabled={editMutation.isPending}
                 className="flex-1 h-10 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50">
                 {editMutation.isPending ? (t('channels.form.saving') || '保存中...') : (t('channels.form.save') || '保存')}

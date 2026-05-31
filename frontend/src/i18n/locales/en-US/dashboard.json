@@ -21,11 +21,20 @@
     "activeTitle": "Active Subscriptions",
     "plansUnit": "plans",
     "viewDetails": "View Details",
+    "hideDetails": "Hide Details",
     "statusTitle": "Subscription Status",
     "statusPermanent": "Permanent",
-    "statusValid": "Valid",
+    "statusValid": "Active",
     "statusNone": "No Subscription",
-    "purchaseCode": "Purchase Code"
+    "purchaseCode": "Purchase Code",
+    "quotaLimit": "Quota Limit",
+    "remainingQuota": "Remaining Quota",
+    "resetCycle": "Reset Cycle",
+    "startDate": "Start Date",
+    "expireDate": "Expiry Date",
+    "monthlyQuota": "Monthly Quota",
+    "monthly": "Monthly",
+    "noReset": "No Reset"
   },
   "tutorial": {
     "title": "Tutorials",

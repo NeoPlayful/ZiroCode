@@ -14,18 +14,36 @@ function getRedis(): Redis {
   return globalForRedis.redis;
 }
 
-const RATE_LIMIT_WINDOW = 60; // 1 minute
-const RATE_LIMIT_MAX = 30;    // max requests per window
+let rateLimitCache: { max: number; window: number; time: number } | null = null;
+
+async function getRateLimitConfig(): Promise<{ max: number; window: number }> {
+  if (rateLimitCache && Date.now() - rateLimitCache.time < 60000) {
+    return { max: rateLimitCache.max, window: rateLimitCache.window };
+  }
+  try {
+    const [maxConfig, windowConfig] = await Promise.all([
+      prisma.systemConfig.findUnique({ where: { key: 'rate_limit_max' } }),
+      prisma.systemConfig.findUnique({ where: { key: 'rate_limit_window' } }),
+    ]);
+    const max = maxConfig?.value ? Number(maxConfig.value) : 30;
+    const window = windowConfig?.value ? Number(windowConfig.value) : 60;
+    rateLimitCache = { max, window, time: Date.now() };
+    return { max, window };
+  } catch {
+    return { max: 30, window: 60 };
+  }
+}
 
 export async function checkRateLimit(userId: string): Promise<boolean> {
   const redis = getRedis();
   try {
+    const config = await getRateLimitConfig();
     const key = `ratelimit:${userId}`;
     const current = await redis.incr(key);
     if (current === 1) {
-      await redis.expire(key, RATE_LIMIT_WINDOW);
+      await redis.expire(key, config.window);
     }
-    return current <= RATE_LIMIT_MAX;
+    return current <= config.max;
   } catch {
     return true; // fail open if Redis is down
   }

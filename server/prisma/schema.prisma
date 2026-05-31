@@ -444,6 +444,7 @@ model ModelChannel {
   isActive         Boolean      @default(true)
   priority         Int          @default(0)
   weight           Int          @default(1)
+  timeout          Int          @default(0)
   healthStatus     HealthStatus @default(UNKNOWN)
   lastHealthCheckAt DateTime?
   inputPrice        Decimal  @default("0")

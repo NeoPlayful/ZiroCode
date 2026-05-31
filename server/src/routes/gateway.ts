@@ -6,6 +6,7 @@ import { createNotification } from '../lib/notification.js';
 import { dispatchWebhook } from '../lib/webhook-dispatcher.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
 import { triggerReferralReward } from '../lib/referral.js';
+import { checkApiKeyRateLimit } from '../lib/api-utils.js';
 
 let defaultPricingCache: { inputPrice: number; outputPrice: number; cacheWritePrice: number; cacheReadPrice: number } | null = null;
 let modelPricingCache: Record<string, { input: number; output: number; cacheWrite: number; cacheRead: number }> | null = null;
@@ -57,13 +58,13 @@ async function calculateCost(model: string, inputTokens: number, outputTokens: n
   return (inputTokens / 1_000_000 * ip) + (outputTokens / 1_000_000 * op) + (cacheCreationTokens / 1_000_000 * cwp) + (cacheReadTokens / 1_000_000 * crp);
 }
 
-async function validateApiKey(authHeader: string | null): Promise<{ userId: string; apiKeyId: string } | null> {
+async function validateApiKey(authHeader: string | null): Promise<{ userId: string; apiKeyId: string; rateLimit: number | null } | null> {
   if (!authHeader || !authHeader.startsWith('Bearer sk-')) return null;
   const key = authHeader.replace('Bearer ', '');
   const apiKey = await prisma.apiKey.findUnique({ where: { key } });
   if (!apiKey || !apiKey.isActive) return null;
   await prisma.apiKey.update({ where: { id: apiKey.id }, data: { lastUsedAt: new Date() } });
-  return { userId: apiKey.userId, apiKeyId: apiKey.id };
+  return { userId: apiKey.userId, apiKeyId: apiKey.id, rateLimit: apiKey.rateLimit ?? null };
 }
 
 async function logUsage(auth: { userId: string; apiKeyId: string }, model: string, tokensUsed: number, quotaUsed: bigint, inputTokens: number, outputTokens: number, cacheCreationTokens: number, cacheReadTokens: number, cost: number | null, statusCode: number, error: string | null, requestTime: Date, responseTime: Date, channelId?: string, clientIp?: string, routePath?: string) {
@@ -135,9 +136,15 @@ export async function gatewayRoutes(app: FastifyInstance) {
       const auth = await validateApiKey((req as any).headers.authorization || null);
       if (!auth) return reply.status(401).send({ error: { code: 'UNAUTHORIZED', message: '无效的 API Key' } });
 
-      // 速率限制
+      // 全局速率限制
       const allowed = await checkRateLimit(auth.userId);
       if (!allowed) return reply.status(429).send({ error: { code: 'RATE_LIMITED', message: '请求过于频繁' } });
+
+      // API Key 独立速率限制
+      if (auth.rateLimit && auth.rateLimit > 0) {
+        const keyAllowed = await checkApiKeyRateLimit(auth.apiKeyId, auth.rateLimit);
+        if (!keyAllowed) return reply.status(429).send({ error: { code: 'KEY_RATE_LIMITED', message: '该 API Key 请求过于频繁' } });
+      }
 
       // 配额检查
       const quota = await getCachedQuota(auth.userId);
@@ -251,6 +258,9 @@ export async function gatewayRoutes(app: FastifyInstance) {
       return reply.status(result.response.status).send(responseData);
     } catch (error: any) {
       console.error('Gateway error:', error);
+      if (error.isTimeout) {
+        return reply.status(504).send({ error: { code: 'UPSTREAM_TIMEOUT', message: '上游请求超时，请稍后重试' } });
+      }
       return reply.status(500).send({ error: { code: 'INTERNAL', message: error.message || '代理请求失败' } });
     }
   });
