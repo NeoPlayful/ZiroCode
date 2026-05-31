@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import AdminSidebar from '../components/admin/AdminSidebar'
 import AdminDashboard from '../components/admin/AdminDashboard'
@@ -19,7 +19,13 @@ import AdminBillingReport from '../components/admin/AdminBillingReport'
 export default function AdminPage() {
   const { t } = useTranslation('admin')
   const [tab, setTab] = useState('dashboard')
+  const mainRef = useRef<HTMLElement>(null)
   const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => fetch('/api/auth/me').then(r => r.json()) })
+
+  // 切换标签时滚动回顶部
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0)
+  }, [tab])
 
   if (!me?.user) return null
   if (me.user.role !== 'ADMIN') {
@@ -29,7 +35,8 @@ export default function AdminPage() {
   return (
     <div className="flex overflow-hidden bg-[#f9f9f9] dark:bg-[#0F0F10] flex-1 min-h-0">
       <AdminSidebar activeTab={tab} onTabChange={setTab} />
-      <main className="flex-1 overflow-y-auto overflow-x-hidden p-8">
+      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-8">
+        <div className="min-h-full flex flex-col">
           {tab === 'dashboard' && <AdminDashboard />}
           {tab === 'users' && <AdminUsers />}
           {tab === 'subscriptions' && <AdminSubscriptions />}
@@ -44,10 +51,11 @@ export default function AdminPage() {
           {tab === 'config' && <AdminConfig />}
           {tab === 'analytics' && <AdminAnalytics />}
           {tab === 'billing' && <AdminBillingReport />}
-        </main>
-      </div>
-    )
-  }
+        </div>
+      </main>
+    </div>
+  )
+}
 
 function AdminConfig() {
   const { t } = useTranslation('admin')
