@@ -37,9 +37,9 @@ export default function AdminRedeemCodes() {
   }
 
   return (
-    <div className="flex flex-col min-h-0 flex-1 gap-6">
+    <div className="space-y-6">
       {/* KPI 卡片 */}
-      <div className="grid grid-cols-4 gap-4 flex-shrink-0">
+      <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<TicketIcon className="w-5 h-5" />}
           label={t('redeemCodes.kpi.totalCodes')}
@@ -72,7 +72,7 @@ export default function AdminRedeemCodes() {
 
       {/* 生成表单 */}
       {showForm && (
-        <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] p-6 flex-shrink-0">
+        <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E5E5E7] mb-4">{t('redeemCodes.generateForm.title')}</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
@@ -125,7 +125,7 @@ export default function AdminRedeemCodes() {
       )}
 
       {/* 筛选工具栏 */}
-      <div className="bg-gray-50/50 dark:bg-[#242426]/50 rounded-xl p-4 flex items-center justify-between gap-4 flex-shrink-0">
+      <div className="bg-gray-50/50 dark:bg-[#242426]/50 rounded-xl p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           {/* 搜索框 */}
           <div className="relative flex-1 max-w-xs">
@@ -175,11 +175,11 @@ export default function AdminRedeemCodes() {
       </div>
 
       {/* 表格容器 */}
-      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] flex flex-col min-h-0 overflow-hidden flex-1">
-        <div className="flex-1 min-h-0 overflow-auto">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-gray-100 dark:border-[#303033] overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 dark:border-[#303033] sticky top-0 bg-white dark:bg-[#1F1F21] z-10">
+              <tr className="border-b border-gray-100 dark:border-[#303033]">
                 <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('redeemCodes.table.code')}</th>
                 <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('redeemCodes.table.quota')}</th>
                 <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 dark:text-[#98989D] uppercase tracking-wider">{t('redeemCodes.table.type')}</th>
@@ -197,7 +197,7 @@ export default function AdminRedeemCodes() {
         </div>
 
         {/* 表格底部 - 分页 */}
-        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-100 dark:border-[#303033] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#303033] flex items-center justify-between">
           <div className="text-sm text-gray-500 dark:text-[#98989D]">
             {t('redeemCodes.pagination', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </div>

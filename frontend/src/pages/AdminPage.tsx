@@ -35,8 +35,7 @@ export default function AdminPage() {
   return (
     <div className="flex overflow-hidden bg-[#f9f9f9] dark:bg-[#0F0F10] flex-1 min-h-0">
       <AdminSidebar activeTab={tab} onTabChange={setTab} />
-      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-8">
-        <div className="min-h-full flex flex-col">
+      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-8 flex flex-col">
           {tab === 'dashboard' && <AdminDashboard />}
           {tab === 'users' && <AdminUsers />}
           {tab === 'subscriptions' && <AdminSubscriptions />}
@@ -51,7 +50,6 @@ export default function AdminPage() {
           {tab === 'config' && <AdminConfig />}
           {tab === 'analytics' && <AdminAnalytics />}
           {tab === 'billing' && <AdminBillingReport />}
-        </div>
       </main>
     </div>
   )

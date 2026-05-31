@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
@@ -18,26 +17,30 @@
   --radius-md: 0.5rem;
 }
 
-.dark {
-  --background: #0F0F10;
-  --foreground: #E5E5E7;
-  --primary: #F97346;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1C1C1E;
-  --secondary-foreground: #E5E5E7;
-  --muted: #242426;
-  --muted-foreground: #98989D;
-  --card: #1F1F21;
-  --card-foreground: #E5E5E7;
-  --ring: #F97346;
-  --border: #303033;
-  --destructive: #FF453A;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-ring: var(--ring);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --radius-md: var(--radius-md);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
