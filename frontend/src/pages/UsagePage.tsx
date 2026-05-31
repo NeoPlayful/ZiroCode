@@ -117,6 +117,7 @@ export default function UsagePage() {
                     <tr className="border-b border-gray-100 dark:border-[#303033]">
                       <th className="w-10 px-2 py-3" />
                       <th className="text-left px-2 py-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] whitespace-nowrap w-36">{t('usage.recentRecords.time')}</th>
+                      <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">API密钥</th>
                       <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{t('usage.recentRecords.model')}</th>
                       <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">输入</th>
                       <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">输出</th>
@@ -188,6 +189,9 @@ function BillingRow({ log, isOpen, onToggle }: { log: any; isOpen: boolean; onTo
         </td>
         <td className="px-2 py-3 text-sm text-gray-500 dark:text-[#98989D] whitespace-nowrap">{new Date(log.requestTime).toLocaleString()}</td>
         <td className="px-3 py-3">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#242426] text-gray-600 dark:text-[#98989D]">{log.apiKey?.name || '-'}</span>
+        </td>
+        <td className="px-3 py-3">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#242426] text-gray-700 dark:text-[#E5E5E7]">{log.model}</span>
         </td>
         <td className="px-3 py-3 text-sm text-left text-gray-700 dark:text-[#E5E5E7] font-mono whitespace-nowrap">{it > 0 ? it.toLocaleString() : '-'}</td>
@@ -199,7 +203,7 @@ function BillingRow({ log, isOpen, onToggle }: { log: any; isOpen: boolean; onTo
       </tr>
       {isOpen && (
         <tr key={`${log.id}-detail`}>
-          <td colSpan={9} className="px-6 py-0">
+          <td colSpan={10} className="px-6 py-0">
             <div className="border-t border-gray-100 dark:border-[#303033] mb-3" />
             <h4 className="text-sm font-semibold text-gray-900 dark:text-[#E5E5E7] mb-4">计费详情</h4>
 

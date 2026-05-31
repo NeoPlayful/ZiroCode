@@ -14,7 +14,7 @@ export async function billingRoutes(app: FastifyInstance) {
       }
 
       const filter: any = {
-        requestTime: { gte: new Date(from), lte: new Date(to) },
+        requestTime: { gte: new Date(from + 'T00:00:00.000'), lt: new Date(to + 'T23:59:59.999') },
       };
       if (userId) filter.userId = userId;
       if (model) filter.model = model;
@@ -108,8 +108,8 @@ export async function billingRoutes(app: FastifyInstance) {
       const pageSize = parseInt(pageSizeStr) || 20;
 
       const filter: any = { userId };
-      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from) };
-      if (to) filter.requestTime = { ...filter.requestTime, lte: new Date(to) };
+      if (from) filter.requestTime = { ...filter.requestTime, gte: new Date(from + 'T00:00:00.000') };
+      if (to) filter.requestTime = { ...filter.requestTime, lt: new Date(to + 'T23:59:59.999') };
 
       const [logs, total, user] = await Promise.all([
         prisma.apiUsageLog.findMany({
