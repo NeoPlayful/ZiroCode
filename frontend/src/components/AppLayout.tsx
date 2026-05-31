@@ -76,7 +76,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[#f0ebe3] dark:bg-[#0F0F10] flex flex-col">
-      <nav className="bg-white dark:bg-[#1F1F21] border-b border-gray-200 dark:border-[#303033]">
+      <nav className="sticky top-0 z-50 bg-white dark:bg-[#1F1F21] border-b border-gray-200 dark:border-[#303033]">
         <div className="max-w-[1280px] mx-auto px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl">
             <SparklesIcon className="w-7 h-7 text-[#e8673a]" />ZiroCode
