@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/AppLayout'
+import AdminLayout from './components/AdminLayout'
 import ScrollToTop from './components/ScrollToTop'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -55,6 +56,8 @@ export default function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/developer" element={<DeveloperPage />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
+      </Route>
+      <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
