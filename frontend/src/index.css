@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
@@ -36,11 +37,20 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0F0F10;
+  --foreground: #E5E5E7;
+  --primary: #F97346;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1C1C1E;
+  --secondary-foreground: #E5E5E7;
+  --muted: #242426;
+  --muted-foreground: #98989D;
+  --card: #1F1F21;
+  --card-foreground: #E5E5E7;
+  --ring: #F97346;
+  --border: #303033;
+  --destructive: #FF453A;
 }
 
 body {
