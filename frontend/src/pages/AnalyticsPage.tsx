@@ -39,30 +39,30 @@ export default function AnalyticsPage() {
     <div className="max-w-6xl mx-auto px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('analytics.title')}</h1>
-        <a href="/api/analytics/export?format=csv" className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">{t('analytics.exportCSV')}</a>
+        <a href="/api/analytics/export?format=csv" className="px-4 py-2 border border-gray-300 dark:border-[#303033] rounded-lg hover:bg-gray-50 dark:hover:bg-[#242426]">{t('analytics.exportCSV')}</a>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">{t('analytics.summary.totalCalls')}</div>
+        <div className="bg-white dark:bg-[#1F1F21] p-4 rounded-lg border border-gray-200 dark:border-[#303033]">
+          <div className="text-sm text-gray-600 dark:text-[#E5E5E7]">{t('analytics.summary.totalCalls')}</div>
           <div className="text-2xl font-bold mt-1">{overview?.totalCalls?.toLocaleString() || 0}</div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">{t('analytics.summary.totalTokens')}</div>
+        <div className="bg-white dark:bg-[#1F1F21] p-4 rounded-lg border border-gray-200 dark:border-[#303033]">
+          <div className="text-sm text-gray-600 dark:text-[#E5E5E7]">{t('analytics.summary.totalTokens')}</div>
           <div className="text-2xl font-bold mt-1">{overview?.totalTokens?.toLocaleString() || 0}</div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">{t('analytics.summary.totalCost')}</div>
+        <div className="bg-white dark:bg-[#1F1F21] p-4 rounded-lg border border-gray-200 dark:border-[#303033]">
+          <div className="text-sm text-gray-600 dark:text-[#E5E5E7]">{t('analytics.summary.totalCost')}</div>
           <div className="text-2xl font-bold mt-1">¥{overview?.totalCost || '0.00'}</div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+      <div className="bg-white dark:bg-[#1F1F21] p-6 rounded-lg border border-gray-200 dark:border-[#303033] mb-6">
         <h2 className="font-semibold mb-4">{t('analytics.costTrends.title')}</h2>
         <ReactECharts option={costChartOption} style={{ height: 300 }} />
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bg-white dark:bg-[#1F1F21] p-6 rounded-lg border border-gray-200 dark:border-[#303033]">
         <h2 className="font-semibold mb-4">{t('analytics.modelDistribution.title')}</h2>
         <ReactECharts option={modelsChartOption} style={{ height: 300 }} />
       </div>

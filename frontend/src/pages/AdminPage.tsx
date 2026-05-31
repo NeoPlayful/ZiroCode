@@ -23,11 +23,11 @@ export default function AdminPage() {
 
   if (!me?.user) return null
   if (me.user.role !== 'ADMIN') {
-    return <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center text-gray-400"><p>{t('admin.permissionRequired')}</p></div>
+    return <div className="min-h-screen bg-[#f9f9f9] dark:bg-[#0F0F10] flex items-center justify-center text-gray-400"><p>{t('admin.permissionRequired')}</p></div>
   }
 
   return (
-    <div className="flex overflow-hidden bg-[#f9f9f9]" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex overflow-hidden bg-[#f9f9f9] dark:bg-[#0F0F10]" style={{ height: 'calc(100vh - 56px)' }}>
       <AdminSidebar activeTab={tab} onTabChange={setTab} />
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-8">
           {tab === 'dashboard' && <AdminDashboard />}
@@ -140,56 +140,56 @@ function AdminConfig() {
   return (
     <div className="space-y-6">
       {/* 基本设置 */}
-      <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-6">
-        <h3 className="text-base font-semibold text-[#111827] mb-4">{t('admin.config.title')}</h3>
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-6">
+        <h3 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">{t('admin.config.title')}</h3>
         <div className="space-y-4 max-w-md">
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('admin.config.siteName')}</label>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('admin.config.siteName')}</label>
             <input value={siteName} onChange={e => setSiteName(e.target.value)}
-              className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('admin.config.defaultQuota')}</label>
+            <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('admin.config.defaultQuota')}</label>
             <input value={defaultQuota} onChange={e => setDefaultQuota(e.target.value)} type="number"
-              className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+              className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
           </div>
         </div>
       </div>
 
       {/* 模型定价 */}
-      <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-6">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base font-semibold text-[#111827]">{t('admin.config.modelPricing') || '模型定价（最高优先级）'}</h3>
-            <p className="text-sm text-gray-400 mt-1">按模型设置独立定价，单位为每百万 token 的美元价格。留空表示不设置该模型价格。</p>
+            <h3 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7]">{t('admin.config.modelPricing') || '模型定价（最高优先级）'}</h3>
+            <p className="text-sm text-gray-400 dark:text-[#6E6E73] mt-1">按模型设置独立定价，单位为每百万 token 的美元价格。留空表示不设置该模型价格。</p>
           </div>
           <button onClick={fillBuiltinPrices}
-            className="h-9 px-4 text-xs font-medium border border-[#ECEFF3] rounded-xl hover:bg-gray-50 text-gray-600 transition-colors">
+            className="h-9 px-4 text-xs font-medium border border-[#ECEFF3] dark:border-[#303033] rounded-xl hover:bg-gray-50 dark:hover:bg-[#242426] text-gray-600 dark:text-[#E5E5E7] transition-colors">
             {t('admin.config.fillBuiltin') || '统一设为 $1'}
           </button>
         </div>
 
         {/* 价格摘要 */}
         <div className="grid grid-cols-4 gap-3 mb-4">
-          <div className="bg-gray-50 rounded-xl p-3 text-center">
-            <div className="text-xs text-gray-400">{t('admin.config.configuredModels') || '已配置模型'}</div>
-            <div className="text-lg font-bold text-[#111827]">{Object.keys(modelPrices).length} / {models.length}</div>
+          <div className="bg-gray-50 dark:bg-[#242426]/50 rounded-xl p-3 text-center">
+            <div className="text-xs text-gray-400 dark:text-[#6E6E73]">{t('admin.config.configuredModels') || '已配置模型'}</div>
+            <div className="text-lg font-bold text-[#111827] dark:text-[#E5E5E7]">{Object.keys(modelPrices).length} / {models.length}</div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 text-center">
-            <div className="text-xs text-gray-400">最高输入价</div>
-            <div className="text-lg font-bold text-[#F97346]">
+          <div className="bg-gray-50 dark:bg-[#242426]/50 rounded-xl p-3 text-center">
+            <div className="text-xs text-gray-400 dark:text-[#6E6E73]">最高输入价</div>
+            <div className="text-lg font-bold text-[#F97346] dark:text-[#e8673a]">
               ${Math.max(...models.map(m => parseFloat(modelPrices[m]?.input) || 0), 0).toFixed(2)}
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 text-center">
-            <div className="text-xs text-gray-400">最低输入价</div>
-            <div className="text-lg font-bold text-green-600">
+          <div className="bg-gray-50 dark:bg-[#242426]/50 rounded-xl p-3 text-center">
+            <div className="text-xs text-gray-400 dark:text-[#6E6E73]">最低输入价</div>
+            <div className="text-lg font-bold text-green-600 dark:text-[#30D158]">
               ${Math.min(...models.map(m => parseFloat(modelPrices[m]?.input) || Infinity), Infinity).toFixed(2)}
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 text-center">
-            <div className="text-xs text-gray-400">最高输出价</div>
-            <div className="text-lg font-bold text-[#F97346]">
+          <div className="bg-gray-50 dark:bg-[#242426]/50 rounded-xl p-3 text-center">
+            <div className="text-xs text-gray-400 dark:text-[#6E6E73]">最高输出价</div>
+            <div className="text-lg font-bold text-[#F97346] dark:text-[#e8673a]">
               ${Math.max(...models.map(m => parseFloat(modelPrices[m]?.output) || 0), 0).toFixed(2)}
             </div>
           </div>
@@ -199,37 +199,37 @@ function AdminConfig() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#ECEFF3]">
-                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 w-48">{t('admin.config.modelName') || '模型'}</th>
-                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400">{t('admin.config.inputPrice') || '输入单价（$/M）'}</th>
-                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400">{t('admin.config.outputPrice') || '输出单价（$/M）'}</th>
-                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400">{t('admin.config.cacheWritePrice') || '缓存写入（$/M）'}</th>
-                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400">{t('admin.config.cacheReadPrice') || '缓存读取（$/M）'}</th>
+              <tr className="border-b border-[#ECEFF3] dark:border-[#303033]">
+                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 dark:text-[#6E6E73] w-48">{t('admin.config.modelName') || '模型'}</th>
+                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{t('admin.config.inputPrice') || '输入单价（$/M）'}</th>
+                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{t('admin.config.outputPrice') || '输出单价（$/M）'}</th>
+                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{t('admin.config.cacheWritePrice') || '缓存写入（$/M）'}</th>
+                <th className="text-left px-3 py-2.5 text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{t('admin.config.cacheReadPrice') || '缓存读取（$/M）'}</th>
               </tr>
             </thead>
             <tbody>
               {models.map(model => {
                 const p = modelPrices[model]
                 return (
-                  <tr key={model} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <tr key={model} className="border-b border-gray-50 dark:border-[#303033]/50 hover:bg-gray-50/50 dark:hover:bg-[#242426]/30">
                     <td className="px-3 py-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">{model}</span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#242426] text-gray-700 dark:text-[#E5E5E7]">{model}</span>
                     </td>
                     <td className="px-3 py-2">
                       <input value={p?.input ?? ''} onChange={e => updateModelPrice(model, 'input', e.target.value)} type="number" step="0.001" placeholder="默认"
-                        className="w-24 h-8 px-2 border border-[#ECEFF3] rounded-lg text-xs focus:outline-none focus:border-[#111827]" />
+                        className="w-24 h-8 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-xs focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
                     </td>
                     <td className="px-3 py-2">
                       <input value={p?.output ?? ''} onChange={e => updateModelPrice(model, 'output', e.target.value)} type="number" step="0.001" placeholder="默认"
-                        className="w-24 h-8 px-2 border border-[#ECEFF3] rounded-lg text-xs focus:outline-none focus:border-[#111827]" />
+                        className="w-24 h-8 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-xs focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
                     </td>
                     <td className="px-3 py-2">
                       <input value={p?.cacheWrite ?? ''} onChange={e => updateModelPrice(model, 'cacheWrite', e.target.value)} type="number" step="0.001" placeholder="默认"
-                        className="w-24 h-8 px-2 border border-[#ECEFF3] rounded-lg text-xs focus:outline-none focus:border-[#111827]" />
+                        className="w-24 h-8 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-xs focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
                     </td>
                     <td className="px-3 py-2">
                       <input value={p?.cacheRead ?? ''} onChange={e => updateModelPrice(model, 'cacheRead', e.target.value)} type="number" step="0.001" placeholder="默认"
-                        className="w-24 h-8 px-2 border border-[#ECEFF3] rounded-lg text-xs focus:outline-none focus:border-[#111827]" />
+                        className="w-24 h-8 px-2 border border-[#ECEFF3] dark:border-[#303033] rounded-lg text-xs focus:outline-none focus:border-[#111827] dark:focus:border-gray-400 dark:bg-[#242426] dark:text-[#E5E5E7]" />
                     </td>
                   </tr>
                 )
@@ -245,7 +245,7 @@ function AdminConfig() {
           className="h-10 px-6 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors">
           {saving ? (t('admin.config.saving') || '保存中...') : (t('admin.config.save') || '保存')}
         </button>
-        {saved && <span className="text-sm text-green-600">已保存</span>}
+        {saved && <span className="text-sm text-green-600 dark:text-[#30D158]">已保存</span>}
       </div>
     </div>
   )

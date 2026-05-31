@@ -7,7 +7,7 @@ export default function DeveloperPage() {
     <div className="max-w-[1200px] mx-auto px-8 py-8">
       <h1 className="text-2xl font-bold mb-6">{t('developer.title')}</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-xl border border-gray-200 dark:border-[#303033] p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">{t('developer.authentication')}</h2>
         <div className="space-y-2 text-sm">
           <p><strong>Cookie:</strong> {t('developer.authCookie')}</p>
@@ -15,25 +15,25 @@ export default function DeveloperPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-xl border border-gray-200 dark:border-[#303033] p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">{t('developer.statusCodes')}</h2>
         <table className="w-full text-sm">
-          <thead><tr className="border-b"><th className="text-left p-2">{t('developer.statusCode')}</th><th className="text-left p-2">{t('developer.description')}</th></tr></thead>
+          <thead><tr className="border-b dark:border-[#303033]"><th className="text-left p-2 text-gray-600 dark:text-[#E5E5E7]">{t('developer.statusCode')}</th><th className="text-left p-2 text-gray-600 dark:text-[#E5E5E7]">{t('developer.description')}</th></tr></thead>
           <tbody>
-            <tr className="border-b"><td className="p-2">200</td><td className="p-2">{t('developer.status.200')}</td></tr>
-            <tr className="border-b"><td className="p-2">400</td><td className="p-2">{t('developer.status.400')}</td></tr>
-            <tr className="border-b"><td className="p-2">401</td><td className="p-2">{t('developer.status.401')}</td></tr>
-            <tr className="border-b"><td className="p-2">403</td><td className="p-2">{t('developer.status.403')}</td></tr>
-            <tr className="border-b"><td className="p-2">404</td><td className="p-2">{t('developer.status.404')}</td></tr>
-            <tr className="border-b"><td className="p-2">500</td><td className="p-2">{t('developer.status.500')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">200</td><td className="p-2">{t('developer.status.200')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">400</td><td className="p-2">{t('developer.status.400')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">401</td><td className="p-2">{t('developer.status.401')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">403</td><td className="p-2">{t('developer.status.403')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">404</td><td className="p-2">{t('developer.status.404')}</td></tr>
+            <tr className="border-b dark:border-[#303033]"><td className="p-2">500</td><td className="p-2">{t('developer.status.500')}</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white dark:bg-[#1F1F21] rounded-xl border border-gray-200 dark:border-[#303033] p-6">
         <h2 className="text-lg font-semibold mb-4">{t('developer.errorCodes')}</h2>
         <table className="w-full text-sm">
-          <thead><tr className="border-b"><th className="text-left p-2">{t('developer.errorCode')}</th><th className="text-left p-2">{t('developer.description')}</th></tr></thead>
+          <thead><tr className="border-b dark:border-[#303033]"><th className="text-left p-2 text-gray-600 dark:text-[#E5E5E7]">{t('developer.errorCode')}</th><th className="text-left p-2 text-gray-600 dark:text-[#E5E5E7]">{t('developer.description')}</th></tr></thead>
           <tbody>
             <tr className="border-b"><td className="p-2">UNAUTHORIZED</td><td className="p-2">{t('developer.errors.UNAUTHORIZED')}</td></tr>
             <tr className="border-b"><td className="p-2">FORBIDDEN</td><td className="p-2">{t('developer.errors.FORBIDDEN')}</td></tr>

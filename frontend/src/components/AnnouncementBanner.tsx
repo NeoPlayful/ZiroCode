@@ -19,7 +19,7 @@ export default function AnnouncementBanner() {
   const announcement = unread[0]
 
   return (
-    <div className="border-b bg-[#fef3ee] border-[#f5d0c0] px-4 py-2 flex items-center justify-between text-sm text-[#8b4513]">
+    <div className="border-b bg-[#fef3ee] dark:bg-[#F97346]/12 border-[#f5d0c0] dark:border-[#F97346]/30 px-4 py-2 flex items-center justify-between text-sm text-[#8b4513] dark:text-orange-300">
       <p className="flex-1">{announcement.title}</p>
       <button onClick={() => markReadMutation.mutate(announcement.id)} className="ml-2">
         <XMarkIcon className="w-4 h-4" />

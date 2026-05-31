@@ -40,7 +40,7 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-11 w-[90px] flex items-center justify-center gap-2 rounded-full bg-transparent text-blue-600 hover:bg-gray-100 transition-colors"
+        className="h-11 w-[90px] flex items-center justify-center gap-2 rounded-full bg-transparent text-blue-600 dark:text-[#BF5AF2] hover:bg-gray-100 dark:hover:bg-[#242426] transition-colors"
       >
         <GlobeAltIcon className="w-5 h-5" />
         <span className="text-sm font-medium">{currentLanguage.shortLabel}</span>
@@ -48,7 +48,7 @@ export default function LanguageSwitcher() {
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-[110px] bg-white rounded-3xl border border-[#EAECEF] p-1.5 transition-all duration-150 ease-out origin-top-right animate-in fade-in zoom-in-95"
+          className="absolute right-0 mt-2 w-[110px] bg-white dark:bg-[#1F1F21] rounded-3xl border border-[#EAECEF] dark:border-[#303033] p-1.5 transition-all duration-150 ease-out origin-top-right animate-in fade-in zoom-in-95"
           style={{ boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}
         >
           {languages.map((lang) => (
@@ -57,8 +57,8 @@ export default function LanguageSwitcher() {
               onClick={() => handleLanguageChange(lang.code)}
               className={`w-full flex items-center px-3 py-1.5 rounded-xl text-left transition-colors ${
                 lang.code === i18n.language
-                  ? 'text-[#2563EB] font-medium'
-                  : 'text-[#111827] hover:bg-gray-50'
+                  ? 'text-[#2563EB] dark:text-[#BF5AF2] font-medium'
+                  : 'text-[#111827] dark:text-[#E5E5E7] hover:bg-gray-50 dark:hover:bg-[#242426]'
               }`}
             >
               <span className="text-sm">{lang.label}</span>

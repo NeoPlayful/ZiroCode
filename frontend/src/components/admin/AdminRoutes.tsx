@@ -152,26 +152,26 @@ export default function AdminRoutes() {
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm p-6 animate-pulse">
-              <div className="h-5 bg-gray-100 rounded w-48 mb-3" />
-              <div className="h-4 bg-gray-100 rounded w-64" />
+            <div key={i} className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm p-6 animate-pulse">
+              <div className="h-5 bg-gray-100 dark:bg-[#242426] rounded w-48 mb-3" />
+              <div className="h-4 bg-gray-100 dark:bg-[#242426] rounded w-64" />
             </div>
           ))}
         </div>
       ) : routes.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm py-20 px-6 text-center">
-          <RouteSvg className="w-16 h-16 mx-auto mb-5 text-gray-200" />
-          <h3 className="text-lg font-semibold text-[#111827] mb-1">{t('routes.empty') || '暂无路由'}</h3>
-          <p className="text-sm text-[#6B7280] mb-6">创建第一个路由开始配置转发规则</p>
+        <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm py-20 px-6 text-center">
+          <RouteSvg className="w-16 h-16 mx-auto mb-5 text-gray-200 dark:text-gray-600" />
+          <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-1">{t('routes.empty') || '暂无路由'}</h3>
+          <p className="text-sm text-[#6B7280] dark:text-[#98989D] mb-6">创建第一个路由开始配置转发规则</p>
           <button onClick={() => setShowCreate(true)}
             className="h-11 px-5 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 shadow-sm">
             {t('routes.addBtn') || '新增路由'}
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#ECEFF3] shadow-sm divide-y divide-[#ECEFF3]">
+        <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm divide-y divide-[#ECEFF3] dark:divide-[#303033]">
           <div className="px-6 py-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-[#111827]">{t('routes.listTitle') || '转发规则'} ({routes.length})</h2>
+            <h2 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7]">{t('routes.listTitle') || '转发规则'} ({routes.length})</h2>
             <button
               onClick={() => setShowCreate(true)}
               className="h-9 px-4 bg-[#e8673a] hover:bg-[#d4562a] text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-all hover:-translate-y-0.5 shadow-sm"
@@ -185,10 +185,10 @@ export default function AdminRoutes() {
               {/* Row 1: Name + Badges + Actions */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="text-lg font-semibold text-[#111827]">{route.displayName}</span>
-                  <code className="text-xs text-[#6B7280] bg-[#F3F4F6] px-2 py-1 rounded-md font-mono">{route.path}</code>
+                  <span className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7]">{route.displayName}</span>
+                  <code className="text-xs text-[#6B7280] dark:text-[#98989D] bg-[#F3F4F6] dark:bg-[#242426] px-2 py-1 rounded-md font-mono">{route.path}</code>
                   <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${
-                    route.mode === 'single' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'
+                    route.mode === 'single' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                   }`}>
                     {route.mode === 'single' ? (t('routes.mode.single') || '单一') : (t('routes.mode.loadBalance') || '负载均衡')}
                   </span>
@@ -205,7 +205,7 @@ export default function AdminRoutes() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => openEdit(route)}
-                    className="h-8 px-3 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
+                    className="h-8 px-3 rounded-lg text-xs font-medium bg-gray-100 dark:bg-[#242426] hover:bg-gray-200 dark:hover:bg-[#2C2C2E] text-gray-700 dark:text-[#E5E5E7] transition-colors">
                     {t('routes.editButton') || '编辑'}
                   </button>
                   <button onClick={() => setDeleteRoute(route)}
@@ -217,13 +217,13 @@ export default function AdminRoutes() {
 
               {/* Row 2: API Endpoint */}
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Endpoint</span>
-                <code className="text-xs bg-[#F3F4F6] text-[#6B7280] px-2.5 py-1 rounded-md font-mono max-w-[480px] truncate" title={`${API_HOST}${route.path}`}>
+                <span className="text-xs font-medium text-[#6B7280] dark:text-[#98989D] uppercase tracking-wider">Endpoint</span>
+                <code className="text-xs bg-[#F3F4F6] dark:bg-[#242426] text-[#6B7280] dark:text-[#98989D] px-2.5 py-1 rounded-md font-mono max-w-[480px] truncate" title={`${API_HOST}${route.path}`}>
                   {API_HOST}{route.path}
                 </code>
                 <button
                   onClick={(e) => { e.stopPropagation(); copyFullUrl(route.path) }}
-                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 text-xs text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 text-xs text-[#6B7280] dark:text-[#98989D] hover:text-[#111827] dark:hover:text-[#F5F5F7] hover:bg-[#F3F4F6] dark:hover:bg-[#242426] rounded-lg transition-colors"
                 >
                   {copiedPath === route.path ? (
                     <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>已复制</>
@@ -234,28 +234,28 @@ export default function AdminRoutes() {
               </div>
 
               {/* Row 2: Channel info */}
-              <div className="text-sm text-[#6B7280] space-y-1">
+              <div className="text-sm text-[#6B7280] dark:text-[#98989D] space-y-1">
                 {route.mode === 'single' ? (
                   <>
                     <div className="flex items-center gap-2">
                       <HealthDot status={getChannelHealth(route.primaryChannelId)} />
-                      <span>{t('routes.primaryChannel') || '主要'}: <span className="font-medium text-[#111827]">{getChannelName(route.primaryChannelId)}</span></span>
+                      <span>{t('routes.primaryChannel') || '主要'}: <span className="font-medium text-[#111827] dark:text-[#E5E5E7]">{getChannelName(route.primaryChannelId)}</span></span>
                       {route.activeChannel === 'backup' && (
-                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">已切备用</span>
+                        <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">已切备用</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       <HealthDot status={getChannelHealth(route.backupChannelId)} />
-                      <span>{t('routes.backupChannel') || '备用'}: <span className="font-medium text-[#111827]">{getChannelName(route.backupChannelId)}</span></span>
+                      <span>{t('routes.backupChannel') || '备用'}: <span className="font-medium text-[#111827] dark:text-[#E5E5E7]">{getChannelName(route.backupChannelId)}</span></span>
                     </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span>{t('routes.strategy') || '策略'}: <span className="font-medium text-[#111827]">
+                    <span>{t('routes.strategy') || '策略'}: <span className="font-medium text-[#111827] dark:text-[#E5E5E7]">
                       {route.strategy === 'round_robin' ? (t('routes.strategies.roundRobin') || '轮询') : (t('routes.strategies.weighted') || '加权轮询')}
                     </span></span>
-                    <span className="text-[#9CA3AF]">|</span>
-                    <span>{t('routes.channels') || '渠道池'}: <span className="font-medium text-[#111827]">{(route.channelIds || []).length} 个渠道</span></span>
+                    <span className="text-[#9CA3AF] dark:text-gray-600">|</span>
+                    <span>{t('routes.channels') || '渠道池'}: <span className="font-medium text-[#111827] dark:text-[#E5E5E7]">{(route.channelIds || []).length} 个渠道</span></span>
                   </div>
                 )}
               </div>
@@ -264,7 +264,7 @@ export default function AdminRoutes() {
               {route.mode === 'load_balance' && (route.channelIds || []).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {(route.channelIds || []).map((chId: string) => (
-                    <span key={chId} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F4F6] border border-[#E5E7EB] rounded-md text-xs text-[#6B7280]">
+                    <span key={chId} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F4F6] dark:bg-[#242426] border border-[#E5E7EB] dark:border-[#303033] rounded-md text-xs text-[#6B7280] dark:text-[#98989D]">
                       <HealthDot status={getChannelHealth(chId)} />
                       {getChannelName(chId)}
                     </span>
@@ -279,23 +279,23 @@ export default function AdminRoutes() {
       {/* Create Dialog */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('routes.form.title') || '新增路由'}</h3>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">{t('routes.form.title') || '新增路由'}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.path') || '路径'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.path') || '路径'}</label>
                 <input value={newForm.path} onChange={e => setNewForm({ ...newForm, path: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder="/codex" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="/codex" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.displayName') || '名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.displayName') || '名称'}</label>
                 <input value={newForm.displayName} onChange={e => setNewForm({ ...newForm, displayName: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" placeholder="Codex API" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" placeholder="Codex API" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.mode') || '模式'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.mode') || '模式'}</label>
                 <select value={newForm.mode} onChange={e => setNewForm({ ...newForm, mode: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                   <option value="single">{t('routes.mode.single') || '单一渠道'}</option>
                   <option value="load_balance">{t('routes.mode.loadBalance') || '负载均衡'}</option>
                 </select>
@@ -303,17 +303,17 @@ export default function AdminRoutes() {
               {newForm.mode === 'single' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
                     <select value={newForm.primaryChannelId} onChange={e => setNewForm({ ...newForm, primaryChannelId: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="">--</option>
                       {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
                     <select value={newForm.backupChannelId} onChange={e => setNewForm({ ...newForm, backupChannelId: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="">--</option>
                       {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
                     </select>
@@ -322,22 +322,22 @@ export default function AdminRoutes() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.channels') || '渠道池'}</label>
-                    <div className="border border-[#ECEFF3] rounded-xl p-2 max-h-32 overflow-y-auto">
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.channels') || '渠道池'}</label>
+                    <div className="border border-[#ECEFF3] dark:border-[#303033] rounded-xl p-2 max-h-32 overflow-y-auto">
                       {channels.map((c: any) => (
-                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
+                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-[#242426] rounded-lg cursor-pointer">
                           <input type="checkbox" checked={newForm.channelIds.includes(c.id)}
                             onChange={() => setNewForm({ ...newForm, channelIds: newForm.channelIds.includes(c.id) ? newForm.channelIds.filter(id => id !== c.id) : [...newForm.channelIds, c.id] })}
-                            className="rounded border-gray-300" />
+                            className="rounded border-gray-300 dark:border-[#303033]" />
                           {c.displayName || c.name}
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.strategy') || '策略'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.strategy') || '策略'}</label>
                     <select value={newForm.strategy} onChange={e => setNewForm({ ...newForm, strategy: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="round_robin">{t('routes.strategies.roundRobin') || '轮询'}</option>
                       <option value="weighted">{t('routes.strategies.weighted') || '加权轮询'}</option>
                     </select>
@@ -345,10 +345,10 @@ export default function AdminRoutes() {
                 </>
               )}
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
                 <input value={newForm.billingMultiplier} onChange={e => setNewForm({ ...newForm, billingMultiplier: e.target.value })}
                   type="number" step="0.1" min="0.1"
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
             </div>
             <div className="flex gap-2 mt-5">
@@ -358,7 +358,7 @@ export default function AdminRoutes() {
                 {createMutation.isPending ? (t('routes.form.saving') || '保存中...') : (t('routes.form.create') || '创建')}
               </button>
               <button onClick={() => setShowCreate(false)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('routes.form.cancel') || '取消'}
               </button>
             </div>
@@ -369,31 +369,31 @@ export default function AdminRoutes() {
       {/* Edit Dialog */}
       {editRoute && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditRoute(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-4">{t('routes.form.editTitle') || '编辑路由'}</h3>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-4">{t('routes.form.editTitle') || '编辑路由'}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.path') || '路径'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.path') || '路径'}</label>
                 <input value={editForm.path} onChange={e => setEditForm({ ...editForm, path: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.displayName') || '名称'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.displayName') || '名称'}</label>
                 <input value={editForm.displayName} onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
               <div className="flex items-center gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={editForm.isActive}
                     onChange={() => setEditForm({ ...editForm, isActive: !editForm.isActive })}
-                    className="rounded border-gray-300" />
-                  <span className="text-sm text-[#6B7280]">{t('routes.status.active') || '启用'}</span>
+                    className="rounded border-gray-300 dark:border-[#303033]" />
+                  <span className="text-sm text-[#6B7280] dark:text-[#98989D]">{t('routes.status.active') || '启用'}</span>
                 </label>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.mode') || '模式'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.mode') || '模式'}</label>
                 <select value={editForm.mode} onChange={e => setEditForm({ ...editForm, mode: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                   <option value="single">{t('routes.mode.single') || '单一渠道'}</option>
                   <option value="load_balance">{t('routes.mode.loadBalance') || '负载均衡'}</option>
                 </select>
@@ -401,17 +401,17 @@ export default function AdminRoutes() {
               {editForm.mode === 'single' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.primaryChannel') || '主要渠道'}</label>
                     <select value={editForm.primaryChannelId} onChange={e => setEditForm({ ...editForm, primaryChannelId: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="">--</option>
                       {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.backupChannel') || '备用渠道'}</label>
                     <select value={editForm.backupChannelId} onChange={e => setEditForm({ ...editForm, backupChannelId: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="">--</option>
                       {channels.map((c: any) => <option key={c.id} value={c.id}>{c.displayName || c.name}</option>)}
                     </select>
@@ -420,22 +420,22 @@ export default function AdminRoutes() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.channels') || '渠道池'}</label>
-                    <div className="border border-[#ECEFF3] rounded-xl p-2 max-h-32 overflow-y-auto">
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.channels') || '渠道池'}</label>
+                    <div className="border border-[#ECEFF3] dark:border-[#303033] rounded-xl p-2 max-h-32 overflow-y-auto">
                       {channels.map((c: any) => (
-                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
+                        <label key={c.id} className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-[#242426] rounded-lg cursor-pointer">
                           <input type="checkbox" checked={editForm.channelIds.includes(c.id)}
                             onChange={() => setEditForm({ ...editForm, channelIds: editForm.channelIds.includes(c.id) ? editForm.channelIds.filter(id => id !== c.id) : [...editForm.channelIds, c.id] })}
-                            className="rounded border-gray-300" />
+                            className="rounded border-gray-300 dark:border-[#303033]" />
                           {c.displayName || c.name}
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.strategy') || '策略'}</label>
+                    <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.strategy') || '策略'}</label>
                     <select value={editForm.strategy} onChange={e => setEditForm({ ...editForm, strategy: e.target.value })}
-                      className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none bg-white">
+                      className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none bg-white dark:bg-[#242426] dark:text-[#E5E5E7]">
                       <option value="round_robin">{t('routes.strategies.roundRobin') || '轮询'}</option>
                       <option value="weighted">{t('routes.strategies.weighted') || '加权轮询'}</option>
                     </select>
@@ -443,10 +443,10 @@ export default function AdminRoutes() {
                 </>
               )}
               <div>
-                <label className="block text-sm font-medium text-[#6B7280] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
+                <label className="block text-sm font-medium text-[#6B7280] dark:text-[#98989D] mb-1">{t('routes.form.billingMultiplier') || '计费倍率'}</label>
                 <input value={editForm.billingMultiplier} onChange={e => setEditForm({ ...editForm, billingMultiplier: e.target.value })}
                   type="number" step="0.1" min="0.1"
-                  className="w-full h-10 px-3 border border-[#ECEFF3] rounded-xl text-sm focus:outline-none focus:border-[#111827]" />
+                  className="w-full h-10 px-3 border border-[#ECEFF3] dark:border-[#303033] rounded-xl text-sm focus:outline-none focus:border-[#111827] dark:bg-[#242426] dark:text-[#E5E5E7]" />
               </div>
             </div>
             <div className="flex gap-2 mt-5">
@@ -456,7 +456,7 @@ export default function AdminRoutes() {
                 {editMutation.isPending ? (t('routes.form.saving') || '保存中...') : (t('routes.form.save') || '保存')}
               </button>
               <button onClick={() => setEditRoute(null)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('routes.form.cancel') || '取消'}
               </button>
             </div>
@@ -467,9 +467,9 @@ export default function AdminRoutes() {
       {/* Delete Dialog */}
       {deleteRoute && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setDeleteRoute(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3]" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#111827] mb-2">{t('routes.deleteConfirm') || '确定删除此路由？'}</h3>
-            <p className="text-sm text-[#6B7280] mb-4">{t('routes.deleteConfirmMessage') || '将永久删除该路由，此操作不可撤销。'}</p>
+          <div className="bg-white dark:bg-[#1F1F21] rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl border border-[#ECEFF3] dark:border-[#303033]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-[#111827] dark:text-[#E5E5E7] mb-2">{t('routes.deleteConfirm') || '确定删除此路由？'}</h3>
+            <p className="text-sm text-[#6B7280] dark:text-[#98989D] mb-4">{t('routes.deleteConfirmMessage') || '将永久删除该路由，此操作不可撤销。'}</p>
             <div className="flex gap-2">
               <button onClick={() => deleteMutation.mutate(deleteRoute.id)}
                 disabled={deleteMutation.isPending}
@@ -477,7 +477,7 @@ export default function AdminRoutes() {
                 {deleteMutation.isPending ? '删除中...' : (t('routes.deleteButton') || '删除')}
               </button>
               <button onClick={() => setDeleteRoute(null)}
-                className="flex-1 h-10 border border-[#ECEFF3] hover:bg-gray-50 rounded-xl text-sm text-[#6B7280] font-medium transition-colors">
+                className="flex-1 h-10 border border-[#ECEFF3] dark:border-[#303033] hover:bg-gray-50 dark:hover:bg-[#242426] rounded-xl text-sm text-[#6B7280] dark:text-[#98989D] font-medium transition-colors">
                 {t('routes.form.cancel') || '取消'}
               </button>
             </div>
@@ -516,13 +516,13 @@ function CopySvg() {
 
 function KPICard({ icon, label, value, trend }: any) {
   return (
-    <div className="bg-white rounded-2xl border border-[#ECEFF3] p-5 hover:shadow-sm transition-shadow">
+    <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] p-5 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">{icon}</div>
-        <span className="text-xs font-medium text-gray-400">{trend}</span>
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-[#242426] flex items-center justify-center text-gray-600 dark:text-[#E5E5E7]">{icon}</div>
+        <span className="text-xs font-medium text-gray-400 dark:text-[#6E6E73]">{trend}</span>
       </div>
-      <div className="text-2xl font-bold text-[#111827] mb-1">{value}</div>
-      <div className="text-sm text-[#6B7280]">{label}</div>
+      <div className="text-2xl font-bold text-[#111827] dark:text-[#E5E5E7] mb-1">{value}</div>
+      <div className="text-sm text-[#6B7280] dark:text-[#98989D]">{label}</div>
     </div>
   )
 }
