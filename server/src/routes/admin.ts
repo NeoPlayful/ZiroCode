@@ -253,10 +253,9 @@ export async function adminRoutes(app: FastifyInstance) {
     try {
       const admin = await handleAuth(req, reply);
       if (!admin) return;
-      const { name, displayName, baseUrl, apiKey, models, priority, weight, timeout } = req.body as any;
+      const { name, displayName, baseUrl, apiKey, models, priority, weight, timeout, modelRedirect, proxyUrl } = req.body as any;
       if (!name || !name.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: '渠道名称为必填项' } });
       if (!baseUrl || !baseUrl.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'Base URL 为必填项' } });
-      if (!apiKey || !apiKey.trim()) return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'API Key 为必填项' } });
 
       const existing = await prisma.modelChannel.findUnique({ where: { name: name.trim() } });
       if (existing) return reply.status(409).send({ error: { code: 'CONFLICT', message: `渠道名称 "${name}" 已被使用` } });
@@ -270,11 +269,13 @@ export async function adminRoutes(app: FastifyInstance) {
           displayName: displayName || name.trim(),
           displayOrder: nextOrder,
           baseUrl: baseUrl.trim(),
-          apiKey: apiKey.trim(),
+          apiKey: apiKey?.trim() || '',
           models: models || [],
           priority: priority || 0,
           weight: weight !== undefined ? weight : 1,
           timeout: timeout !== undefined && timeout !== '' ? parseInt(timeout) : 0,
+          modelRedirect: modelRedirect || undefined,
+          proxyUrl: proxyUrl || '',
         },
       });
       return reply.send({ channel });
@@ -306,6 +307,8 @@ export async function adminRoutes(app: FastifyInstance) {
       if (data.weight !== undefined) updateData.weight = data.weight;
       if (data.isActive !== undefined) updateData.isActive = data.isActive;
       if (data.timeout !== undefined) updateData.timeout = data.timeout !== '' ? parseInt(data.timeout) : 0;
+      if (data.modelRedirect !== undefined) updateData.modelRedirect = data.modelRedirect;
+      if (data.proxyUrl !== undefined) updateData.proxyUrl = data.proxyUrl;
 
       const channel = await prisma.modelChannel.update({ where: { id }, data: updateData });
       return reply.send({ channel });

@@ -445,6 +445,8 @@ model ModelChannel {
   priority         Int          @default(0)
   weight           Int          @default(1)
   timeout          Int          @default(0)
+  modelRedirect     Json?        @default("{}")
+  proxyUrl          String       @default("")
   healthStatus     HealthStatus @default(UNKNOWN)
   lastHealthCheckAt DateTime?
   inputPrice        Decimal  @default("0")
