@@ -21,6 +21,7 @@ import { systemRoutes } from './routes/system.js';
 import { gatewayRoutes } from './routes/gateway.js';
 import { i18nMiddleware } from './i18n/middleware.js';
 import { startScheduler } from './lib/scheduler.js';
+import { initGeoIP } from './lib/geoip.js';
 
 const app = Fastify({ logger: true });
 
@@ -86,6 +87,8 @@ async function start() {
   app.register(gatewayRoutes);
 
   startScheduler();
+
+  await initGeoIP(process.env.GEOIP_DB_PATH);
 
   const port = parseInt(process.env.PORT || '4000');
   await app.listen({ port, host: '0.0.0.0' });

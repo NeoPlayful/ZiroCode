@@ -534,6 +534,17 @@
       "input_tokens": "输入 Token",
       "output_tokens": "输出 Token",
       "cost": "费用(USD)"
+    },
+    "geo": {
+      "title": "请求来源分布",
+      "country": "地域",
+      "countryRanking": "国家占比",
+      "requests": "请求数",
+      "tokens": "Token 消耗",
+      "unknown": "未知",
+      "other": "其他",
+      "local": "本地",
+      "noData": "暂无地域数据"
     }
   },
   "billing": {

@@ -13,6 +13,8 @@ export default function AdminAnalytics() {
   const [logPage, setLogPage] = useState(1)
   const [logFilter, setLogFilter] = useState('')
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
+  const [geoMetric, setGeoMetric] = useState('requests')
+  const [geoPeriod, setGeoPeriod] = useState('7d')
 
   // Today overview
   const { data: overview } = useQuery({
@@ -41,6 +43,19 @@ export default function AdminAnalytics() {
     refetchInterval: 60000,
   })
 
+  // Geo distribution
+  const { data: geoData } = useQuery({
+    queryKey: ['admin-analytics-geo', geoPeriod, geoMetric],
+    queryFn: () => {
+      const now = Date.now()
+      const ms = geoPeriod === '24h' ? 86400000 : geoPeriod === '30d' ? 30 * 86400000 : 7 * 86400000
+      const from = new Date(now - ms).toISOString()
+      return fetch(`/api/admin/analytics/geo?from=${from}`).then(r => r.json())
+    },
+    placeholderData: (prev: any) => prev,
+    refetchInterval: 60000,
+  })
+
   // Request logs
   const { data: logData } = useQuery({
     queryKey: ['admin-analytics-requests', logPage, logFilter],
@@ -51,6 +66,12 @@ export default function AdminAnalytics() {
   const axisLineColor = isDark ? '#2C2C2E' : '#E5E7EB'
   const splitLineColor = isDark ? '#2C2C2E' : '#F3F4F6'
   const seriesColor = '#F97346'
+
+  function flagEmoji(countryCode: string): string {
+    if (!countryCode || countryCode === 'LOCAL') return ''
+    const codePoints = countryCode.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+    return String.fromCodePoint(...codePoints)
+  }
 
   const trendChartOption = {
     tooltip: {
@@ -86,6 +107,75 @@ export default function AdminAnalytics() {
       } : undefined,
     }],
   }
+
+  const geoCodeToName = (code: string | null) => {
+    if (!code) return t('analytics.geo.unknown') || '未知'
+    if (code === 'LOCAL') return t('analytics.geo.local') || '本地'
+    return code
+  }
+
+  const geoDataList = geoData?.distribution || []
+  const geoTotal = geoDataList.reduce((s: number, d: any) => s + (geoMetric === 'tokens' ? d.tokens : d.requests), 0)
+  const geoRanking = geoDataList.map((d: any) => ({
+    country: d.country,
+    displayName: geoCodeToName(d.country),
+    count: geoMetric === 'tokens' ? d.tokens : d.requests,
+    pct: geoTotal > 0 ? ((geoMetric === 'tokens' ? d.tokens : d.requests) / geoTotal * 100) : 0,
+  })).sort((a: any, b: any) => b.count - a.count)
+
+  const geoPieData = geoRanking.map((d: any) => ({
+    name: d.country || 'UNKNOWN',
+    displayName: d.displayName,
+    value: d.count,
+  }))
+
+  const geoChartOption = {
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: isDark ? 'rgba(15,15,16,0.95)' : 'rgba(255,255,255,0.95)',
+      borderColor: isDark ? '#303033' : '#E5E7EB',
+      textStyle: { color: isDark ? '#F5F5F7' : '#111827', fontSize: 12 },
+      formatter: (params: any) => {
+        const flag = params.data.name?.length === 2 ? flagEmoji(params.data.name) : ''
+        return `${flag}<b> ${params.data.displayName}</b><br/>${geoMetric === 'tokens' ? 'Token' : '请求数'}: <b>${params.value.toLocaleString()}</b> (${params.percent}%)`
+      },
+    },
+    series: [{
+      type: 'pie' as const,
+      radius: ['30%', '60%'],
+      center: ['50%', '50%'],
+      avoidLabelOverlap: true,
+      padAngle: 1,
+      itemStyle: {
+        borderRadius: 4,
+        borderColor: isDark ? '#1F1F21' : '#fff',
+        borderWidth: 2,
+      },
+      label: {
+        show: true,
+        formatter: (params: any) => {
+          const flag = params.data.name?.length === 2 ? flagEmoji(params.data.name) : ''
+          return `${flag}${params.data.displayName}\n${params.percent}%`
+        },
+        fontSize: 11,
+        color: isDark ? '#98989D' : '#6B7280',
+      },
+      labelLine: {
+        lineStyle: { color: isDark ? '#303033' : '#E5E7EB' },
+      },
+      data: geoPieData,
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      },
+    }],
+    color: ['#F97346', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F43F5E', '#6366F1', '#94A3B8', '#6B7280'],
+  }
+
+  const GEO_COLORS = ['#F97346', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F43F5E', '#6366F1', '#94A3B8', '#6B7280']
 
   return (
     <div className="space-y-6">
@@ -206,6 +296,86 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-6">
+        {/* Geo 饼图 */}
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm">
+        <div className="px-6 py-4 border-b border-[#ECEFF3] dark:border-[#303033] flex items-center justify-between">
+          <h3 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7]">{t('analytics.geo.title') || '请求来源分布'}</h3>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-gray-100 dark:bg-[#242426] rounded-lg p-0.5">
+              {['24h', '7d', '30d'].map(p => (
+                <button key={p} onClick={() => setGeoPeriod(p)}
+                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${geoPeriod === p ? 'bg-white dark:bg-[#2C2C2E] text-[#111827] dark:text-[#E5E5E7] shadow-sm' : 'text-gray-500 dark:text-[#98989D] hover:text-gray-700 dark:hover:text-[#F5F5F7]'}`}>
+                  {t(`analytics.period.${p}`) || p}
+                </button>
+              ))}
+            </div>
+            <div className="flex bg-gray-100 dark:bg-[#242426] rounded-lg p-0.5">
+              {['requests', 'tokens'].map(m => (
+                <button key={m} onClick={() => setGeoMetric(m)}
+                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${geoMetric === m ? 'bg-white dark:bg-[#2C2C2E] text-[#111827] dark:text-[#E5E5E7] shadow-sm' : 'text-gray-500 dark:text-[#98989D] hover:text-gray-700 dark:hover:text-[#F5F5F7]'}`}>
+                  {m === 'requests' ? (t('analytics.metric.requests') || '请求数') : (t('analytics.metric.tokens') || 'Token')}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="p-4">
+          {!geoData?.distribution?.length ? (
+            <div className="py-8 text-center text-sm text-gray-400 dark:text-[#6E6E73]">{t('analytics.geo.noData') || '暂无地域数据'}</div>
+          ) : (
+            <ReactEChartsCore option={geoChartOption} style={{ height: 300 }} notMerge />
+          )}
+        </div>
+      </div>
+
+      {/* Geo 国家百分比排行 */}
+      <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm">
+        <div className="px-6 py-4 border-b border-[#ECEFF3] dark:border-[#303033] flex items-center justify-between">
+          <h3 className="text-base font-semibold text-[#111827] dark:text-[#E5E5E7]">{t('analytics.geo.countryRanking') || '国家占比'}</h3>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-gray-100 dark:bg-[#242426] rounded-lg p-0.5">
+              {['24h', '7d', '30d'].map(p => (
+                <button key={p} onClick={() => setGeoPeriod(p)}
+                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${geoPeriod === p ? 'bg-white dark:bg-[#2C2C2E] text-[#111827] dark:text-[#E5E5E7] shadow-sm' : 'text-gray-500 dark:text-[#98989D] hover:text-gray-700 dark:hover:text-[#F5F5F7]'}`}>
+                  {t(`analytics.period.${p}`) || p}
+                </button>
+              ))}
+            </div>
+            <div className="flex bg-gray-100 dark:bg-[#242426] rounded-lg p-0.5">
+              {['requests', 'tokens'].map(m => (
+                <button key={m} onClick={() => setGeoMetric(m)}
+                  className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${geoMetric === m ? 'bg-white dark:bg-[#2C2C2E] text-[#111827] dark:text-[#E5E5E7] shadow-sm' : 'text-gray-500 dark:text-[#98989D] hover:text-gray-700 dark:hover:text-[#F5F5F7]'}`}>
+                  {m === 'requests' ? (t('analytics.metric.requests') || '请求数') : (t('analytics.metric.tokens') || 'Token')}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="p-4">
+          {!geoData?.distribution?.length ? (
+            <div className="py-8 text-center text-sm text-gray-400 dark:text-[#6E6E73]">{t('analytics.geo.noData') || '暂无地域数据'}</div>
+          ) : (
+            <div className="space-y-3 max-w-2xl">
+              {geoRanking.map((r: any, i: number) => (
+                <div key={r.country || 'unknown'} className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full flex-shrink-0" style={{ backgroundColor: GEO_COLORS[i % GEO_COLORS.length] }} />
+                  <span className="text-sm font-medium text-[#111827] dark:text-[#E5E5E7] w-20">
+                    {r.country === 'LOCAL' ? (t('analytics.geo.local') || '本地') : r.country ? `${flagEmoji(r.country)} ${r.country}` : (t('analytics.geo.unknown') || '未知')}
+                  </span>
+                  <div className="flex-1 h-3 bg-gray-100 dark:bg-[#242426] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.max(r.pct, 0.5)}%`, backgroundColor: GEO_COLORS[i % GEO_COLORS.length] }} />
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-[#98989D] w-12 text-right font-medium">{r.pct.toFixed(1)}%</span>
+                  <span className="text-xs text-gray-400 dark:text-[#6E6E73] w-24 text-right">{r.count.toLocaleString()} {geoMetric === 'tokens' ? 'tokens' : 'req'}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      </div>
+
       {/* Request Log */}
       <div className="bg-white dark:bg-[#1F1F21] rounded-2xl border border-[#ECEFF3] dark:border-[#303033] shadow-sm">
         <button onClick={() => setLogExpanded(!logExpanded)} className="w-full px-6 py-4 flex items-center justify-between">
@@ -227,6 +397,7 @@ export default function AdminAnalytics() {
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">入口</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">渠道</th>
                     <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">IP</th>
+                    <th className="text-left py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase w-16">{t('analytics.geo.country') || '地域'}</th>
                     <th className="text-right py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">Token</th>
                     <th className="text-right py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">耗时</th>
                     <th className="text-center py-2.5 px-3 text-xs font-medium text-gray-400 dark:text-[#6E6E73] uppercase">状态</th>
@@ -261,6 +432,7 @@ export default function AdminAnalytics() {
                           ) : '-'}
                         </td>
                         <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D]">{log.clientIp || '-'}</td>
+                        <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-[#98989D]">{log.country === 'LOCAL' ? (t('analytics.geo.local') || '本地') : log.country ? `${flagEmoji(log.country)} ${log.country}` : '—'}</td>
                         <td className="py-2.5 px-3 text-xs text-right text-gray-700 dark:text-[#E5E5E7]">{log.tokensUsed}</td>
                         <td className="py-2.5 px-3 text-xs text-right text-gray-500 dark:text-[#98989D]">{log.latencyMs ? `${log.latencyMs}ms` : '-'}</td>
                         <td className="py-2.5 px-3 text-center">
@@ -273,7 +445,7 @@ export default function AdminAnalytics() {
                       </tr>
                       {isOpen && (
                         <tr key={`${log.id}-detail`}>
-                          <td colSpan={10} className="px-6 py-0">
+                          <td colSpan={11} className="px-6 py-0">
                             <div className="border-t border-gray-100 dark:border-[#303033] mb-3" />
                             {/* 请求详情 */}
                             <div className="space-y-3 pb-4">
